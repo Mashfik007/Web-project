@@ -16,7 +16,6 @@ async function POST(request: Request) {
 
     if (existsuser) {
       throw new Error("User already exists");
-  
     }
     const user = await User.create({
       name,
@@ -27,7 +26,6 @@ async function POST(request: Request) {
 
     user.refreshToken = user.genRefreshToken();
     user.forgotPassToken = user.genforgotPassToken();
-
 
     await user.save();
 

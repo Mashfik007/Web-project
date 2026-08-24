@@ -17,7 +17,7 @@ const Form_schema = z.object({
 
 function Page() {
   type FormField = z.Infer<typeof Form_schema>;
-const router = useRouter();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -28,11 +28,10 @@ const router = useRouter();
   });
 
   const onSubmit: SubmitHandler<FormField> = async (data) => {
-   
     try {
       const res = await login_user(data);
       console.log(res);
-      
+
       if (true) {
         router.push("/profile/123");
       }

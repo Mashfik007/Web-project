@@ -71,6 +71,5 @@ export async function logout() {
     }
   } catch (error) {
     console.log(error);
-
   }
 }

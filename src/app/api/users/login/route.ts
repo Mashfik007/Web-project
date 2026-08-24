@@ -12,9 +12,7 @@ export async function POST(request: Request) {
     const { email } = body;
 
     // Find user
-    const user = await User.findOne({ email }).select(
-      "_id",
-    );
+    const user = await User.findOne({ email }).select("_id");
 
     if (!user) {
       return NextResponse.json(new ApiError(401, "User does not exist"), {
@@ -25,7 +23,6 @@ export async function POST(request: Request) {
     // Generate tokens
     const accessToken = user.genAccessToken();
 
-
     // Create response
     const response = NextResponse.json(
       new ApiResponce(200, null, "Logged in successfully"),
@@ -35,13 +32,11 @@ export async function POST(request: Request) {
     // Set access token cookie
     response.cookies.set("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // ✅ Only secure in production
-      sameSite: 'lax',
-      path: '/',
+      secure: process.env.NODE_ENV === "production", // ✅ Only secure in production
+      sameSite: "lax",
+      path: "/",
       maxAge: 60 * 15,
     });
-
-
 
     return response;
   } catch (error: any) {
