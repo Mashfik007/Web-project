@@ -1,8 +1,16 @@
+"use client";
+
 interface BrowseToolbarProps {
   total: number;
+  sort: string;
+  onSortChange: (value: string) => void;
 }
 
-export default function BrowseToolbar({ total }: BrowseToolbarProps) {
+export default function BrowseToolbar({
+  total,
+  sort,
+  onSortChange,
+}: BrowseToolbarProps) {
   return (
     <div className="flex items-center justify-between">
       <p className="text-sm text-slate-500">
@@ -10,7 +18,11 @@ export default function BrowseToolbar({ total }: BrowseToolbarProps) {
         results
       </p>
 
-      <select className="select select-sm rounded-xl border-slate-200 bg-white text-sm text-slate-600">
+      <select
+        value={sort}
+        onChange={(event) => onSortChange(event.target.value)}
+        className="select select-sm rounded-xl border-slate-200 bg-white text-sm text-slate-600"
+      >
         <option>Most Relevant</option>
         <option>Highest Rated</option>
         <option>Newest First</option>

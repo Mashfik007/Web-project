@@ -1,0 +1,14 @@
+export type BookFormat = "PHYSICAL" | "DIGITAL";
+export type BookAvailability = "Available" | "On Loan";
+
+export type Book = {
+  id: number;
+  title: string;
+  author: string;
+  rating: number;
+  year: number;
+  format: BookFormat;
+  availability: BookAvailability;
+  image: string;
+  genre: string;
+};

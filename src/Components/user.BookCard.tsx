@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { Book } from "@/types/book";
 
 interface BookCardProps {
   book: Book;
@@ -13,6 +14,7 @@ export default function BookCard({ book }: BookCardProps) {
           src={book.image}
           alt={book.title}
           fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover"
         />
 
@@ -38,7 +40,10 @@ export default function BookCard({ book }: BookCardProps) {
 
         {/* Rating */}
         <div className="mt-3 flex items-center gap-1">
-          <span className="text-xs tracking-tight text-sky-600">★★★★★</span>
+          <span className="text-xs tracking-tight text-sky-600">
+            {"★".repeat(Math.round(book.rating))}
+            {"☆".repeat(5 - Math.round(book.rating))}
+          </span>
 
           <span className="text-[10px] text-slate-500">{book.rating}</span>
         </div>

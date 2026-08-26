@@ -1,3 +1,5 @@
+"use client";
+
 import FilterSection from "./user.Filtersearch";
 
 const genres = [
@@ -10,7 +12,41 @@ const genres = [
   "Literary",
 ];
 
-export default function FilterSidebar() {
+export type AvailabilityFilter = "All" | "Available" | "On Loan";
+export type FormatFilter = "All" | "Physical" | "Digital";
+
+export type BrowseFilters = {
+  genres: string[];
+  availability: AvailabilityFilter;
+  format: FormatFilter;
+  minRating: number;
+  yearFrom: number;
+  yearTo: number;
+};
+
+export const defaultBrowseFilters: BrowseFilters = {
+  genres: [],
+  availability: "All",
+  format: "All",
+  minRating: 1,
+  yearFrom: 2000,
+  yearTo: 2024,
+};
+
+interface FilterSidebarProps {
+  filters: BrowseFilters;
+  onChange: (filters: BrowseFilters) => void;
+}
+
+export default function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
+  const toggleGenre = (genre: string) => {
+    const selected = filters.genres.includes(genre)
+      ? filters.genres.filter((item) => item !== genre)
+      : [...filters.genres, genre];
+
+    onChange({ ...filters, genres: selected });
+  };
+
   return (
     <aside className="h-fit overflow-hidden rounded-2xl border border-slate-200 bg-white">
       {/* Filter header */}
@@ -38,6 +74,8 @@ export default function FilterSidebar() {
           >
             <input
               type="checkbox"
+              checked={filters.genres.includes(genre)}
+              onChange={() => toggleGenre(genre)}
               className="checkbox checkbox-sm checkbox-info"
             />
 
@@ -48,72 +86,65 @@ export default function FilterSidebar() {
 
       {/* Availability */}
       <FilterSection title="AVAILABILITY">
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
-          <input
-            type="radio"
-            name="availability"
-            defaultChecked
-            className="radio radio-sm radio-info"
-          />
-          All
-        </label>
-
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
-          <input
-            type="radio"
-            name="availability"
-            className="radio radio-sm radio-info"
-          />
-          Available
-        </label>
-
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
-          <input
-            type="radio"
-            name="availability"
-            className="radio radio-sm radio-info"
-          />
-          On Loan
-        </label>
+        {(["All", "Available", "On Loan"] as AvailabilityFilter[]).map(
+          (option) => (
+            <label
+              key={option}
+              className="flex cursor-pointer items-center gap-2 text-sm text-slate-600"
+            >
+              <input
+                type="radio"
+                name="availability"
+                checked={filters.availability === option}
+                onChange={() => onChange({ ...filters, availability: option })}
+                className="radio radio-sm radio-info"
+              />
+              {option}
+            </label>
+          ),
+        )}
       </FilterSection>
 
       {/* Format */}
       <FilterSection title="FORMAT">
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
-          <input
-            type="radio"
-            name="format"
-            defaultChecked
-            className="radio radio-sm radio-info"
-          />
-          All Formats
-        </label>
-
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
-          <input
-            type="radio"
-            name="format"
-            className="radio radio-sm radio-info"
-          />
-          Physical
-        </label>
-
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
-          <input
-            type="radio"
-            name="format"
-            className="radio radio-sm radio-info"
-          />
-          Digital
-        </label>
+        {(["All", "Physical", "Digital"] as FormatFilter[]).map((option) => (
+          <label
+            key={option}
+            className="flex cursor-pointer items-center gap-2 text-sm text-slate-600"
+          >
+            <input
+              type="radio"
+              name="format"
+              checked={filters.format === option}
+              onChange={() => onChange({ ...filters, format: option })}
+              className="radio radio-sm radio-info"
+            />
+            {option === "All" ? "All Formats" : option}
+          </label>
+        ))}
       </FilterSection>
 
       {/* Rating */}
       <FilterSection title="MINIMUM RATING">
         <div className="flex items-center gap-1 text-sm text-sky-600">
-          ★★★☆☆
-          <span className="ml-2 text-xs text-slate-600">1.0+</span>
+          {"★".repeat(Math.round(filters.minRating))}
+          {"☆".repeat(5 - Math.round(filters.minRating))}
+          <span className="ml-2 text-xs text-slate-600">
+            {filters.minRating.toFixed(1)}+
+          </span>
         </div>
+
+        <input
+          type="range"
+          min={1}
+          max={5}
+          step={0.5}
+          value={filters.minRating}
+          onChange={(event) =>
+            onChange({ ...filters, minRating: Number(event.target.value) })
+          }
+          className="range range-xs range-info"
+        />
 
         <div className="flex justify-between px-1 text-[10px] text-slate-400">
           <span>1</span>
@@ -127,21 +158,39 @@ export default function FilterSidebar() {
       {/* Year */}
       <FilterSection title="YEAR PUBLISHED">
         <div className="flex items-center gap-2">
-          <button className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">
-            2000
-          </button>
+          <input
+            type="number"
+            min={1900}
+            max={filters.yearTo}
+            value={filters.yearFrom}
+            onChange={(event) =>
+              onChange({ ...filters, yearFrom: Number(event.target.value) })
+            }
+            className="w-20 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600"
+          />
 
           <span className="text-slate-400">-</span>
 
-          <button className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">
-            2024
-          </button>
+          <input
+            type="number"
+            min={filters.yearFrom}
+            max={2026}
+            value={filters.yearTo}
+            onChange={(event) =>
+              onChange({ ...filters, yearTo: Number(event.target.value) })
+            }
+            className="w-20 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600"
+          />
         </div>
       </FilterSection>
 
       {/* Reset */}
       <div className="p-4 text-center">
-        <button className="text-xs font-medium text-slate-500 hover:text-sky-600">
+        <button
+          type="button"
+          onClick={() => onChange(defaultBrowseFilters)}
+          className="text-xs font-medium text-slate-500 hover:text-sky-600"
+        >
           Reset all filters
         </button>
       </div>
