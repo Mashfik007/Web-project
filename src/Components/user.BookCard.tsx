@@ -1,13 +1,18 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Book } from "@/types/book";
 
 interface BookCardProps {
   book: Book;
+  userId: string;
 }
 
-export default function BookCard({ book }: BookCardProps) {
+export default function BookCard({ book, userId }: BookCardProps) {
   return (
-    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-lg">
+    <Link
+      href={`/user/${userId}/browsebook/${book.id}`}
+      className="block overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-lg"
+    >
       {/* Image */}
       <div className="relative h-66 w-full overflow-hidden">
         <Image
@@ -63,6 +68,6 @@ export default function BookCard({ book }: BookCardProps) {
           <span className="text-[9px] text-slate-500">{book.year}</span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
