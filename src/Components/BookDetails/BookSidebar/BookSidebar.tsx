@@ -1,4 +1,15 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import {
+  ConfirmModal,
+  FormField,
+  FormModal,
+  StatusModal,
+  formHasValues,
+  useFeedback,
+} from "@/Components/Modal/AppModal";
 import type { BookDetails } from "@/types/bookDetails";
 
 interface BookSidebarProps {
@@ -6,6 +17,10 @@ interface BookSidebarProps {
 }
 
 export default function BookSidebar({ book }: BookSidebarProps) {
+  const [borrowing, setBorrowing] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const feedback = useFeedback();
+
   return (
     <aside className="flex flex-col gap-4">
       <div className="relative aspect-3/4 w-full overflow-hidden rounded-2xl shadow-md">
@@ -21,64 +36,30 @@ export default function BookSidebar({ book }: BookSidebarProps) {
 
       <button
         type="button"
+        onClick={() => setBorrowing(true)}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-600"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="size-4"
-        >
-          <path d="M12 7v14" />
-          <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
-        </svg>
         Borrow This Book
       </button>
 
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
+          onClick={() =>
+            feedback.success(
+              "Added to wishlist",
+              `"${book.title}" is now on your shelf.`,
+            )
+          }
           className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-sky-200 hover:bg-sky-50"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-4 text-sky-500"
-          >
-            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-          </svg>
           Wishlist
         </button>
-
         <button
           type="button"
+          onClick={() => setSharing(true)}
           className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-sky-200 hover:bg-sky-50"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-4 text-sky-500"
-          >
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <path d="m8.59 13.51 6.83 3.98" />
-            <path d="M15.41 6.51l-6.82 3.98" />
-          </svg>
           Share
         </button>
       </div>
@@ -97,6 +78,60 @@ export default function BookSidebar({ book }: BookSidebarProps) {
           </span>
         </p>
       </div>
+
+      <FormModal
+        open={borrowing}
+        onClose={() => setBorrowing(false)}
+        title="Borrow this book"
+        submitLabel="Send request"
+        onSubmit={(form) => {
+          if (!formHasValues(form, ["returnDate"])) {
+            setBorrowing(false);
+            feedback.failed(
+              "Request not sent",
+              "Choose an expected return date.",
+            );
+            return;
+          }
+          setBorrowing(false);
+          feedback.success(
+            "Borrow request sent",
+            `We'll notify you when "${book.title}" is approved.`,
+          );
+        }}
+      >
+        <p className="text-sm text-slate-500">
+          Request <b>{book.title}</b> by {book.author}.
+        </p>
+        <FormField
+          label="Expected return"
+          name="returnDate"
+          type="date"
+          defaultValue={new Date(Date.now() + 14 * 86400000)
+            .toISOString()
+            .slice(0, 10)}
+        />
+      </FormModal>
+
+      <ConfirmModal
+        open={sharing}
+        onClose={() => setSharing(false)}
+        title="Share this title"
+        message={`Copy a Folio link for "${book.title}" to send to a friend.`}
+        confirmLabel="Copy link"
+        onConfirm={() => {
+          setSharing(false);
+          feedback.success("Link copied", "You can paste it anywhere.");
+        }}
+      />
+
+      <StatusModal
+        open={feedback.status !== null}
+        onClose={feedback.closeStatus}
+        variant={feedback.status?.variant ?? "success"}
+        title={feedback.status?.title ?? ""}
+        message={feedback.status?.message ?? ""}
+      />
     </aside>
   );
 }

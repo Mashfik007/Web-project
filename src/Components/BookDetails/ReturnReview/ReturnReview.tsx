@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { StatusModal, useFeedback } from "@/Components/Modal/AppModal";
 
 export default function ReturnReview() {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [note, setNote] = useState("");
+  const feedback = useFeedback();
 
   const displayRating = hoveredRating || rating;
 
@@ -69,10 +71,33 @@ export default function ReturnReview() {
 
       <button
         type="button"
+        onClick={() => {
+          if (rating === 0) {
+            feedback.failed(
+              "Review not submitted",
+              "Choose a star rating before sending your return review.",
+            );
+            return;
+          }
+          feedback.success(
+            "Review submitted",
+            note.trim()
+              ? "Thanks — your rating and note will help other readers."
+              : "Thanks — your rating will help other readers.",
+          );
+        }}
         className="mt-4 w-full rounded-xl bg-sky-100 px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-200"
       >
         Submit Review
       </button>
+
+      <StatusModal
+        open={feedback.status !== null}
+        onClose={feedback.closeStatus}
+        variant={feedback.status?.variant ?? "success"}
+        title={feedback.status?.title ?? ""}
+        message={feedback.status?.message ?? ""}
+      />
     </article>
   );
 }

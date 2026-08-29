@@ -1,4 +1,16 @@
+"use client";
+
+import { useState } from "react";
+import {
+  ConfirmModal,
+  StatusModal,
+  useFeedback,
+} from "@/Components/Modal/AppModal";
+
 export default function AutoHoldBanner() {
+  const [confirming, setConfirming] = useState(false);
+  const feedback = useFeedback();
+
   return (
     <div className="mt-6 flex flex-col gap-4 rounded-xl border border-sky-100 bg-sky-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-start gap-3">
@@ -29,10 +41,34 @@ export default function AutoHoldBanner() {
 
       <button
         type="button"
+        onClick={() => setConfirming(true)}
         className="shrink-0 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-600"
       >
         Enable Hold
       </button>
+
+      <ConfirmModal
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        title="Enable auto-hold"
+        message="We'll notify you and hold the next available copy for 48 hours."
+        confirmLabel="Enable"
+        tone="success"
+        onConfirm={() => {
+          setConfirming(false);
+          feedback.success(
+            "Auto-hold enabled",
+            "You'll get a notification as soon as a copy is free.",
+          );
+        }}
+      />
+      <StatusModal
+        open={feedback.status !== null}
+        onClose={feedback.closeStatus}
+        variant={feedback.status?.variant ?? "success"}
+        title={feedback.status?.title ?? ""}
+        message={feedback.status?.message ?? ""}
+      />
     </div>
   );
 }

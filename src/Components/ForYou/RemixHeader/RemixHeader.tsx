@@ -1,3 +1,13 @@
+"use client";
+
+import { useState } from "react";
+import {
+  FormField,
+  FormModal,
+  StatusModal,
+  formHasValues,
+  useFeedback,
+} from "@/Components/Modal/AppModal";
 import type { ForYouHeader } from "@/types/forYou";
 
 interface RemixHeaderProps {
@@ -5,6 +15,10 @@ interface RemixHeaderProps {
 }
 
 export default function RemixHeader({ header }: RemixHeaderProps) {
+  const [blindDate, setBlindDate] = useState(false);
+  const [navigator, setNavigator] = useState(false);
+  const feedback = useFeedback();
+
   return (
     <section>
       <p className="text-[10px] font-semibold tracking-[0.2em] text-slate-400 uppercase">
@@ -41,6 +55,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
       <div className="mt-5 flex flex-wrap gap-3">
         <button
           type="button"
+          onClick={() => setBlindDate(true)}
           className="flex items-center gap-2 rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-600"
         >
           <svg
@@ -60,6 +75,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
 
         <button
           type="button"
+          onClick={() => setNavigator(true)}
           className="flex items-center gap-2 rounded-xl border border-sky-200 bg-white px-5 py-2.5 text-sm font-semibold text-sky-600 transition hover:bg-sky-50"
         >
           <svg
@@ -79,6 +95,86 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
           Series Navigator
         </button>
       </div>
+
+      <FormModal
+        open={blindDate}
+        onClose={() => setBlindDate(false)}
+        title="Start a Blind Date"
+        submitLabel="Match me"
+        onSubmit={(form) => {
+          if (!formHasValues(form, ["mood", "length"])) {
+            feedback.failed(
+              "Could not match",
+              "Choose a mood and length for your surprise book.",
+            );
+            return;
+          }
+          const data = new FormData(form);
+          setBlindDate(false);
+          feedback.success(
+            "Your date is ready",
+            `A ${data.get("length")} ${data.get("mood")} pick is waiting on your shelf.`,
+          );
+        }}
+      >
+        <FormField
+          label="Mood"
+          name="mood"
+          as="select"
+          required
+          options={["Curious", "Cozy", "Dark", "Hopeful", "Adventurous"]}
+        />
+        <FormField
+          label="Length"
+          name="length"
+          as="select"
+          required
+          options={["Short read", "Standard", "Epic"]}
+        />
+      </FormModal>
+
+      <FormModal
+        open={navigator}
+        onClose={() => setNavigator(false)}
+        title="Series Navigator"
+        submitLabel="Find next book"
+        onSubmit={(form) => {
+          if (!formHasValues(form, ["series"])) {
+            feedback.failed(
+              "Series not found",
+              "Enter a series name to find the next volume.",
+            );
+            return;
+          }
+          const data = new FormData(form);
+          setNavigator(false);
+          feedback.success(
+            "Next volume found",
+            `"${data.get("series")}" — volume ${data.get("volume") || "2"} is available to reserve.`,
+          );
+        }}
+      >
+        <FormField
+          label="Series name"
+          name="series"
+          placeholder="e.g. Dune"
+          required
+        />
+        <FormField
+          label="Last volume read"
+          name="volume"
+          type="number"
+          placeholder="1"
+        />
+      </FormModal>
+
+      <StatusModal
+        open={feedback.status !== null}
+        onClose={feedback.closeStatus}
+        variant={feedback.status?.variant ?? "success"}
+        title={feedback.status?.title ?? ""}
+        message={feedback.status?.message ?? ""}
+      />
     </section>
   );
 }

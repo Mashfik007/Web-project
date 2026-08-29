@@ -1,14 +1,25 @@
+"use client";
+
 import type { BookDetails } from "@/types/bookDetails";
+import {
+  PolarAngleAxis,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+} from "recharts";
 
 interface MatchScoreProps {
   matchScore: BookDetails["matchScore"];
 }
 
 export default function MatchScore({ matchScore }: MatchScoreProps) {
-  const percentage = (matchScore.score / matchScore.maxScore) * 100;
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  const data = [
+    {
+      name: "Match",
+      value: matchScore.score,
+      fill: "#0ea5e9",
+    },
+  ];
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -39,28 +50,28 @@ export default function MatchScore({ matchScore }: MatchScoreProps) {
 
       <div className="mt-5 flex flex-col items-center">
         <div className="relative size-36">
-          <svg viewBox="0 0 128 128" className="size-full -rotate-90">
-            <circle
-              cx="64"
-              cy="64"
-              r={radius}
-              fill="none"
-              stroke="#e2e8f0"
-              strokeWidth="10"
-            />
-            <circle
-              cx="64"
-              cy="64"
-              r={radius}
-              fill="none"
-              stroke="#0ea5e9"
-              strokeWidth="10"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadialBarChart
+              data={data}
+              innerRadius="78%"
+              outerRadius="100%"
+              startAngle={90}
+              endAngle={-270}
+              barSize={10}
+            >
+              <PolarAngleAxis
+                type="number"
+                domain={[0, matchScore.maxScore]}
+                tick={false}
+              />
+              <RadialBar
+                dataKey="value"
+                background={{ fill: "#e2e8f0" }}
+                cornerRadius={10}
+              />
+            </RadialBarChart>
+          </ResponsiveContainer>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-2xl font-bold text-slate-800">
               {matchScore.score}
             </span>

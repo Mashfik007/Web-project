@@ -1,4 +1,12 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import {
+  ConfirmModal,
+  StatusModal,
+  useFeedback,
+} from "@/Components/Modal/AppModal";
 import type { CommunityMember } from "@/types/communityShelf";
 
 interface MemberCardProps {
@@ -6,6 +14,9 @@ interface MemberCardProps {
 }
 
 export default function MemberCard({ member }: MemberCardProps) {
+  const [requesting, setRequesting] = useState(false);
+  const feedback = useFeedback();
+
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
@@ -75,11 +86,34 @@ export default function MemberCard({ member }: MemberCardProps) {
 
         <button
           type="button"
+          onClick={() => setRequesting(true)}
           className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
         >
           View Profile
         </button>
       </div>
+
+      <ConfirmModal
+        open={requesting}
+        onClose={() => setRequesting(false)}
+        title={member.name}
+        message={`${member.name} is reading "${member.currentlyReading.title}". Send a borrow request when they finish?`}
+        confirmLabel="Request book"
+        onConfirm={() => {
+          setRequesting(false);
+          feedback.success(
+            "Request sent",
+            `${member.name} will see your request for "${member.currentlyReading.title}".`,
+          );
+        }}
+      />
+      <StatusModal
+        open={feedback.status !== null}
+        onClose={feedback.closeStatus}
+        variant={feedback.status?.variant ?? "success"}
+        title={feedback.status?.title ?? ""}
+        message={feedback.status?.message ?? ""}
+      />
     </article>
   );
 }

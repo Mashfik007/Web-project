@@ -2,8 +2,7 @@ import connectDB from "@/dbConfig/dbConfig";
 import { User } from "@/Model/Users";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
-import { json } from "zod";
-async function POST(request: Request) {
+export  async function POST(request: Request) {
   try {
     await connectDB();
     const body = await request.json();

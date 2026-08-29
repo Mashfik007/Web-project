@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { BorrowingHabits } from "@/types/forYou";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 interface BorrowingHabitsCardProps {
   habits: BorrowingHabits;
@@ -14,42 +15,34 @@ function DonutChart({
   genres: BorrowingHabits["genres"];
   totalBooks: number;
 }) {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  let offset = 0;
-
   return (
     <div className="relative size-36 shrink-0">
-      <svg viewBox="0 0 128 128" className="size-full -rotate-90">
-        <circle
-          cx="64"
-          cy="64"
-          r={radius}
-          fill="none"
-          stroke="#f1f5f9"
-          strokeWidth="14"
-        />
-        {genres.map((genre) => {
-          const segment = (genre.percentage / 100) * circumference;
-          const currentOffset = offset;
-          offset += segment;
-
-          return (
-            <circle
-              key={genre.genre}
-              cx="64"
-              cy="64"
-              r={radius}
-              fill="none"
-              stroke={genre.color}
-              strokeWidth="14"
-              strokeDasharray={`${segment} ${circumference - segment}`}
-              strokeDashoffset={-currentOffset}
-            />
-          );
-        })}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={genres}
+            dataKey="percentage"
+            nameKey="genre"
+            innerRadius={42}
+            outerRadius={56}
+            paddingAngle={2}
+            stroke="none"
+          >
+            {genres.map((genre) => (
+              <Cell key={genre.genre} fill={genre.color} />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value) => [`${value}%`, "Share"]}
+            contentStyle={{
+              borderRadius: 10,
+              border: "1px solid #E2E8F0",
+              fontSize: 12,
+            }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold text-slate-800">{totalBooks}</span>
         <span className="text-xs text-slate-400">books</span>
       </div>

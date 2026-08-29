@@ -1,10 +1,26 @@
+"use client";
+
 import type { GenreStat } from "@/types/myShelf";
+import {
+  Bar,
+  BarChart,
+  LabelList,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface GenreBreakdownProps {
   genres: GenreStat[];
 }
 
 export default function GenreBreakdown({ genres }: GenreBreakdownProps) {
+  const data = genres.map((genre) => ({
+    ...genre,
+    detail: `${genre.count} books · ${genre.percentage}%`,
+  }));
+
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
@@ -28,24 +44,48 @@ export default function GenreBreakdown({ genres }: GenreBreakdownProps) {
         </h3>
       </div>
 
-      <ul className="mt-5 space-y-4">
-        {genres.map((genre) => (
-          <li key={genre.genre}>
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-medium text-slate-700">{genre.genre}</span>
-              <span className="text-slate-400">
-                {genre.count} books · {genre.percentage}%
-              </span>
-            </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-              <div
-                className="h-full rounded-full bg-sky-500"
-                style={{ width: `${genre.percentage}%` }}
+      <div className="mt-4 h-52 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            layout="vertical"
+            data={data}
+            margin={{ top: 4, right: 96, left: 4, bottom: 4 }}
+          >
+            <XAxis type="number" domain={[0, 100]} hide />
+            <YAxis
+              type="category"
+              dataKey="genre"
+              width={78}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: "#334155" }}
+            />
+            <Tooltip
+              cursor={{ fill: "rgba(14, 165, 233, 0.06)" }}
+              formatter={(value) => [`${value}%`, "Share"]}
+              contentStyle={{
+                borderRadius: 10,
+                border: "1px solid #E2E8F0",
+                fontSize: 12,
+              }}
+            />
+            <Bar
+              dataKey="percentage"
+              fill="#0EA5E9"
+              barSize={10}
+              radius={[0, 8, 8, 0]}
+              background={{ fill: "#F1F5F9", radius: 8 }}
+            >
+              <LabelList
+                dataKey="detail"
+                position="right"
+                fill="#94A3B8"
+                fontSize={10}
               />
-            </div>
-          </li>
-        ))}
-      </ul>
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </article>
   );
 }

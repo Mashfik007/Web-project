@@ -1,4 +1,12 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import {
+  ConfirmModal,
+  StatusModal,
+  useFeedback,
+} from "@/Components/Modal/AppModal";
 import type { RecommendedBook } from "@/types/forYou";
 
 interface RecommendationCardProps {
@@ -19,6 +27,9 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function RecommendationCard({ book }: RecommendationCardProps) {
+  const [dating, setDating] = useState(false);
+  const feedback = useFeedback();
+
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="relative aspect-3/4 w-full overflow-hidden bg-slate-100">
@@ -67,6 +78,7 @@ export default function RecommendationCard({ book }: RecommendationCardProps) {
             )}
             <button
               type="button"
+              onClick={() => setDating(true)}
               className="flex items-center gap-0.5 text-[10px] font-medium text-sky-600 hover:underline"
             >
               <svg
@@ -86,6 +98,28 @@ export default function RecommendationCard({ book }: RecommendationCardProps) {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        open={dating}
+        onClose={() => setDating(false)}
+        title="Blind date this book"
+        message={`Wrap "${book.title}" as a surprise pick? The cover stays hidden until you start reading.`}
+        confirmLabel="Wrap it"
+        onConfirm={() => {
+          setDating(false);
+          feedback.success(
+            "Blind date booked",
+            `"${book.title}" is wrapped and waiting on your shelf.`,
+          );
+        }}
+      />
+      <StatusModal
+        open={feedback.status !== null}
+        onClose={feedback.closeStatus}
+        variant={feedback.status?.variant ?? "success"}
+        title={feedback.status?.title ?? ""}
+        message={feedback.status?.message ?? ""}
+      />
     </article>
   );
 }

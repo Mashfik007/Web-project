@@ -15,6 +15,7 @@ export async function register_user(user: FormData) {
 
     const data = await res.json();
 
+
     if (!res.ok) {
       console.log(data.message);
       return;

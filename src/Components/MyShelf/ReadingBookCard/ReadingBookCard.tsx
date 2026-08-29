@@ -1,4 +1,12 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import {
+  ConfirmModal,
+  StatusModal,
+  useFeedback,
+} from "@/Components/Modal/AppModal";
 import type { ShelfBook } from "@/types/myShelf";
 
 interface ReadingBookCardProps {
@@ -13,6 +21,8 @@ export default function ReadingBookCard({
   const progress = Math.round((book.currentPage / book.pages) * 100);
   const pagesLeft = book.pages - book.currentPage;
   const isReading = variant === "reading" && book.currentPage > 0;
+  const [action, setAction] = useState<"renew" | "return" | null>(null);
+  const feedback = useFeedback();
 
   return (
     <article className="rounded-2xl border border-sky-100 bg-slate-50/80 p-5">
@@ -86,6 +96,7 @@ export default function ReadingBookCard({
               <div className="mt-4 flex gap-2">
                 <button
                   type="button"
+                  onClick={() => setAction("renew")}
                   className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
                 >
                   <svg
@@ -108,6 +119,7 @@ export default function ReadingBookCard({
 
                 <button
                   type="button"
+                  onClick={() => setAction("return")}
                   className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
                 >
                   <svg
@@ -136,6 +148,37 @@ export default function ReadingBookCard({
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        open={action === "renew"}
+        onClose={() => setAction(null)}
+        title="Renew this book"
+        message={`Extend the due date for "${book.title}"?`}
+        confirmLabel="Renew"
+        onConfirm={() => {
+          setAction(null);
+          feedback.success("Book renewed", `"${book.title}" is due later.`);
+        }}
+      />
+      <ConfirmModal
+        open={action === "return"}
+        onClose={() => setAction(null)}
+        title="Return this book"
+        message={`Mark "${book.title}" as returned to the library?`}
+        confirmLabel="Return"
+        tone="success"
+        onConfirm={() => {
+          setAction(null);
+          feedback.success("Return started", `"${book.title}" is marked for return.`);
+        }}
+      />
+      <StatusModal
+        open={feedback.status !== null}
+        onClose={feedback.closeStatus}
+        variant={feedback.status?.variant ?? "success"}
+        title={feedback.status?.title ?? ""}
+        message={feedback.status?.message ?? ""}
+      />
     </article>
   );
 }

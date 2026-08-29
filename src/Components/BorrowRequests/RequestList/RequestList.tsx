@@ -3,6 +3,11 @@
 import { useMemo, useState } from "react";
 import FilterTabs from "../FilterTabs/FilterTabs";
 import RequestCard from "../RequestCard/RequestCard";
+import {
+  ConfirmModal,
+  StatusModal,
+  useFeedback,
+} from "@/Components/Modal/AppModal";
 import type {
   BorrowRequestFilter,
   BorrowRequestStatus,
@@ -19,6 +24,12 @@ export default function RequestList({ filters, requests }: RequestListProps) {
     "pending",
   );
   const [localRequests, setLocalRequests] = useState(requests);
+  const [confirm, setConfirm] = useState<{
+    id: string;
+    action: "approve" | "decline";
+    title: string;
+  } | null>(null);
+  const feedback = useFeedback();
 
   const visibleRequests = useMemo(
     () =>
@@ -73,12 +84,57 @@ export default function RequestList({ filters, requests }: RequestListProps) {
             <RequestCard
               key={request.id}
               request={request}
-              onApprove={handleApprove}
-              onDecline={handleDecline}
+              onApprove={(id) =>
+                setConfirm({
+                  id,
+                  action: "approve",
+                  title: request.bookTitle,
+                })
+              }
+              onDecline={(id) =>
+                setConfirm({
+                  id,
+                  action: "decline",
+                  title: request.bookTitle,
+                })
+              }
             />
           ))
         )}
       </div>
+
+      <ConfirmModal
+        open={confirm !== null}
+        onClose={() => setConfirm(null)}
+        title={confirm?.action === "approve" ? "Approve request" : "Decline request"}
+        message={
+          confirm
+            ? `${confirm.action === "approve" ? "Approve" : "Decline"} the request for "${confirm.title}"?`
+            : ""
+        }
+        confirmLabel={confirm?.action === "approve" ? "Approve" : "Decline"}
+        tone={confirm?.action === "approve" ? "success" : "danger"}
+        onConfirm={() => {
+          if (!confirm) return;
+          if (confirm.action === "approve") handleApprove(confirm.id);
+          else handleDecline(confirm.id);
+          const title = confirm.title;
+          const action = confirm.action;
+          setConfirm(null);
+          feedback.success(
+            action === "approve" ? "Request approved" : "Request declined",
+            `"${title}" was ${action === "approve" ? "approved" : "declined"}.`,
+          );
+        }}
+      />
+
+      <StatusModal
+        open={feedback.status !== null}
+        onClose={feedback.closeStatus}
+        variant={feedback.status?.variant ?? "success"}
+        title={feedback.status?.title ?? ""}
+        message={feedback.status?.message ?? ""}
+      />
     </div>
   );
 }

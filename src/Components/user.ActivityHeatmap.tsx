@@ -1,10 +1,14 @@
+"use client";
+
+import HeatmapChart from "@/Components/user.HeatmapChart";
+
 const activity = [
   0, 1, 0, 2, 1, 0, 1, 2, 1, 3, 0, 1, 1, 2, 3, 1, 0, 1, 2, 3, 2, 0, 1, 3, 3, 1,
   2, 3, 2, 1, 0, 2, 3, 1, 2, 3, 1, 2, 0, 1, 3, 2, 1, 3, 0, 2, 3, 1, 0, 1, 2, 3,
   1, 2, 3, 1, 0, 2, 1, 3, 1, 0, 2, 1, 3, 2, 1, 3, 0, 1, 2, 3,
 ];
 
-const colors = ["bg-sky-50", "bg-sky-100", "bg-sky-300", "bg-sky-600"];
+const legendColors = ["#F0F9FF", "#E0F2FE", "#7DD3FC", "#0284C7"];
 
 export default function ActivityHeatmap() {
   return (
@@ -17,22 +21,19 @@ export default function ActivityHeatmap() {
         <span className="text-[10px] text-slate-400">12 weeks</span>
       </div>
 
-      <div className="mt-4 grid grid-cols-12 gap-1.5">
-        {activity.map((level, index) => (
-          <div
-            key={index}
-            className={`aspect-square rounded-sm ${colors[level]}`}
-          />
-        ))}
+      <div className="mt-4 h-28 w-full">
+        <HeatmapChart activity={activity} weeks={12} days={6} flow="row" />
       </div>
 
       <div className="mt-4 flex items-center justify-end gap-1.5 text-[10px] text-slate-400">
         <span>Less</span>
-
-        {colors.map((color, index) => (
-          <div key={index} className={`size-3 rounded-sm ${color}`} />
+        {legendColors.map((color) => (
+          <div
+            key={color}
+            className="size-3 rounded-sm"
+            style={{ backgroundColor: color }}
+          />
         ))}
-
         <span>More</span>
       </div>
     </div>

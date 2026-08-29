@@ -1,6 +1,9 @@
-const activityColors = ["bg-sky-50", "bg-sky-100", "bg-sky-300", "bg-sky-600"];
+"use client";
+
+import HeatmapChart from "@/Components/user.HeatmapChart";
 
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
+const legendColors = ["#F0F9FF", "#E0F2FE", "#7DD3FC", "#0284C7"];
 
 interface ReadingActivityProps {
   activity: number[];
@@ -25,29 +28,24 @@ export default function ReadingActivity({
         </span>
       </div>
 
-      <div className="mt-4 flex gap-2">
-        <div className="flex flex-col gap-1 pt-0.5 text-[9px] text-slate-400">
-          {dayLabels.map((day, index) => (
-            <span key={index} className="flex h-3 items-center">
-              {day}
-            </span>
-          ))}
-        </div>
-
-        <div className="grid flex-1 grid-flow-col grid-rows-7 gap-1">
-          {activity.map((level, index) => (
-            <div
-              key={index}
-              className={`aspect-square rounded-sm ${activityColors[level] ?? activityColors[0]}`}
-            />
-          ))}
-        </div>
+      <div className="mt-4 h-36 w-full">
+        <HeatmapChart
+          activity={activity}
+          weeks={12}
+          days={7}
+          flow="column"
+          dayLabels={dayLabels}
+        />
       </div>
 
       <div className="mt-4 flex items-center justify-end gap-1.5 text-[10px] text-slate-400">
         <span>Less</span>
-        {activityColors.map((color, index) => (
-          <div key={index} className={`size-3 rounded-sm ${color}`} />
+        {legendColors.map((color) => (
+          <div
+            key={color}
+            className="size-3 rounded-sm"
+            style={{ backgroundColor: color }}
+          />
         ))}
         <span>More</span>
       </div>
