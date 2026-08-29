@@ -56,10 +56,10 @@ export default function BookCard({ book, userId }: BookCardProps) {
         {/* Bottom */}
         <div className="mt-3 flex items-center justify-between">
           <span
-            className={`rounded-full border px-2 py-1 text-[9px] font-medium ${
+            className={`badge badge-xs ${
               book.availability === "Available"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-600"
-                : "border-amber-200 bg-amber-50 text-amber-600"
+                ? "badge-soft badge-success"
+                : "badge-soft badge-warning"
             }`}
           >
             {book.availability}

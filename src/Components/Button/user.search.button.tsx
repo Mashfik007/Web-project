@@ -4,7 +4,7 @@ interface SearchButtonProps {
 
 export default function SearchButton({ label }: SearchButtonProps) {
   return (
-    <button className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/20">
+    <button type="button" className="btn btn-ghost text-white">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"

@@ -239,10 +239,8 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
                 <li key={item.label}>
                   <Link
                     href={href}
-                    className={`is-drawer-close:tooltip is-drawer-close:tooltip-right rounded-xl ${
-                      isActive
-                        ? "bg-white/90 font-semibold text-sky-700 shadow-sm"
-                        : "hover:bg-white/60"
+                    className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${
+                      isActive ? "menu-active" : ""
                     }`}
                     data-tip={item.label}
                   >

@@ -16,8 +16,7 @@ interface DeliveryFormProps {
   onSubmit: (data: DeliveryFormData) => void;
 }
 
-const inputClassName =
-  "w-full rounded-lg border border-slate-300 px-4 py-3 text-black transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200";
+const inputClassName = "input w-full";
 
 export default function DeliveryForm({
   delivery,
@@ -113,7 +112,7 @@ export default function DeliveryForm({
               </label>
               <select
                 {...register("city")}
-                className={inputClassName}
+                className="select w-full"
               >
                 {delivery.cities.map((city) => (
                   <option key={city} value={city}>
@@ -130,7 +129,7 @@ export default function DeliveryForm({
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Quantity
               </label>
-              <div className="flex h-[50px] items-center justify-between rounded-lg border border-slate-300 px-3">
+              <div className="join">
                 <button
                   type="button"
                   onClick={() =>
@@ -138,11 +137,13 @@ export default function DeliveryForm({
                       shouldValidate: true,
                     })
                   }
-                  className="btn btn-circle btn-ghost btn-sm"
+                  className="btn join-item"
                 >
                   −
                 </button>
-                <span className="font-semibold text-slate-800">{quantity}</span>
+                <span className="btn join-item no-animation pointer-events-none">
+                  {quantity}
+                </span>
                 <button
                   type="button"
                   onClick={() =>
@@ -150,7 +151,7 @@ export default function DeliveryForm({
                       shouldValidate: true,
                     })
                   }
-                  className="btn btn-circle btn-ghost btn-sm"
+                  className="btn join-item"
                 >
                   +
                 </button>
@@ -164,7 +165,7 @@ export default function DeliveryForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn btn-info mt-2 w-full rounded-xl border-0 bg-sky-500 text-white hover:bg-sky-600 disabled:bg-slate-200 disabled:text-slate-400"
+            className="btn btn-primary mt-2 w-full"
           >
             {isSubmitting ? "Submitting..." : "Continue to Payment"}
             <svg

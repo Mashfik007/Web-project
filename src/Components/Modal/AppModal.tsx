@@ -20,45 +20,35 @@ export function AppModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        aria-label="Close modal"
-        className="absolute inset-0 bg-slate-900/40"
-        onClick={onClose}
-      />
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.18)]">
+    <dialog className="modal modal-open" open onCancel={onClose}>
+      <div className="modal-box">
         {title ? (
           <div className="mb-4 flex items-start justify-between gap-3">
-            <h2 className="font-serif text-xl font-bold text-slate-900">
-              {title}
-            </h2>
+            <h3 className="font-serif text-xl font-bold">{title}</h3>
             <button
               type="button"
               onClick={onClose}
-              className="flex size-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+              className="btn btn-circle btn-ghost btn-sm"
               aria-label="Close"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="size-4"
-              >
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
+              ✕
             </button>
           </div>
         ) : null}
         {children}
-        {footer ? (
-          <div className="mt-6 flex flex-wrap justify-end gap-2">{footer}</div>
-        ) : null}
+        {footer ? <div className="modal-action">{footer}</div> : null}
       </div>
-    </div>
+      <form
+        method="dialog"
+        className="modal-backdrop"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onClose();
+        }}
+      >
+        <button type="submit">close</button>
+      </form>
+    </dialog>
   );
 }
 
@@ -81,12 +71,9 @@ export function FormField({
   as?: "input" | "textarea" | "select";
   options?: string[];
 }) {
-  const fieldClass =
-    "mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-sky-400";
-
   return (
-    <label className="block">
-      <span className="text-xs font-medium text-slate-500">{label}</span>
+    <fieldset className="fieldset p-0">
+      <legend className="fieldset-legend">{label}</legend>
       {as === "textarea" ? (
         <textarea
           name={name}
@@ -94,14 +81,14 @@ export function FormField({
           defaultValue={defaultValue}
           required={required}
           rows={4}
-          className={fieldClass}
+          className="textarea w-full"
         />
       ) : as === "select" ? (
         <select
           name={name}
           defaultValue={defaultValue}
           required={required}
-          className={fieldClass}
+          className="select w-full"
         >
           {(options ?? []).map((option) => (
             <option key={option} value={option}>
@@ -116,10 +103,10 @@ export function FormField({
           placeholder={placeholder}
           defaultValue={defaultValue}
           required={required}
-          className={fieldClass}
+          className="input w-full"
         />
       )}
-    </label>
+    </fieldset>
   );
 }
 
@@ -135,18 +122,14 @@ export function ModalButton({
   tone?: "primary" | "secondary" | "danger" | "success";
 }) {
   const tones = {
-    primary: "bg-sky-500 text-white hover:bg-sky-600",
-    secondary: "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
-    danger: "bg-rose-500 text-white hover:bg-rose-600",
-    success: "bg-emerald-500 text-white hover:bg-emerald-600",
+    primary: "btn-primary",
+    secondary: "btn-ghost",
+    danger: "btn-error",
+    success: "btn-success",
   };
 
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${tones[tone]}`}
-    >
+    <button type={type} onClick={onClick} className={`btn ${tones[tone]}`}>
       {children}
     </button>
   );
@@ -182,7 +165,9 @@ export function StatusModal({
       <div className="flex flex-col items-center px-2 pt-2 pb-1 text-center">
         <span
           className={`mb-4 flex size-16 items-center justify-center rounded-full ${
-            isSuccess ? "bg-emerald-50 text-emerald-500" : "bg-rose-50 text-rose-500"
+            isSuccess
+              ? "bg-success/10 text-success"
+              : "bg-error/10 text-error"
           }`}
         >
           {isSuccess ? (
@@ -210,8 +195,10 @@ export function StatusModal({
             </svg>
           )}
         </span>
-        <h2 className="font-serif text-xl font-bold text-slate-900">{title}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-500">{message}</p>
+        <h2 className="font-serif text-xl font-bold">{title}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-base-content/60">
+          {message}
+        </p>
       </div>
     </AppModal>
   );
@@ -241,7 +228,7 @@ export function FormModal({
     <AppModal open={open} onClose={onClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-3">
         {children}
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="modal-action">
           <ModalButton tone="secondary" onClick={onClose}>
             Cancel
           </ModalButton>
@@ -279,18 +266,13 @@ export function ConfirmModal({
           <ModalButton tone="secondary" onClick={onClose}>
             Cancel
           </ModalButton>
-          <ModalButton
-            tone={tone}
-            onClick={() => {
-              onConfirm();
-            }}
-          >
+          <ModalButton tone={tone} onClick={onConfirm}>
             {confirmLabel}
           </ModalButton>
         </>
       }
     >
-      <p className="text-sm leading-relaxed text-slate-500">{message}</p>
+      <p className="text-sm leading-relaxed text-base-content/60">{message}</p>
     </AppModal>
   );
 }

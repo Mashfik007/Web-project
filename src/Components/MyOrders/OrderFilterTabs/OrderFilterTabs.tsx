@@ -25,10 +25,8 @@ export default function OrderFilterTabs({
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(filter.status)}
-            className={`btn btn-sm h-9 min-h-0 rounded-full border-0 px-4 ${
-              isActive
-                ? "bg-sky-500 text-white hover:bg-sky-600"
-                : "border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50"
+            className={`btn btn-sm ${
+              isActive ? "btn-primary" : "btn-ghost"
             }`}
           >
             {filter.label}

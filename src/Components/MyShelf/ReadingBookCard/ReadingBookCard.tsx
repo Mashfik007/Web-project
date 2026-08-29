@@ -82,12 +82,11 @@ export default function ReadingBookCard({
                 <span className="font-semibold text-sky-600">{progress}%</span>
               </div>
 
-              <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-sky-100">
-                <div
-                  className="h-full rounded-full bg-sky-500 transition-all"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+              <progress
+                className="progress progress-primary mt-2"
+                value={progress}
+                max={100}
+              />
 
               <p className="mt-2 text-xs text-slate-500">
                 {pagesLeft} pages to go · due {book.dueDate}
@@ -97,7 +96,7 @@ export default function ReadingBookCard({
                 <button
                   type="button"
                   onClick={() => setAction("renew")}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                  className="btn btn-ghost btn-sm"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -120,7 +119,7 @@ export default function ReadingBookCard({
                 <button
                   type="button"
                   onClick={() => setAction("return")}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                  className="btn btn-ghost btn-sm"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

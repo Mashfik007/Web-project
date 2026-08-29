@@ -35,11 +35,13 @@ export default function SidebarProfile({
     <div className="mt-auto w-full rounded-b-3xl border-t border-white/40 bg-white/95 p-2 shadow-[0_-4px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
       <Link
         href={`/user/${userId}/shelf`}
-        className="is-drawer-close:tooltip is-drawer-close:tooltip-right flex items-center gap-3 rounded-2xl p-2 transition hover:bg-sky-50"
+        className="is-drawer-close:tooltip is-drawer-close:tooltip-right flex items-center gap-3 rounded-2xl p-2 hover:bg-primary/10"
         data-tip={name}
       >
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sky-500 text-sm font-bold text-white shadow-sm">
-          {initials}
+        <span className="avatar avatar-placeholder">
+          <span className="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-content">
+            {initials}
+          </span>
         </span>
 
         <div className="is-drawer-close:hidden min-w-0 flex-1">
@@ -52,7 +54,7 @@ export default function SidebarProfile({
         type="button"
         onClick={handleSignOut}
         disabled={isSigningOut}
-        className="is-drawer-close:tooltip is-drawer-close:tooltip-right mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
+        className="btn btn-error btn-outline btn-sm mt-2 w-full"
         data-tip="Sign out"
       >
         <svg

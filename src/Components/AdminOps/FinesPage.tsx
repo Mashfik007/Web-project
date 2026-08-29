@@ -48,7 +48,7 @@ export default function FinesPage({ summary, fines }: FinesPageProps) {
         {cards.map((card) => (
           <article
             key={card.key}
-            className="rounded-xl border border-slate-100 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.05)]"
+            className="card bg-base-100 p-4 shadow-sm"
           >
             <span
               className={`flex size-9 items-center justify-center rounded-lg text-sm font-bold ${card.color}`}

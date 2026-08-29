@@ -74,10 +74,8 @@ export default function RequestList({ filters, requests }: RequestListProps) {
 
       <div className="space-y-3">
         {visibleRequests.length === 0 ? (
-          <div className="alert rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <span className="text-sm text-slate-500">
-              No requests in this category.
-            </span>
+          <div className="alert">
+            <span className="text-sm">No requests in this category.</span>
           </div>
         ) : (
           visibleRequests.map((request) => (

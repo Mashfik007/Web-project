@@ -49,7 +49,7 @@ export default function DigitalLibraryPage({
         {resources.map((resource) => (
           <article
             key={resource.id}
-            className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.05)]"
+            className="card bg-base-100 overflow-hidden shadow-sm"
           >
             <div
               className={`relative flex h-28 items-center justify-center ${resource.coverClass}`}
@@ -66,10 +66,8 @@ export default function DigitalLibraryPage({
                 <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
               </svg>
               <span
-                className={`absolute top-3 right-3 rounded-md px-2 py-0.5 text-[10px] font-bold ${
-                  resource.format === "PDF"
-                    ? "bg-rose-500 text-white"
-                    : "bg-violet-500 text-white"
+                className={`badge badge-sm absolute top-3 right-3 ${
+                  resource.format === "PDF" ? "badge-error" : "badge-secondary"
                 }`}
               >
                 {resource.format}
@@ -85,7 +83,7 @@ export default function DigitalLibraryPage({
                 <span>{resource.size}</span>
               </div>
               <div className="mt-3 flex items-center justify-between">
-                <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-600">
+                <span className="badge badge-soft badge-info badge-sm">
                   {resource.category}
                 </span>
                 <div className="flex gap-1">
@@ -97,7 +95,7 @@ export default function DigitalLibraryPage({
                         `${resource.title} (${resource.size}) is ready.`,
                       )
                     }
-                    className="flex size-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50"
+                    className="btn btn-ghost btn-square btn-sm"
                     aria-label="Download"
                   >
                     ↓
@@ -105,7 +103,7 @@ export default function DigitalLibraryPage({
                   <button
                     type="button"
                     onClick={() => setDeleting(resource)}
-                    className="flex size-8 items-center justify-center rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-100"
+                    className="btn btn-error btn-soft btn-square btn-sm"
                     aria-label="Delete"
                   >
                     ⌫

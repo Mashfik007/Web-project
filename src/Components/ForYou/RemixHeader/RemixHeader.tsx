@@ -56,7 +56,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
         <button
           type="button"
           onClick={() => setBlindDate(true)}
-          className="flex items-center gap-2 rounded-xl bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-600"
+          className="btn btn-primary"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +76,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
         <button
           type="button"
           onClick={() => setNavigator(true)}
-          className="flex items-center gap-2 rounded-xl border border-sky-200 bg-white px-5 py-2.5 text-sm font-semibold text-sky-600 transition hover:bg-sky-50"
+          className="btn btn-primary btn-outline"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

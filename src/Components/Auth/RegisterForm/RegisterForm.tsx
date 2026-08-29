@@ -98,7 +98,7 @@ export default function RegisterForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-sky-500 py-3.5 font-semibold text-white transition hover:bg-sky-600 active:scale-[0.98] disabled:opacity-70"
+          className="btn btn-primary btn-block"
         >
           {isSubmitting ? "Creating account..." : "Continue →"}
         </button>

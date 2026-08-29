@@ -166,7 +166,7 @@ export default function FilterSidebar({ filters, onChange }: FilterSidebarProps)
             onChange={(event) =>
               onChange({ ...filters, yearFrom: Number(event.target.value) })
             }
-            className="w-20 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600"
+            className="input input-sm w-20"
           />
 
           <span className="text-slate-400">-</span>
@@ -179,7 +179,7 @@ export default function FilterSidebar({ filters, onChange }: FilterSidebarProps)
             onChange={(event) =>
               onChange({ ...filters, yearTo: Number(event.target.value) })
             }
-            className="w-20 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600"
+            className="input input-sm w-20"
           />
         </div>
       </FilterSection>
@@ -189,7 +189,7 @@ export default function FilterSidebar({ filters, onChange }: FilterSidebarProps)
         <button
           type="button"
           onClick={() => onChange(defaultBrowseFilters)}
-          className="text-xs font-medium text-slate-500 hover:text-sky-600"
+          className="btn btn-ghost btn-xs"
         >
           Reset all filters
         </button>

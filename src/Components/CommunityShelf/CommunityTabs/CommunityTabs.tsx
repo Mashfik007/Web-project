@@ -14,22 +14,16 @@ export default function CommunityTabs({ tabs, members }: CommunityTabsProps) {
 
   return (
     <section>
-      <div className="flex overflow-x-auto border-b border-slate-200">
+      <div role="tablist" className="tabs tabs-border">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
+            role="tab"
             onClick={() => setActiveTab(tab.id)}
-            className={`relative shrink-0 px-4 py-3 text-sm font-medium whitespace-nowrap transition ${
-              activeTab === tab.id
-                ? "text-sky-600"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
+            className={`tab ${activeTab === tab.id ? "tab-active" : ""}`}
           >
             {tab.label}
-            {activeTab === tab.id && (
-              <span className="absolute right-0 bottom-0 left-0 h-0.5 bg-sky-500" />
-            )}
           </button>
         ))}
       </div>

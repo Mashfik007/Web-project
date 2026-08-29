@@ -37,7 +37,7 @@ export default function BookSidebar({ book }: BookSidebarProps) {
       <button
         type="button"
         onClick={() => setBorrowing(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-600"
+        className="btn btn-primary btn-block"
       >
         Borrow This Book
       </button>
@@ -51,14 +51,14 @@ export default function BookSidebar({ book }: BookSidebarProps) {
               `"${book.title}" is now on your shelf.`,
             )
           }
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-sky-200 hover:bg-sky-50"
+          className="btn btn-ghost"
         >
           Wishlist
         </button>
         <button
           type="button"
           onClick={() => setSharing(true)}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-sky-200 hover:bg-sky-50"
+          className="btn btn-ghost"
         >
           Share
         </button>

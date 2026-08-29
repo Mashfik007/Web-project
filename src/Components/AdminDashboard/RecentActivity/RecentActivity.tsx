@@ -6,7 +6,7 @@ interface RecentActivityProps {
 
 export default function RecentActivity({ items }: RecentActivityProps) {
   return (
-    <article className="rounded-xl border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.05)]">
+    <article className="card bg-base-100 p-5 shadow-sm">
       <h2 className="text-base font-semibold text-slate-800">Recent Activity</h2>
 
       <ul className="mt-4 space-y-4">

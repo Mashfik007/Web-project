@@ -100,12 +100,12 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
                       </p>
                     </div>
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                      className={`badge badge-sm ${
                         notice.status === "Sent"
-                          ? "bg-emerald-50 text-emerald-600"
+                          ? "badge-soft badge-success"
                           : notice.status === "Scheduled"
-                            ? "bg-sky-50 text-sky-600"
-                            : "bg-slate-100 text-slate-500"
+                            ? "badge-soft badge-info"
+                            : "badge-ghost"
                       }`}
                     >
                       {notice.status}
@@ -115,11 +115,11 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
                     <span>
                       {notice.recipients} recipients ·{" "}
                       <span
-                        className={
+                        className={`badge badge-xs ${
                           notice.priority === "High"
-                            ? "text-rose-500"
-                            : "text-sky-500"
-                        }
+                            ? "badge-soft badge-error"
+                            : "badge-soft badge-info"
+                        }`}
                       >
                         {notice.priority}
                       </span>

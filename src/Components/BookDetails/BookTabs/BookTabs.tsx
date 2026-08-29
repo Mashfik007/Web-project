@@ -16,18 +16,15 @@ export default function BookTabs({ metadata }: BookTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>("Details");
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex gap-6 border-b border-slate-200">
+    <section className="card bg-base-100 p-6 shadow-sm">
+      <div role="tablist" className="tabs tabs-border">
         {TABS.map((tab) => (
           <button
             key={tab}
             type="button"
+            role="tab"
             onClick={() => setActiveTab(tab)}
-            className={`pb-3 text-sm font-medium transition ${
-              activeTab === tab
-                ? "border-b-2 border-sky-500 text-sky-600"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
+            className={`tab ${activeTab === tab ? "tab-active" : ""}`}
           >
             {tab}
           </button>

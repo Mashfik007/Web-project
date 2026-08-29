@@ -66,7 +66,7 @@ export default function ReturnReview() {
         onChange={(event) => setNote(event.target.value)}
         placeholder="Write a brief note for other readers... (optional)"
         rows={3}
-        className="mt-4 w-full resize-none rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-sky-300 focus:outline-none"
+        className="textarea textarea-bordered mt-4 w-full"
       />
 
       <button
@@ -86,7 +86,7 @@ export default function ReturnReview() {
               : "Thanks — your rating will help other readers.",
           );
         }}
-        className="mt-4 w-full rounded-xl bg-sky-100 px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-200"
+        className="btn btn-primary btn-soft btn-block mt-4"
       >
         Submit Review
       </button>

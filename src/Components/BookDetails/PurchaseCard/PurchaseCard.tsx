@@ -23,7 +23,7 @@ export default function PurchaseCard({ price, checkoutHref }: PurchaseCardProps)
 
       <Link
         href={checkoutHref}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-sky-600 transition hover:bg-sky-50"
+        className="mt-5 btn btn-block bg-base-100 text-primary hover:bg-base-200"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

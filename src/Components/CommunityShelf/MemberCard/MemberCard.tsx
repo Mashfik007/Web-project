@@ -87,7 +87,7 @@ export default function MemberCard({ member }: MemberCardProps) {
         <button
           type="button"
           onClick={() => setRequesting(true)}
-          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+          className="btn btn-ghost btn-xs"
         >
           View Profile
         </button>

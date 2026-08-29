@@ -50,7 +50,7 @@ export default function BarcodePage({ scans }: BarcodePageProps) {
               <input
                 name="bookId"
                 placeholder="Or enter Book ID manually..."
-                className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+                className="input min-w-0 flex-1"
               />
               <ModalButton type="submit">Search</ModalButton>
             </form>

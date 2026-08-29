@@ -42,7 +42,7 @@ export default function AutoHoldBanner() {
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="shrink-0 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-600"
+        className="btn btn-primary btn-sm shrink-0"
       >
         Enable Hold
       </button>

@@ -17,8 +17,7 @@ interface PaymentFormProps {
   onSubmit: (data: PaymentFormData) => void;
 }
 
-const inputClassName =
-  "w-full rounded-lg border border-slate-300 px-4 py-3 text-black transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200";
+const inputClassName = "input w-full";
 
 export default function PaymentForm({
   paymentMethods,
@@ -179,14 +178,14 @@ export default function PaymentForm({
             <button
               type="button"
               onClick={onBack}
-              className="btn btn-outline rounded-xl border-slate-200 text-slate-600"
+              className="btn btn-outline"
             >
               Back
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn btn-info rounded-xl border-0 bg-sky-500 text-white hover:bg-sky-600 disabled:bg-slate-200 disabled:text-slate-400"
+              className="btn btn-primary"
             >
               {isSubmitting ? "Submitting..." : "Review Order"}
               <svg

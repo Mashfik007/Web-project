@@ -21,7 +21,7 @@ export default function MonthlyBorrowChart({
   yearLabel,
 }: MonthlyBorrowChartProps) {
   return (
-    <article className="rounded-xl border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.05)]">
+    <article className="card bg-base-100 p-5 shadow-sm">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-slate-800">
@@ -33,7 +33,7 @@ export default function MonthlyBorrowChart({
         </div>
         <button
           type="button"
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600"
+          className="btn btn-ghost btn-xs"
         >
           {yearLabel}
           <svg

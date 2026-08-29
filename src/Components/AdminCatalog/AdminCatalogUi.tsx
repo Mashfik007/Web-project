@@ -20,30 +20,24 @@ export function AdminPageShell({
   children,
 }: AdminPageShellProps) {
   return (
-    <main className="min-h-full bg-[#F9FAFB] p-5 md:p-7 lg:p-8">
+    <main className="min-h-full bg-base-200 p-5 md:p-7 lg:p-8">
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="font-serif text-2xl font-bold tracking-tight">
             {title}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+          <p className="mt-1 text-sm text-base-content/50">{subtitle}</p>
         </div>
         {headerRight ??
           (addLabel ? (
-            <button
-              type="button"
-              onClick={onAdd}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-600"
-            >
+            <button type="button" onClick={onAdd} className="btn btn-primary">
               <span className="text-base leading-none">+</span>
               {addLabel}
             </button>
           ) : null)}
       </header>
       {framed ? (
-        <section className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.05)]">
-          {children}
-        </section>
+        <section className="card bg-base-100 shadow-sm">{children}</section>
       ) : (
         children
       )}
@@ -69,39 +63,34 @@ export function AdminTable({
   return (
     <>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left">
+        <table className="table">
           <thead>
-            <tr className="border-b border-slate-100">
+            <tr>
               {columns.map((column) => (
-                <th
-                  key={column}
-                  className="px-4 py-3 text-[11px] font-semibold tracking-wide text-slate-400 uppercase"
-                >
-                  {column}
-                </th>
+                <th key={column}>{column}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">{children}</tbody>
+          <tbody>{children}</tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-        <p className="text-xs text-slate-400">
+      <div className="flex items-center justify-between border-t border-base-200 px-4 py-3">
+        <p className="text-xs text-base-content/40">
           Showing {from}-{to} of {total} records
         </p>
-        <div className="flex items-center gap-1">
-          <span className="flex size-7 items-center justify-center rounded-md text-slate-400">
+        <div className="join">
+          <button type="button" className="btn join-item btn-sm btn-ghost">
             ‹
-          </span>
-          <span className="flex size-7 items-center justify-center rounded-md bg-sky-500 text-xs font-semibold text-white">
+          </button>
+          <button type="button" className="btn join-item btn-sm btn-primary">
             1
-          </span>
-          <span className="flex size-7 items-center justify-center rounded-md text-xs text-slate-500">
+          </button>
+          <button type="button" className="btn join-item btn-sm">
             2
-          </span>
-          <span className="flex size-7 items-center justify-center rounded-md text-slate-400">
+          </button>
+          <button type="button" className="btn join-item btn-sm btn-ghost">
             ›
-          </span>
+          </button>
         </div>
       </div>
     </>
@@ -116,18 +105,18 @@ export function StatusBadge({
   tone: "green" | "orange" | "purple" | "red" | "slate" | "sky" | "teal";
 }) {
   const tones = {
-    green: "bg-emerald-50 text-emerald-600",
-    orange: "bg-orange-50 text-orange-600",
-    purple: "bg-violet-50 text-violet-600",
-    red: "bg-rose-50 text-rose-600",
-    slate: "bg-slate-100 text-slate-500",
-    sky: "bg-sky-50 text-sky-600",
-    teal: "bg-teal-50 text-teal-600",
+    green: "badge-success",
+    orange: "badge-warning",
+    purple: "badge-secondary",
+    red: "badge-error",
+    slate: "badge-ghost",
+    sky: "badge-info",
+    teal: "badge-accent",
   };
 
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${tones[tone]}`}
+      className={`badge badge-sm ${tone === "slate" ? tones[tone] : `badge-soft ${tones[tone]}`}`}
     >
       {label}
     </span>
@@ -150,7 +139,7 @@ function IconButton({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={`flex size-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-600 ${className ?? ""}`}
+      className={`btn btn-ghost btn-square btn-sm ${className ?? ""}`}
     >
       {children}
     </button>
@@ -195,10 +184,11 @@ export function ViewButton({ onClick }: { onClick?: () => void }) {
 
 export function DeleteButton({ onClick }: { onClick?: () => void }) {
   return (
-    <IconButton
-      label="Delete"
+    <button
+      type="button"
+      aria-label="Delete"
       onClick={onClick}
-      className="bg-rose-50 text-rose-500 hover:bg-rose-100 hover:text-rose-600"
+      className="btn btn-error btn-soft btn-square btn-sm"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -212,7 +202,7 @@ export function DeleteButton({ onClick }: { onClick?: () => void }) {
         <path d="M8 6V4h8v2" />
         <path d="M19 6l-1 14H6L5 6" />
       </svg>
-    </IconButton>
+    </button>
   );
 }
 
@@ -224,27 +214,20 @@ export function AdminSearchRow({
   children?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:flex-row md:items-center">
-      <label className="relative min-w-0 flex-1">
-        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-400">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="size-4"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-        </span>
-        <input
-          name="search"
-          type="search"
-          placeholder={placeholder}
-          className="w-full rounded-lg border border-slate-200 bg-white py-2 pr-3 pl-9 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-sky-300"
-        />
+    <div className="flex flex-col gap-3 border-b border-base-200 p-4 md:flex-row md:items-center">
+      <label className="input w-full min-w-0 flex-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="size-4 opacity-50"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input name="search" type="search" placeholder={placeholder} />
       </label>
       {children}
     </div>
@@ -259,11 +242,7 @@ export function FilterSelect({
   options: string[];
 }) {
   return (
-    <select
-      name={name}
-      defaultValue="All"
-      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-sky-300"
-    >
+    <select name={name} defaultValue="All" className="select">
       {options.map((option) => (
         <option key={option} value={option}>
           {option}

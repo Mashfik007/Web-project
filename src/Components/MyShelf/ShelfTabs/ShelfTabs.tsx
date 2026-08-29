@@ -31,26 +31,20 @@ export default function ShelfTabs({
   const activeBooks = booksByTab[activeTab] ?? [];
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex overflow-x-auto border-b border-slate-200 px-2">
+    <section className="card bg-base-100 shadow-sm">
+      <div role="tablist" className="tabs tabs-border px-2">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
+            role="tab"
             onClick={() => setActiveTab(tab.id)}
-            className={`relative shrink-0 px-4 py-4 text-sm font-medium whitespace-nowrap transition ${
-              activeTab === tab.id
-                ? "text-sky-600"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
+            className={`tab ${activeTab === tab.id ? "tab-active" : ""}`}
           >
             {tab.label}
-            <span className="ml-2 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
+            <span className="badge badge-soft badge-info badge-xs ml-2">
               {tab.count}
             </span>
-            {activeTab === tab.id && (
-              <span className="absolute right-0 bottom-0 left-0 h-0.5 bg-sky-500" />
-            )}
           </button>
         ))}
       </div>

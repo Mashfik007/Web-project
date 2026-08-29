@@ -21,7 +21,7 @@ export default function BrowseToolbar({
       <select
         value={sort}
         onChange={(event) => onSortChange(event.target.value)}
-        className="select select-sm rounded-xl border-slate-200 bg-white text-sm text-slate-600"
+        className="select select-sm"
       >
         <option>Most Relevant</option>
         <option>Highest Rated</option>

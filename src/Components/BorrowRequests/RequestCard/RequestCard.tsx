@@ -13,15 +13,15 @@ const statusBadge: Record<
 > = {
   pending: {
     label: "Pending",
-    className: "badge-outline border-sky-200 bg-sky-50 text-sky-700",
+    className: "badge-soft badge-warning",
   },
   approved: {
     label: "Approved",
-    className: "badge-outline border-emerald-200 bg-emerald-50 text-emerald-700",
+    className: "badge-soft badge-success",
   },
   declined: {
     label: "Declined",
-    className: "badge-ghost text-slate-500",
+    className: "badge-ghost",
   },
 };
 
@@ -80,7 +80,7 @@ export default function RequestCard({
             <button
               type="button"
               onClick={() => onApprove?.(request.id)}
-              className="btn btn-info btn-sm flex-1 gap-1.5 rounded-xl border-0 bg-sky-500 text-white hover:bg-sky-600 sm:flex-none"
+              className="btn btn-success btn-sm flex-1 sm:flex-none"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -100,7 +100,7 @@ export default function RequestCard({
             <button
               type="button"
               onClick={() => onDecline?.(request.id)}
-              className="btn btn-outline btn-sm flex-1 gap-1.5 rounded-xl border-slate-200 bg-white text-slate-500 hover:bg-slate-50 sm:flex-none"
+              className="btn btn-error btn-outline btn-sm flex-1 sm:flex-none"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

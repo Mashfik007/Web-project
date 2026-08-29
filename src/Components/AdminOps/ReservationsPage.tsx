@@ -62,7 +62,7 @@ export default function ReservationsPage({
             </td>
             <td className="px-4 py-3 text-slate-500">{item.reservedDate}</td>
             <td className="px-4 py-3">
-              <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-600">
+              <span className="badge badge-soft badge-info badge-sm">
                 #{item.queue}
               </span>
             </td>

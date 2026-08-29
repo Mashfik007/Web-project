@@ -56,10 +56,8 @@ export default function ReportsPage({ trends, topBooks }: ReportsPageProps) {
             key={item}
             type="button"
             onClick={() => setPeriod(item)}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              period === item
-                ? "bg-sky-100 text-sky-700"
-                : "bg-white text-slate-500"
+            className={`btn btn-sm ${
+              period === item ? "btn-primary btn-soft" : "btn-ghost"
             }`}
           >
             {item}
@@ -74,10 +72,8 @@ export default function ReportsPage({ trends, topBooks }: ReportsPageProps) {
               key={item}
               type="button"
               onClick={() => setTab(item)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                tab === item
-                  ? "bg-slate-900 text-white"
-                  : "bg-white text-slate-500"
+              className={`btn btn-sm ${
+                tab === item ? "btn-neutral" : "btn-ghost"
               }`}
             >
               {item}
@@ -139,26 +135,26 @@ export default function ReportsPage({ trends, topBooks }: ReportsPageProps) {
         <AdminCard>
           <div className="p-5">
             <h2 className="font-semibold text-slate-800">Top Borrowed Books</h2>
-            <table className="mt-4 w-full text-left text-sm">
+            <table className="table mt-4">
               <thead>
-                <tr className="text-[11px] tracking-wide text-slate-400 uppercase">
-                  <th className="pb-2">Book</th>
-                  <th className="pb-2">Category</th>
-                  <th className="pb-2">Borrows</th>
-                  <th className="pb-2">Rating</th>
+                <tr>
+                  <th>Book</th>
+                  <th>Category</th>
+                  <th>Borrows</th>
+                  <th>Rating</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {topBooks.map((book) => (
                   <tr key={book.title}>
-                    <td className="py-3 font-medium text-slate-800">{book.title}</td>
-                    <td className="py-3">
-                      <span className="rounded-md bg-sky-50 px-2 py-0.5 text-xs text-sky-600">
+                    <td className="font-medium">{book.title}</td>
+                    <td>
+                      <span className="badge badge-soft badge-info badge-sm">
                         {book.category}
                       </span>
                     </td>
-                    <td className="py-3 text-slate-600">{book.borrows}</td>
-                    <td className="py-3 text-slate-600">★ {book.rating}</td>
+                    <td>{book.borrows}</td>
+                    <td>★ {book.rating}</td>
                   </tr>
                 ))}
               </tbody>

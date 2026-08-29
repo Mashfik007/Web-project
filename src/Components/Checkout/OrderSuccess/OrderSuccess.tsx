@@ -67,13 +67,13 @@ export default function OrderSuccess({
         <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
           <Link
             href={ordersHref}
-            className="btn btn-info rounded-xl border-0 bg-sky-500 text-white hover:bg-sky-600"
+            className="btn btn-primary"
           >
             View My Orders
           </Link>
           <Link
             href={browseHref}
-            className="btn btn-outline rounded-xl border-sky-200 text-sky-600 hover:bg-sky-50"
+            className="btn btn-outline btn-primary"
           >
             Keep Browsing
           </Link>

@@ -90,18 +90,18 @@ export default function LoginForm() {
         />
 
         <div className="flex justify-end">
-          <button
-            type="button"
-            className="text-sm font-medium text-sky-500 hover:text-sky-600"
-          >
-            Forgot password?
-          </button>
+        <button
+          type="button"
+          className="btn btn-link btn-sm px-0 text-primary"
+        >
+          Forgot password?
+        </button>
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 py-3.5 font-semibold text-white transition hover:bg-sky-600 active:scale-[0.98] disabled:opacity-70"
+          className="btn btn-primary btn-block"
         >
           <LoginDoorIcon />
           {isSubmitting ? "Signing in..." : "Sign In to Folio"}

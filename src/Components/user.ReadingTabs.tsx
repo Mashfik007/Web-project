@@ -13,28 +13,21 @@ export default function ReadingTabs() {
   const [activeTab, setActiveTab] = useState("Currently Reading");
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm">
+    <div className="card bg-base-100 shadow-sm">
       {/* Tabs */}
-      <div className="flex overflow-x-auto border-b border-slate-200">
+      <div role="tablist" className="tabs tabs-border">
         {tabs.map((tab) => (
           <button
             key={tab.name}
+            type="button"
+            role="tab"
             onClick={() => setActiveTab(tab.name)}
-            className={`relative px-4 py-4 text-xs font-medium whitespace-nowrap transition ${
-              activeTab === tab.name
-                ? "text-sky-700"
-                : "text-slate-500 hover:text-slate-800"
-            }`}
+            className={`tab ${activeTab === tab.name ? "tab-active" : ""}`}
           >
             {tab.name}
-
-            <span className="ml-2 rounded bg-sky-100 px-1.5 py-0.5 text-[10px]">
+            <span className="badge badge-soft badge-info badge-xs ml-2">
               {tab.count}
             </span>
-
-            {activeTab === tab.name && (
-              <span className="absolute bottom-0 left-0 h-0.5 w-full bg-sky-500" />
-            )}
           </button>
         ))}
       </div>
@@ -60,11 +53,12 @@ export default function ReadingTabs() {
 
             {/* Progress */}
             <div className="mt-3 flex items-center gap-2">
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-sky-100">
-                <div className="h-full w-[62%] rounded-full bg-sky-600" />
-              </div>
-
-              <span className="text-xs font-medium text-sky-700">62%</span>
+              <progress
+                className="progress progress-primary flex-1"
+                value={62}
+                max={100}
+              />
+              <span className="text-xs font-medium text-primary">62%</span>
             </div>
 
             <p className="mt-2 text-xs text-slate-500">
@@ -72,11 +66,11 @@ export default function ReadingTabs() {
             </p>
 
             <div className="mt-3 flex gap-2">
-              <button className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-100">
+              <button type="button" className="btn btn-ghost btn-xs">
                 ↻ Renew
               </button>
 
-              <button className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-500 transition hover:bg-slate-100">
+              <button type="button" className="btn btn-ghost btn-xs">
                 ↶ Return
               </button>
             </div>

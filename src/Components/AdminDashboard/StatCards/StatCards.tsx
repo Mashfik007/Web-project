@@ -181,7 +181,7 @@ export default function StatCards({ stats }: StatCardsProps) {
       {stats.map((stat) => (
         <article
           key={stat.id}
-          className="rounded-xl border border-slate-100 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.05)]"
+          className="card bg-base-100 p-4 shadow-sm"
         >
           <div className="flex items-start justify-between">
             <span

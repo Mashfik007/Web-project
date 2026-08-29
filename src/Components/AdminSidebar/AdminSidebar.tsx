@@ -72,16 +72,16 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
     <div className="drawer lg:drawer-open h-screen">
       <input id="admin-drawer" type="checkbox" className="drawer-toggle" />
 
-      <div className="drawer-content flex h-screen flex-col overflow-y-auto bg-[#F9FAFB]">
-        <div className="flex items-center gap-2 border-b border-slate-200 bg-white px-3 py-2 lg:hidden">
+      <div className="drawer-content flex h-screen flex-col overflow-y-auto bg-base-200">
+        <div className="navbar border-b border-base-300 bg-base-100 px-3 lg:hidden">
           <label
             htmlFor="admin-drawer"
             aria-label="open sidebar"
-            className="btn btn-square btn-ghost btn-sm text-slate-700"
+            className="btn btn-square btn-ghost btn-sm"
           >
             <MenuIcon />
           </label>
-          <span className="font-serif text-base font-semibold text-slate-800">
+          <span className="font-serif text-base font-semibold">
             Folio Admin
           </span>
         </div>
@@ -95,32 +95,28 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
           className="drawer-overlay"
         />
 
-        <aside className="flex min-h-full w-64 flex-col bg-[#0B1E2D] text-slate-300">
+        <aside className="flex min-h-full w-64 flex-col bg-neutral text-neutral-content">
           <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-sky-500 text-white shadow-[0_0_16px_rgba(56,189,248,0.35)]">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-content">
               <FolioBookIcon />
             </span>
             <div>
               <p className="font-serif text-lg leading-none font-bold text-white">
                 Folio
               </p>
-              <p className="mt-1 font-mono text-[11px] tracking-[0.14em] text-slate-400 uppercase">
+              <p className="mt-1 font-mono text-[11px] tracking-[0.14em] text-neutral-content/60 uppercase">
                 Admin
               </p>
             </div>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-3 py-4">
-            <ul className="space-y-1">
+          <nav className="flex-1 overflow-y-auto px-2 py-3">
+            <ul className="menu w-full">
               <li>
                 <Link
                   href={dashboardHref}
                   onClick={closeDrawer}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
-                    isDashboard
-                      ? "bg-gradient-to-r from-sky-500/20 to-sky-400/5 font-medium text-sky-300 shadow-[inset_1px_1px_0_rgba(125,211,252,0.35)]"
-                      : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                  }`}
+                  className={isDashboard ? "menu-active" : ""}
                 >
                   <DashboardIcon />
                   Dashboard
@@ -136,11 +132,7 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
                     <Link
                       href={href}
                       onClick={closeDrawer}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
-                        isActive
-                          ? "bg-gradient-to-r from-sky-500/20 to-sky-400/5 font-medium text-sky-300 shadow-[inset_1px_1px_0_rgba(125,211,252,0.35)]"
-                          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
-                      }`}
+                      className={isActive ? "menu-active" : ""}
                     >
                       {sectionIcons[section.slug]}
                       {section.label}
@@ -156,7 +148,7 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
               type="button"
               onClick={handleSignOut}
               disabled={isSigningOut}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-400 transition hover:bg-white/5 hover:text-red-300 disabled:opacity-60"
+              className="btn btn-ghost btn-block justify-start text-error"
             >
               <SignOutIcon />
               {isSigningOut ? "Signing out..." : "Sign Out"}

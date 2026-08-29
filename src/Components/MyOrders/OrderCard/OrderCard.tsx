@@ -13,7 +13,7 @@ interface OrderCardProps {
 
 function StatusBadge({ status }: { status: Order["status"] }) {
   return (
-    <span className="badge badge-sm gap-1.5 border-sky-200 bg-sky-50 text-sky-700">
+    <span className="badge badge-sm badge-soft badge-info gap-1.5">
       <span className="size-1.5 rounded-full bg-sky-500" />
       {ORDER_STATUS_LABEL[status]}
     </span>
@@ -45,7 +45,7 @@ function OrderProduct({ item }: { item: OrderItem }) {
             {item.currency}
             {item.price}
           </span>
-          <span className="badge badge-sm gap-1 border-violet-200 bg-violet-50 text-violet-700">
+          <span className="badge badge-sm badge-soft badge-secondary gap-1">
             <span>{item.seller.icon}</span>
             {item.seller.name}
           </span>
