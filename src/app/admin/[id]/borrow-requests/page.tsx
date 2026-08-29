@@ -1,4 +1,4 @@
-import BorrowRequestsPage from "@/Components/AdminOps/BorrowRequestsPage";
+import BorrowRequestsPage from "@/Components/AdminOps/BorrowRequestsPage/BorrowRequestsPage";
 import { getAdminBorrowRequests } from "@/Components/AdminOps/data/adminOpsData";
 
 interface PageProps {

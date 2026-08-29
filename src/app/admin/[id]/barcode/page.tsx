@@ -1,4 +1,4 @@
-import BarcodePage from "@/Components/AdminOps/BarcodePage";
+import BarcodePage from "@/Components/AdminOps/BarcodePage/BarcodePage";
 import { getAdminScans } from "@/Components/AdminOps/data/adminOpsData";
 
 interface PageProps {

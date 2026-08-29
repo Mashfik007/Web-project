@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import BookGrid from "@/Components/user.BookGrid";
-import BrowseToolbar from "@/Components/user.BrowseToolbar";
+import BookGrid from "@/Components/Browse/BookGrid/BookGrid";
+import BrowseToolbar from "@/Components/Browse/BrowseToolbar/BrowseToolbar";
 import FilterSidebar, {
   defaultBrowseFilters,
   type BrowseFilters,
-} from "@/Components/user.FilterSiderBar";
+} from "@/Components/Browse/FilterSidebar/FilterSidebar";
 import type { BrowsePageData } from "@/types/browse";
 import type { Book } from "@/types/book";
 

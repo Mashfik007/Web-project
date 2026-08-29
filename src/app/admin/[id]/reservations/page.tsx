@@ -1,4 +1,4 @@
-import ReservationsPage from "@/Components/AdminOps/ReservationsPage";
+import ReservationsPage from "@/Components/AdminOps/ReservationsPage/ReservationsPage";
 import { getAdminReservations } from "@/Components/AdminOps/data/adminOpsData";
 
 interface PageProps {

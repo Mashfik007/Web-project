@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import {
   FormField,
   FormModal,
   StatusModal,
   formHasValues,
+  openModal,
   useFeedback,
-} from "@/Components/Modal/AppModal";
+} from "@/Components/Modal";
 import type { ForYouHeader } from "@/types/forYou";
 
 interface RemixHeaderProps {
@@ -15,8 +15,6 @@ interface RemixHeaderProps {
 }
 
 export default function RemixHeader({ header }: RemixHeaderProps) {
-  const [blindDate, setBlindDate] = useState(false);
-  const [navigator, setNavigator] = useState(false);
   const feedback = useFeedback();
 
   return (
@@ -55,7 +53,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
       <div className="mt-5 flex flex-wrap gap-3">
         <button
           type="button"
-          onClick={() => setBlindDate(true)}
+          onClick={() => openModal("blind-date")}
           className="btn btn-primary"
         >
           <svg
@@ -75,7 +73,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
 
         <button
           type="button"
-          onClick={() => setNavigator(true)}
+          onClick={() => openModal("series-navigator")}
           className="btn btn-primary btn-outline"
         >
           <svg
@@ -97,8 +95,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
       </div>
 
       <FormModal
-        open={blindDate}
-        onClose={() => setBlindDate(false)}
+        id="blind-date"
         title="Start a Blind Date"
         submitLabel="Match me"
         onSubmit={(form) => {
@@ -110,7 +107,6 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
             return;
           }
           const data = new FormData(form);
-          setBlindDate(false);
           feedback.success(
             "Your date is ready",
             `A ${data.get("length")} ${data.get("mood")} pick is waiting on your shelf.`,
@@ -134,8 +130,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
       </FormModal>
 
       <FormModal
-        open={navigator}
-        onClose={() => setNavigator(false)}
+        id="series-navigator"
         title="Series Navigator"
         submitLabel="Find next book"
         onSubmit={(form) => {
@@ -147,7 +142,6 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
             return;
           }
           const data = new FormData(form);
-          setNavigator(false);
           feedback.success(
             "Next volume found",
             `"${data.get("series")}" — volume ${data.get("volume") || "2"} is available to reserve.`,
@@ -169,11 +163,10 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
       </FormModal>
 
       <StatusModal
-        open={feedback.status !== null}
-        onClose={feedback.closeStatus}
-        variant={feedback.status?.variant ?? "success"}
-        title={feedback.status?.title ?? ""}
-        message={feedback.status?.message ?? ""}
+        id={feedback.id}
+        variant={feedback.status.variant}
+        title={feedback.status.title}
+        message={feedback.status.message}
       />
     </section>
   );

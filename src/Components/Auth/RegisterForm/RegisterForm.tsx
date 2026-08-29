@@ -8,7 +8,7 @@ import {
   LockIcon,
   PhoneIcon,
   UserIcon,
-} from "@/Components/Auth/AuthIcons";
+} from "@/Components/Auth/AuthIcons/AuthIcons";
 import { register_user } from "@/Controller/users.controller";
 import { Form_shema } from "@/Shchema/users";
 import { zodResolver } from "@hookform/resolvers/zod";

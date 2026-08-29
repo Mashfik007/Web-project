@@ -1,4 +1,4 @@
-import FinesPage from "@/Components/AdminOps/FinesPage";
+import FinesPage from "@/Components/AdminOps/FinesPage/FinesPage";
 import { getAdminFines } from "@/Components/AdminOps/data/adminOpsData";
 
 interface PageProps {

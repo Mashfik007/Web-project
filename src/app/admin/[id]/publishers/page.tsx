@@ -1,4 +1,4 @@
-import PublishersPage from "@/Components/AdminCatalog/PublishersPage";
+import PublishersPage from "@/Components/AdminCatalog/PublishersPage/PublishersPage";
 import { getPublishersData } from "@/Components/AdminCatalog/data/getPublishersData";
 
 interface PageProps {

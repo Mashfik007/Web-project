@@ -1,4 +1,4 @@
-import UsersPage from "@/Components/AdminCatalog/UsersPage";
+import UsersPage from "@/Components/AdminCatalog/UsersPage/UsersPage";
 import { getUsersData } from "@/Components/AdminCatalog/data/getUsersData";
 
 interface PageProps {

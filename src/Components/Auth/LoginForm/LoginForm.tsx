@@ -7,7 +7,7 @@ import {
   EyeOffIcon,
   LockIcon,
   LoginDoorIcon,
-} from "@/Components/Auth/AuthIcons";
+} from "@/Components/Auth/AuthIcons/AuthIcons";
 import { login_user } from "@/Controller/users.controller";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";

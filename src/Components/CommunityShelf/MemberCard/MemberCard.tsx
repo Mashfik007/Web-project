@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 import {
   ConfirmModal,
   StatusModal,
+  openModal,
   useFeedback,
-} from "@/Components/Modal/AppModal";
+} from "@/Components/Modal";
 import type { CommunityMember } from "@/types/communityShelf";
 
 interface MemberCardProps {
@@ -14,8 +14,8 @@ interface MemberCardProps {
 }
 
 export default function MemberCard({ member }: MemberCardProps) {
-  const [requesting, setRequesting] = useState(false);
   const feedback = useFeedback();
+  const modalId = `member-${member.id}`;
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -86,7 +86,7 @@ export default function MemberCard({ member }: MemberCardProps) {
 
         <button
           type="button"
-          onClick={() => setRequesting(true)}
+          onClick={() => openModal(modalId)}
           className="btn btn-ghost btn-xs"
         >
           View Profile
@@ -94,13 +94,11 @@ export default function MemberCard({ member }: MemberCardProps) {
       </div>
 
       <ConfirmModal
-        open={requesting}
-        onClose={() => setRequesting(false)}
+        id={modalId}
         title={member.name}
         message={`${member.name} is reading "${member.currentlyReading.title}". Send a borrow request when they finish?`}
         confirmLabel="Request book"
         onConfirm={() => {
-          setRequesting(false);
           feedback.success(
             "Request sent",
             `${member.name} will see your request for "${member.currentlyReading.title}".`,
@@ -108,11 +106,10 @@ export default function MemberCard({ member }: MemberCardProps) {
         }}
       />
       <StatusModal
-        open={feedback.status !== null}
-        onClose={feedback.closeStatus}
-        variant={feedback.status?.variant ?? "success"}
-        title={feedback.status?.title ?? ""}
-        message={feedback.status?.message ?? ""}
+        id={feedback.id}
+        variant={feedback.status.variant}
+        title={feedback.status.title}
+        message={feedback.status.message}
       />
     </article>
   );

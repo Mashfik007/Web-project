@@ -1,4 +1,4 @@
-import ReturnsPage from "@/Components/AdminOps/ReturnsPage";
+import ReturnsPage from "@/Components/AdminOps/ReturnsPage/ReturnsPage";
 import { getAdminReturns } from "@/Components/AdminOps/data/adminOpsData";
 
 interface PageProps {

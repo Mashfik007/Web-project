@@ -1,4 +1,4 @@
-import NotificationsPage from "@/Components/AdminOps/NotificationsPage";
+import NotificationsPage from "@/Components/AdminOps/NotificationsPage/NotificationsPage";
 import { getAdminNotices } from "@/Components/AdminOps/data/adminOpsData";
 
 interface PageProps {

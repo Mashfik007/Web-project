@@ -1,4 +1,4 @@
-import ReportsPage from "@/Components/AdminOps/ReportsPage";
+import ReportsPage from "@/Components/AdminOps/ReportsPage/ReportsPage";
 import { getAdminReports } from "@/Components/AdminOps/data/adminOpsData";
 
 interface PageProps {

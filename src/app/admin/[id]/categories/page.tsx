@@ -1,4 +1,4 @@
-import CategoriesPage from "@/Components/AdminCatalog/CategoriesPage";
+import CategoriesPage from "@/Components/AdminCatalog/CategoriesPage/CategoriesPage";
 import { getCategoriesData } from "@/Components/AdminCatalog/data/getCategoriesData";
 
 interface PageProps {

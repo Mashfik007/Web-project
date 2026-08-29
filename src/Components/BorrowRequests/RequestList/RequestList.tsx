@@ -6,8 +6,9 @@ import RequestCard from "../RequestCard/RequestCard";
 import {
   ConfirmModal,
   StatusModal,
+  openModal,
   useFeedback,
-} from "@/Components/Modal/AppModal";
+} from "@/Components/Modal";
 import type {
   BorrowRequestFilter,
   BorrowRequestStatus,
@@ -82,28 +83,29 @@ export default function RequestList({ filters, requests }: RequestListProps) {
             <RequestCard
               key={request.id}
               request={request}
-              onApprove={(id) =>
+              onApprove={(id) => {
                 setConfirm({
                   id,
                   action: "approve",
                   title: request.bookTitle,
-                })
-              }
-              onDecline={(id) =>
+                });
+                openModal("user-borrow-confirm");
+              }}
+              onDecline={(id) => {
                 setConfirm({
                   id,
                   action: "decline",
                   title: request.bookTitle,
-                })
-              }
+                });
+                openModal("user-borrow-confirm");
+              }}
             />
           ))
         )}
       </div>
 
       <ConfirmModal
-        open={confirm !== null}
-        onClose={() => setConfirm(null)}
+        id="user-borrow-confirm"
         title={confirm?.action === "approve" ? "Approve request" : "Decline request"}
         message={
           confirm
@@ -127,11 +129,10 @@ export default function RequestList({ filters, requests }: RequestListProps) {
       />
 
       <StatusModal
-        open={feedback.status !== null}
-        onClose={feedback.closeStatus}
-        variant={feedback.status?.variant ?? "success"}
-        title={feedback.status?.title ?? ""}
-        message={feedback.status?.message ?? ""}
+        id={feedback.id}
+        variant={feedback.status.variant}
+        title={feedback.status.title}
+        message={feedback.status.message}
       />
     </div>
   );

@@ -1,10 +1,10 @@
-import ActivityHeatmap from "@/Components/user.ActivityHeatmap";
-import Badges from "@/Components/user.Badges";
-import BooksPerMonth from "@/Components/user.BooksPerMonth";
-import Intro from "@/Components/user.Intro";
-import ReadingTabs from "@/Components/user.ReadingTabs";
-import RecentActivity from "@/Components/user.RecentActivity";
-import Streak from "@/Components/user.Streak";
+import ActivityHeatmap from "@/Components/Dashboard/ActivityHeatmap/ActivityHeatmap";
+import Badges from "@/Components/Dashboard/Badges/Badges";
+import BooksPerMonth from "@/Components/Dashboard/BooksPerMonth/BooksPerMonth";
+import Intro from "@/Components/Dashboard/Intro/Intro";
+import ReadingTabs from "@/Components/Dashboard/ReadingTabs/ReadingTabs";
+import RecentActivity from "@/Components/Dashboard/RecentActivity/RecentActivity";
+import Streak from "@/Components/Dashboard/Streak/Streak";
 import type { DashboardData } from "@/types/dashboard";
 
 interface DashboardPageProps {

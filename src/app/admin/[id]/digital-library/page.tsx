@@ -1,4 +1,4 @@
-import DigitalLibraryPage from "@/Components/AdminOps/DigitalLibraryPage";
+import DigitalLibraryPage from "@/Components/AdminOps/DigitalLibraryPage/DigitalLibraryPage";
 import { getAdminDigitalResources } from "@/Components/AdminOps/data/adminOpsData";
 
 interface PageProps {

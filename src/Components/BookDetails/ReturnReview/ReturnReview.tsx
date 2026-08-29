@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { StatusModal, useFeedback } from "@/Components/Modal/AppModal";
+import { StatusModal, useFeedback } from "@/Components/Modal";
 
 export default function ReturnReview() {
   const [rating, setRating] = useState(0);
@@ -92,11 +92,10 @@ export default function ReturnReview() {
       </button>
 
       <StatusModal
-        open={feedback.status !== null}
-        onClose={feedback.closeStatus}
-        variant={feedback.status?.variant ?? "success"}
-        title={feedback.status?.title ?? ""}
-        message={feedback.status?.message ?? ""}
+        id={feedback.id}
+        variant={feedback.status.variant}
+        title={feedback.status.title}
+        message={feedback.status.message}
       />
     </article>
   );

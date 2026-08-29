@@ -1,4 +1,4 @@
-import BooksPage from "@/Components/AdminCatalog/BooksPage";
+import BooksPage from "@/Components/AdminCatalog/BooksPage/BooksPage";
 import { getBooksData } from "@/Components/AdminCatalog/data/getBooksData";
 
 interface PageProps {

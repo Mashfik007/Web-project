@@ -1,15 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 import {
   ConfirmModal,
   FormField,
   FormModal,
   StatusModal,
   formHasValues,
+  openModal,
   useFeedback,
-} from "@/Components/Modal/AppModal";
+} from "@/Components/Modal";
 import type { BookDetails } from "@/types/bookDetails";
 
 interface BookSidebarProps {
@@ -17,8 +17,6 @@ interface BookSidebarProps {
 }
 
 export default function BookSidebar({ book }: BookSidebarProps) {
-  const [borrowing, setBorrowing] = useState(false);
-  const [sharing, setSharing] = useState(false);
   const feedback = useFeedback();
 
   return (
@@ -36,7 +34,7 @@ export default function BookSidebar({ book }: BookSidebarProps) {
 
       <button
         type="button"
-        onClick={() => setBorrowing(true)}
+        onClick={() => openModal("borrow-book")}
         className="btn btn-primary btn-block"
       >
         Borrow This Book
@@ -57,7 +55,7 @@ export default function BookSidebar({ book }: BookSidebarProps) {
         </button>
         <button
           type="button"
-          onClick={() => setSharing(true)}
+          onClick={() => openModal("share-book")}
           className="btn btn-ghost"
         >
           Share
@@ -80,20 +78,17 @@ export default function BookSidebar({ book }: BookSidebarProps) {
       </div>
 
       <FormModal
-        open={borrowing}
-        onClose={() => setBorrowing(false)}
+        id="borrow-book"
         title="Borrow this book"
         submitLabel="Send request"
         onSubmit={(form) => {
           if (!formHasValues(form, ["returnDate"])) {
-            setBorrowing(false);
             feedback.failed(
               "Request not sent",
               "Choose an expected return date.",
             );
             return;
           }
-          setBorrowing(false);
           feedback.success(
             "Borrow request sent",
             `We'll notify you when "${book.title}" is approved.`,
@@ -114,23 +109,20 @@ export default function BookSidebar({ book }: BookSidebarProps) {
       </FormModal>
 
       <ConfirmModal
-        open={sharing}
-        onClose={() => setSharing(false)}
+        id="share-book"
         title="Share this title"
         message={`Copy a Folio link for "${book.title}" to send to a friend.`}
         confirmLabel="Copy link"
         onConfirm={() => {
-          setSharing(false);
           feedback.success("Link copied", "You can paste it anywhere.");
         }}
       />
 
       <StatusModal
-        open={feedback.status !== null}
-        onClose={feedback.closeStatus}
-        variant={feedback.status?.variant ?? "success"}
-        title={feedback.status?.title ?? ""}
-        message={feedback.status?.message ?? ""}
+        id={feedback.id}
+        variant={feedback.status.variant}
+        title={feedback.status.title}
+        message={feedback.status.message}
       />
     </aside>
   );

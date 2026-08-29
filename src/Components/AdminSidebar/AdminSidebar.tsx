@@ -18,7 +18,7 @@ import {
   ReturnsIcon,
   SignOutIcon,
   UsersIcon,
-} from "@/Components/AdminSidebar/AdminIcons";
+} from "@/Components/AdminSidebar/AdminIcons/AdminIcons";
 import { adminHref, adminSections } from "@/Components/AdminSidebar/adminNav";
 import { logout } from "@/Controller/users.controller";
 import Link from "next/link";

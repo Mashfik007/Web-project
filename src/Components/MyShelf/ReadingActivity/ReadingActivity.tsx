@@ -1,6 +1,6 @@
 "use client";
 
-import HeatmapChart from "@/Components/user.HeatmapChart";
+import HeatmapChart from "@/Components/HeatmapChart/HeatmapChart";
 
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 const legendColors = ["#F0F9FF", "#E0F2FE", "#7DD3FC", "#0284C7"];
