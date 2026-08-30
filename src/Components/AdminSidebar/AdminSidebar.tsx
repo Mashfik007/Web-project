@@ -10,7 +10,6 @@ import {
   DigitalLibraryIcon,
   FinesIcon,
   FolioBookIcon,
-  MenuIcon,
   NotificationsIcon,
   PublishersIcon,
   ReportsIcon,
@@ -20,10 +19,16 @@ import {
   UsersIcon,
 } from "@/Components/AdminSidebar/AdminIcons/AdminIcons";
 import { adminHref, adminSections } from "@/Components/AdminSidebar/adminNav";
+import AppDrawer, {
+  closeDrawer,
+  drawerItemClass,
+} from "@/Components/Sidebar/AppDrawer/AppDrawer";
 import { logout } from "@/Controller/users.controller";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
+
+const DRAWER_ID = "admin-drawer";
 
 const sectionIcons: Record<string, ReactNode> = {
   books: <BooksIcon />,
@@ -41,13 +46,6 @@ const sectionIcons: Record<string, ReactNode> = {
   barcode: <BarcodeIcon />,
 };
 
-function closeDrawer() {
-  const input = document.getElementById(
-    "admin-drawer",
-  ) as HTMLInputElement | null;
-  if (input) input.checked = false;
-}
-
 export default function AdminSidebar({ children }: { children: ReactNode }) {
   const params = useParams();
   const pathname = usePathname();
@@ -57,6 +55,10 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
 
   const dashboardHref = adminHref(adminId);
   const isDashboard = pathname === dashboardHref;
+  const activeSection = adminSections.find(
+    (section) => pathname === adminHref(adminId, section.slug),
+  );
+  const title = isDashboard ? "Dashboard" : (activeSection?.label ?? "Admin");
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -69,93 +71,78 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="drawer lg:drawer-open h-screen">
-      <input id="admin-drawer" type="checkbox" className="drawer-toggle" />
-
-      <div className="drawer-content flex h-screen flex-col overflow-y-auto bg-base-200">
-        <div className="navbar border-b border-base-300 bg-base-100 px-3 lg:hidden">
-          <label
-            htmlFor="admin-drawer"
-            aria-label="open sidebar"
-            className="btn btn-square btn-ghost btn-sm"
-          >
-            <MenuIcon />
-          </label>
-          <span className="font-serif text-base font-semibold">
-            Folio Admin
-          </span>
-        </div>
-        <div className="flex-1">{children}</div>
-      </div>
-
-      <div className="drawer-side z-40">
-        <label
-          htmlFor="admin-drawer"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        />
-
-        <aside className="flex min-h-full w-64 flex-col bg-neutral text-neutral-content">
-          <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-content">
+    <AppDrawer
+      id={DRAWER_ID}
+      title={title}
+      sidebar={
+        <>
+          <div className="flex w-full items-center gap-2 px-2 py-3">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content">
               <FolioBookIcon />
             </span>
-            <div>
-              <p className="font-serif text-lg leading-none font-bold text-white">
+            <div className="is-drawer-close:hidden min-w-0">
+              <p className="font-serif text-sm leading-none font-bold text-slate-800">
                 Folio
               </p>
-              <p className="mt-1 font-mono text-[11px] tracking-[0.14em] text-neutral-content/60 uppercase">
+              <p className="mt-1 font-mono text-[10px] tracking-[0.14em] text-slate-600 uppercase">
                 Admin
               </p>
             </div>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-2 py-3">
-            <ul className="menu w-full">
-              <li>
-                <Link
-                  href={dashboardHref}
-                  onClick={closeDrawer}
-                  className={isDashboard ? "menu-active" : ""}
-                >
-                  <DashboardIcon />
-                  Dashboard
-                </Link>
-              </li>
+          <ul className="menu is-drawer-close:overflow-visible w-full grow overflow-y-auto">
+            <li>
+              <Link
+                href={dashboardHref}
+                onClick={() => closeDrawer(DRAWER_ID)}
+                className={drawerItemClass(isDashboard)}
+                data-tip="Dashboard"
+              >
+                <DashboardIcon />
+                <span className="is-drawer-close:hidden">Dashboard</span>
+              </Link>
+            </li>
 
-              {adminSections.map((section) => {
-                const href = adminHref(adminId, section.slug);
-                const isActive = pathname === href;
+            {adminSections.map((section) => {
+              const href = adminHref(adminId, section.slug);
+              const isActive = pathname === href;
 
-                return (
-                  <li key={section.slug}>
-                    <Link
-                      href={href}
-                      onClick={closeDrawer}
-                      className={isActive ? "menu-active" : ""}
-                    >
-                      {sectionIcons[section.slug]}
+              return (
+                <li key={section.slug}>
+                  <Link
+                    href={href}
+                    onClick={() => closeDrawer(DRAWER_ID)}
+                    className={drawerItemClass(isActive)}
+                    data-tip={section.label}
+                  >
+                    {sectionIcons[section.slug]}
+                    <span className="is-drawer-close:hidden">
                       {section.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
 
-          <div className="border-t border-white/10 p-3">
+          <div className="w-full border-t border-white/40 bg-white/95 p-2 shadow-[0_-4px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
             <button
               type="button"
               onClick={handleSignOut}
               disabled={isSigningOut}
-              className="btn btn-ghost btn-block justify-start text-error"
+              className="btn btn-ghost btn-sm is-drawer-close:tooltip is-drawer-close:tooltip-right w-full justify-start text-error"
+              data-tip="Sign out"
             >
               <SignOutIcon />
-              {isSigningOut ? "Signing out..." : "Sign Out"}
+              <span className="is-drawer-close:hidden">
+                {isSigningOut ? "Signing out..." : "Sign Out"}
+              </span>
             </button>
           </div>
-        </aside>
-      </div>
-    </div>
+        </>
+      }
+    >
+      {children}
+    </AppDrawer>
   );
 }

@@ -8,7 +8,7 @@ const iconProps: SVGProps<SVGSVGElement> = {
   strokeWidth: 1.8,
   strokeLinecap: "round",
   strokeLinejoin: "round",
-  className: "size-4 shrink-0",
+  className: "my-1.5 inline-block size-4 shrink-0",
 };
 
 export function DashboardIcon() {
@@ -188,25 +188,6 @@ export function FolioBookIcon() {
     >
       <path d="M12 7v14" />
       <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
-    </svg>
-  );
-}
-
-export function MenuIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-4"
-    >
-      <path d="M4 5h16" />
-      <path d="M4 12h16" />
-      <path d="M4 19h16" />
     </svg>
   );
 }

@@ -32,16 +32,14 @@ export default function SidebarProfile({
   }
 
   return (
-    <div className="mt-auto w-full rounded-b-3xl border-t border-white/40 bg-white/95 p-2 shadow-[0_-4px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+    <div className="mt-auto w-full border-t border-white/40 bg-white/95 p-2 shadow-[0_-4px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
       <Link
         href={`/user/${userId}/shelf`}
         className="is-drawer-close:tooltip is-drawer-close:tooltip-right flex items-center gap-3 rounded-2xl p-2 hover:bg-primary/10"
         data-tip={name}
       >
-        <span className="avatar avatar-placeholder">
-          <span className="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-content">
-            {initials}
-          </span>
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-content">
+          {initials}
         </span>
 
         <div className="is-drawer-close:hidden min-w-0 flex-1">
@@ -54,7 +52,7 @@ export default function SidebarProfile({
         type="button"
         onClick={handleSignOut}
         disabled={isSigningOut}
-        className="btn btn-error btn-outline btn-sm mt-2 w-full"
+        className="btn btn-ghost btn-sm is-drawer-close:tooltip is-drawer-close:tooltip-right mt-1 w-full justify-start text-error"
         data-tip="Sign out"
       >
         <svg
@@ -65,7 +63,7 @@ export default function SidebarProfile({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="size-4 shrink-0"
+          className="my-1.5 inline-block size-4 shrink-0"
         >
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
           <polyline points="16 17 21 12 16 7" />
