@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import rotateCcwIcon from "@svg/rotate-ccw.svg";
 import { useState } from "react";
 import { StatusModal, useFeedback } from "@/Components/Modal";
 
@@ -18,7 +17,7 @@ export default function ReturnReview() {
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
           <Image
-            src={rotateCcwIcon}
+            src="/svg/rotate-ccw.svg"
             alt="Return"
             width={16}
             height={16}

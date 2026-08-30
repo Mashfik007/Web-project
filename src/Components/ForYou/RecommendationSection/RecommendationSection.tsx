@@ -1,6 +1,4 @@
 import Image from "next/image";
-import expandIcon from "@svg/expand.svg";
-import plusIcon from "@svg/plus.svg";
 import RecommendationCard from "../RecommendationCard/RecommendationCard";
 import type { RecommendationSection as RecommendationSectionData } from "@/types/forYou";
 
@@ -27,7 +25,7 @@ function SectionIcon({
   if (theme === "orange") {
     return (
       <Image
-        src={plusIcon}
+        src="/svg/plus.svg"
         alt="Add"
         width={16}
         height={16}
@@ -38,7 +36,7 @@ function SectionIcon({
 
   return (
     <Image
-      src={expandIcon}
+      src="/svg/expand.svg"
       alt="Expand"
       width={16}
       height={16}

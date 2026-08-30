@@ -1,7 +1,4 @@
 import Image from "next/image";
-import bookIcon from "@svg/book.svg";
-import refreshIcon from "@svg/refresh.svg";
-import usersIcon from "@svg/users.svg";
 import type { NetworkStat } from "@/types/communityShelf";
 
 interface NetworkStatsProps {
@@ -30,7 +27,7 @@ function StatIcon({ id }: { id: string }) {
   if (id === "total-books") {
     return (
       <Image
-        src={bookIcon}
+        src="/svg/book.svg"
         alt="Book"
         width={16}
         height={16}
@@ -42,7 +39,7 @@ function StatIcon({ id }: { id: string }) {
   if (id === "active-members") {
     return (
       <Image
-        src={usersIcon}
+        src="/svg/users.svg"
         alt="Users"
         width={16}
         height={16}
@@ -53,7 +50,7 @@ function StatIcon({ id }: { id: string }) {
 
   return (
     <Image
-      src={refreshIcon}
+      src="/svg/refresh.svg"
       alt="Refresh"
       width={16}
       height={16}

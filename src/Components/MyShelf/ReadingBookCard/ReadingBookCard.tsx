@@ -1,8 +1,5 @@
 "use client";
 
-import arrowLeftIcon from "@svg/arrow-left.svg";
-import clockIcon from "@svg/clock.svg";
-import refreshIcon from "@svg/refresh.svg";
 import Image from "next/image";
 import {
   ConfirmModal,
@@ -53,7 +50,7 @@ export default function ReadingBookCard({
             {isReading && book.daysLeft > 0 && (
               <span className="flex shrink-0 items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-[10px] font-semibold text-sky-700">
                 <Image
-                  src={clockIcon}
+                  src="/svg/clock.svg"
                   alt="Time"
                   width={16}
                   height={16}
@@ -97,7 +94,7 @@ export default function ReadingBookCard({
                   className="btn btn-ghost btn-sm"
                 >
                   <Image
-                    src={refreshIcon}
+                    src="/svg/refresh.svg"
                     alt="Refresh"
                     width={14}
                     height={14}
@@ -112,7 +109,7 @@ export default function ReadingBookCard({
                   className="btn btn-ghost btn-sm"
                 >
                   <Image
-                    src={arrowLeftIcon}
+                    src="/svg/arrow-left.svg"
                     alt="Back"
                     width={14}
                     height={14}

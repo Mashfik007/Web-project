@@ -1,5 +1,4 @@
 import Image from "next/image";
-import cartIcon from "@svg/cart.svg";
 import Link from "next/link";
 import type { BookDetails } from "@/types/bookDetails";
 
@@ -31,7 +30,7 @@ export default function PurchaseCard({
         className="btn btn-block bg-base-100 text-primary hover:bg-base-200 mt-5"
       >
         <Image
-          src={cartIcon}
+          src="/svg/cart.svg"
           alt="Cart"
           width={16}
           height={16}

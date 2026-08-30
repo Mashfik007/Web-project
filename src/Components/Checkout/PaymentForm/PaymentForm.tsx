@@ -1,6 +1,5 @@
 "use client";
 
-import arrowRightIcon from "@svg/arrow-right.svg";
 import { paymentFormSchema, type PaymentFormValues } from "@/Shchema/checkout";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
@@ -183,7 +182,7 @@ export default function PaymentForm({
             >
               {isSubmitting ? "Submitting..." : "Review Order"}
               <Image
-                src={arrowRightIcon}
+                src="/svg/arrow-right.svg"
                 alt="Continue"
                 width={16}
                 height={16}

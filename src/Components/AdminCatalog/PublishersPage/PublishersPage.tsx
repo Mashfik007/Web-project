@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import buildingIcon from "@svg/building.svg";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
@@ -71,7 +70,7 @@ export default function PublishersPage({ publishers }: PublishersPageProps) {
               <div className="flex items-center gap-2.5">
                 <span className="text-sky-500">
                   <Image
-                    src={buildingIcon}
+                    src="/svg/building.svg"
                     alt="Publisher"
                     width={16}
                     height={16}

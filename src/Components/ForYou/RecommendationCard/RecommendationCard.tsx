@@ -1,6 +1,5 @@
 "use client";
 
-import heartIcon from "@svg/heart.svg";
 import Image from "next/image";
 import {
   ConfirmModal,
@@ -83,7 +82,7 @@ export default function RecommendationCard({ book }: RecommendationCardProps) {
               className="flex items-center gap-0.5 text-[10px] font-medium text-sky-600 hover:underline"
             >
               <Image
-                src={heartIcon}
+                src="/svg/heart.svg"
                 alt="Favorite"
                 width={16}
                 height={16}

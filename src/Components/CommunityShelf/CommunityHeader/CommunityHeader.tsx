@@ -1,5 +1,4 @@
 import Image from "next/image";
-import plusIcon from "@svg/plus.svg";
 import type { CommunityShelfHeader } from "@/types/communityShelf";
 
 interface CommunityHeaderProps {
@@ -21,7 +20,7 @@ export default function CommunityHeader({ header }: CommunityHeaderProps) {
 
       <button type="button" className="btn btn-primary">
         <Image
-          src={plusIcon}
+          src="/svg/plus.svg"
           alt="Add"
           width={16}
           height={16}

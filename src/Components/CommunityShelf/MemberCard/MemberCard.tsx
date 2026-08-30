@@ -1,6 +1,5 @@
 "use client";
 
-import bookIcon from "@svg/book.svg";
 import Image from "next/image";
 import {
   ConfirmModal,
@@ -70,7 +69,7 @@ export default function MemberCard({ member }: MemberCardProps) {
       <div className="mt-4 flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-xs text-slate-500">
           <Image
-            src={bookIcon}
+            src="/svg/book.svg"
             alt="Book"
             width={14}
             height={14}

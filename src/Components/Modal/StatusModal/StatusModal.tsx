@@ -1,8 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import checkIcon from "@svg/check.svg";
-import xIcon from "@svg/x.svg";
 import AppModal from "@/Components/Modal/AppModal/AppModal";
 import ModalButton from "@/Components/Modal/ModalButton/ModalButton";
 
@@ -43,7 +41,7 @@ export default function StatusModal({
         >
           {isSuccess ? (
             <Image
-              src={checkIcon}
+              src="/svg/check.svg"
               alt="Confirm"
               width={32}
               height={32}
@@ -51,7 +49,7 @@ export default function StatusModal({
             />
           ) : (
             <Image
-              src={xIcon}
+              src="/svg/x.svg"
               alt="Close"
               width={32}
               height={32}

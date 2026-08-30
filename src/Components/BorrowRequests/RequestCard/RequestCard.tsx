@@ -1,5 +1,3 @@
-import checkIcon from "@svg/check.svg";
-import xIcon from "@svg/x.svg";
 import Image from "next/image";
 import type {
   BorrowRequestStatus,
@@ -88,7 +86,7 @@ export default function RequestCard({
               className="btn btn-success btn-sm flex-1 sm:flex-none"
             >
               <Image
-                src={checkIcon}
+                src="/svg/check.svg"
                 alt="Confirm"
                 width={16}
                 height={16}
@@ -103,7 +101,7 @@ export default function RequestCard({
               className="btn btn-error btn-outline btn-sm flex-1 sm:flex-none"
             >
               <Image
-                src={xIcon}
+                src="/svg/x.svg"
                 alt="Close"
                 width={16}
                 height={16}

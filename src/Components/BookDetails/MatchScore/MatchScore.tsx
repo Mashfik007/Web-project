@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import userIcon from "@svg/user.svg";
 import type { BookDetails } from "@/types/bookDetails";
 import {
   PolarAngleAxis,
@@ -28,7 +27,7 @@ export default function MatchScore({ matchScore }: MatchScoreProps) {
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
           <Image
-            src={userIcon}
+            src="/svg/user.svg"
             alt="User"
             width={16}
             height={16}

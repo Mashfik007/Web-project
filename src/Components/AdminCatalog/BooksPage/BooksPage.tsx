@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import bookIcon from "@svg/book.svg";
 // books catalog for admin — add, edit, delete
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
@@ -113,7 +112,7 @@ export default function BooksPage({ books }: BooksPageProps) {
                 className={`flex size-9 items-center justify-center rounded-lg ${book.coverClass}`}
               >
                 <Image
-                  src={bookIcon}
+                  src="/svg/book.svg"
                   alt="Book"
                   width={16}
                   height={16}

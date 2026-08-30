@@ -1,5 +1,4 @@
 import Image from "next/image";
-import checkCircleIcon from "@svg/check-circle.svg";
 import Link from "next/link";
 import type { PlacedOrder } from "@/types/checkout";
 
@@ -19,7 +18,7 @@ export default function OrderSuccess({
       <div className="card-body items-center gap-5 p-8 text-center">
         <div className="flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
           <Image
-            src={checkCircleIcon}
+            src="/svg/check-circle.svg"
             alt="Success"
             width={32}
             height={32}

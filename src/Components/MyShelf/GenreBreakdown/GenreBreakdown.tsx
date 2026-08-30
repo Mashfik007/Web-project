@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import tagIcon from "@svg/tag.svg";
 import type { GenreStat } from "@/types/myShelf";
 import {
   Bar,
@@ -28,7 +27,7 @@ export default function GenreBreakdown({ genres }: GenreBreakdownProps) {
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
           <Image
-            src={tagIcon}
+            src="/svg/tag.svg"
             alt="Category"
             width={16}
             height={16}

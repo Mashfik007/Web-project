@@ -7,21 +7,6 @@ import AppDrawer, {
 } from "@/Components/Sidebar/AppDrawer/AppDrawer";
 import { logout } from "@/Controller/users.controller";
 import Image from "next/image";
-import barcodeIcon from "@svg/barcode.svg";
-import bellIcon from "@svg/bell.svg";
-import bookIcon from "@svg/book.svg";
-import buildingIcon from "@svg/building.svg";
-import calendarIcon from "@svg/calendar.svg";
-import chartIcon from "@svg/chart.svg";
-import clipboardIcon from "@svg/clipboard.svg";
-import creditCardIcon from "@svg/credit-card.svg";
-import dashboardIcon from "@svg/dashboard.svg";
-import pencilIcon from "@svg/pencil.svg";
-import rotateCcwIcon from "@svg/rotate-ccw.svg";
-import shelfIcon from "@svg/shelf.svg";
-import signOutIcon from "@svg/sign-out.svg";
-import tagIcon from "@svg/tag.svg";
-import usersIcon from "@svg/users.svg";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -33,7 +18,7 @@ const iconClass =
 const sectionIcons: Record<string, ReactNode> = {
   books: (
     <Image
-      src={bookIcon}
+      src="/svg/book.svg"
       alt="Books"
       width={16}
       height={16}
@@ -42,7 +27,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   categories: (
     <Image
-      src={tagIcon}
+      src="/svg/tag.svg"
       alt="Categories"
       width={16}
       height={16}
@@ -51,7 +36,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   authors: (
     <Image
-      src={pencilIcon}
+      src="/svg/pencil.svg"
       alt="Authors"
       width={16}
       height={16}
@@ -60,7 +45,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   publishers: (
     <Image
-      src={buildingIcon}
+      src="/svg/building.svg"
       alt="Publishers"
       width={16}
       height={16}
@@ -69,7 +54,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   users: (
     <Image
-      src={usersIcon}
+      src="/svg/users.svg"
       alt="Users"
       width={16}
       height={16}
@@ -78,7 +63,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   "borrow-requests": (
     <Image
-      src={clipboardIcon}
+      src="/svg/clipboard.svg"
       alt="Borrow requests"
       width={16}
       height={16}
@@ -87,7 +72,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   returns: (
     <Image
-      src={rotateCcwIcon}
+      src="/svg/rotate-ccw.svg"
       alt="Returns"
       width={16}
       height={16}
@@ -96,7 +81,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   reservations: (
     <Image
-      src={calendarIcon}
+      src="/svg/calendar.svg"
       alt="Reservations"
       width={16}
       height={16}
@@ -105,7 +90,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   fines: (
     <Image
-      src={creditCardIcon}
+      src="/svg/credit-card.svg"
       alt="Fines"
       width={16}
       height={16}
@@ -114,7 +99,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   "digital-library": (
     <Image
-      src={shelfIcon}
+      src="/svg/shelf.svg"
       alt="Digital library"
       width={16}
       height={16}
@@ -123,7 +108,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   reports: (
     <Image
-      src={chartIcon}
+      src="/svg/chart.svg"
       alt="Reports"
       width={16}
       height={16}
@@ -132,7 +117,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   notifications: (
     <Image
-      src={bellIcon}
+      src="/svg/bell.svg"
       alt="Notifications"
       width={16}
       height={16}
@@ -141,7 +126,7 @@ const sectionIcons: Record<string, ReactNode> = {
   ),
   barcode: (
     <Image
-      src={barcodeIcon}
+      src="/svg/barcode.svg"
       alt="Barcode"
       width={16}
       height={16}
@@ -183,7 +168,7 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
           <div className="flex w-full items-center gap-2 px-2 py-3">
             <span className="bg-primary text-primary-content flex size-8 shrink-0 items-center justify-center rounded-lg">
               <Image
-                src={bookIcon}
+                src="/svg/book.svg"
                 alt="Folio"
                 width={16}
                 height={16}
@@ -209,7 +194,7 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
                 data-tip="Dashboard"
               >
                 <Image
-                  src={dashboardIcon}
+                  src="/svg/dashboard.svg"
                   alt="Dashboard"
                   width={16}
                   height={16}
@@ -250,7 +235,7 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
               data-tip="Sign out"
             >
               <Image
-                src={signOutIcon}
+                src="/svg/sign-out.svg"
                 alt="Sign out"
                 width={16}
                 height={16}

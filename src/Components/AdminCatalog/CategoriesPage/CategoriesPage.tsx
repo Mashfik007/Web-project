@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import tagIcon from "@svg/tag.svg";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
@@ -66,7 +65,7 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
               <div className="flex items-center gap-2.5">
                 <span className="text-sky-500">
                   <Image
-                    src={tagIcon}
+                    src="/svg/tag.svg"
                     alt="Category"
                     width={16}
                     height={16}

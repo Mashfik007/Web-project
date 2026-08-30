@@ -1,5 +1,4 @@
 import Image from "next/image";
-import usersIcon from "@svg/users.svg";
 import type { BookDetails } from "@/types/bookDetails";
 
 interface CommunityShelfProps {
@@ -14,7 +13,7 @@ export default function CommunityShelf({ community }: CommunityShelfProps) {
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
           <Image
-            src={usersIcon}
+            src="/svg/users.svg"
             alt="Users"
             width={16}
             height={16}

@@ -3,11 +3,6 @@
 import AuthField from "@/Components/Auth/AuthField/AuthField";
 import { login_user } from "@/Controller/users.controller";
 import Image from "next/image";
-import envelopeIcon from "@svg/envelope.svg";
-import eyeIcon from "@svg/eye.svg";
-import eyeOffIcon from "@svg/eye-off.svg";
-import lockIcon from "@svg/lock.svg";
-import loginIcon from "@svg/login.svg";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -66,7 +61,7 @@ export default function LoginForm() {
           {...register("email")}
           type="email"
           placeholder="Email address"
-          icon={<Image src={envelopeIcon} alt="Email" width={16} height={16} />}
+          icon={<Image src="/svg/envelope.svg" alt="Email" width={16} height={16} />}
           error={errors.email?.message}
         />
 
@@ -74,7 +69,7 @@ export default function LoginForm() {
           {...register("password")}
           type={showPassword ? "text" : "password"}
           placeholder="Password"
-          icon={<Image src={lockIcon} alt="Password" width={16} height={16} />}
+          icon={<Image src="/svg/lock.svg" alt="Password" width={16} height={16} />}
           error={errors.password?.message}
           rightSlot={
             <button
@@ -85,14 +80,14 @@ export default function LoginForm() {
             >
               {showPassword ? (
                 <Image
-                  src={eyeOffIcon}
+                  src="/svg/eye-off.svg"
                   alt="Hide password"
                   width={16}
                   height={16}
                 />
               ) : (
                 <Image
-                  src={eyeIcon}
+                  src="/svg/eye.svg"
                   alt="Show password"
                   width={16}
                   height={16}
@@ -116,7 +111,7 @@ export default function LoginForm() {
           disabled={isSubmitting}
           className="btn btn-primary btn-block"
         >
-          <Image src={loginIcon} alt="Sign in" width={18} height={18} />
+          <Image src="/svg/login.svg" alt="Sign in" width={18} height={18} />
           {isSubmitting ? "Signing in..." : "Sign In to Folio"}
         </button>
       </form>

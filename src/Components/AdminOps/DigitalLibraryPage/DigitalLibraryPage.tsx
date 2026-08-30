@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import bookIcon from "@svg/book.svg";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminSearchRow from "@/Components/AdminCatalog/AdminSearchRow/AdminSearchRow";
@@ -52,7 +51,7 @@ export default function DigitalLibraryPage({
               className={`relative flex h-28 items-center justify-center ${resource.coverClass}`}
             >
               <Image
-                src={bookIcon}
+                src="/svg/book.svg"
                 alt="Book"
                 width={16}
                 height={16}

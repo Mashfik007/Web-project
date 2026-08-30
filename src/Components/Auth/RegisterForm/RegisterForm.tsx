@@ -3,12 +3,6 @@
 import AuthField from "@/Components/Auth/AuthField/AuthField";
 import { register_user } from "@/Controller/users.controller";
 import Image from "next/image";
-import envelopeIcon from "@svg/envelope.svg";
-import eyeIcon from "@svg/eye.svg";
-import eyeOffIcon from "@svg/eye-off.svg";
-import lockIcon from "@svg/lock.svg";
-import phoneIcon from "@svg/phone.svg";
-import userIcon from "@svg/user.svg";
 import { Form_shema } from "@/Shchema/users";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -48,7 +42,7 @@ export default function RegisterForm() {
           {...register("name")}
           type="text"
           placeholder="Full name"
-          icon={<Image src={userIcon} alt="Full name" width={16} height={16} />}
+          icon={<Image src="/svg/user.svg" alt="Full name" width={16} height={16} />}
           error={errors.name?.message}
         />
 
@@ -56,7 +50,7 @@ export default function RegisterForm() {
           {...register("email")}
           type="email"
           placeholder="Email address"
-          icon={<Image src={envelopeIcon} alt="Email" width={16} height={16} />}
+          icon={<Image src="/svg/envelope.svg" alt="Email" width={16} height={16} />}
           error={errors.email?.message}
         />
 
@@ -64,7 +58,7 @@ export default function RegisterForm() {
           {...register("phone")}
           type="tel"
           placeholder="Phone number"
-          icon={<Image src={phoneIcon} alt="Phone" width={16} height={16} />}
+          icon={<Image src="/svg/phone.svg" alt="Phone" width={16} height={16} />}
           error={errors.phone?.message}
         />
 
@@ -72,7 +66,7 @@ export default function RegisterForm() {
           {...register("password")}
           type={showPassword ? "text" : "password"}
           placeholder="Password"
-          icon={<Image src={lockIcon} alt="Password" width={16} height={16} />}
+          icon={<Image src="/svg/lock.svg" alt="Password" width={16} height={16} />}
           error={errors.password?.message}
           rightSlot={
             <button
@@ -83,14 +77,14 @@ export default function RegisterForm() {
             >
               {showPassword ? (
                 <Image
-                  src={eyeOffIcon}
+                  src="/svg/eye-off.svg"
                   alt="Hide password"
                   width={16}
                   height={16}
                 />
               ) : (
                 <Image
-                  src={eyeIcon}
+                  src="/svg/eye.svg"
                   alt="Show password"
                   width={16}
                   height={16}
@@ -104,7 +98,7 @@ export default function RegisterForm() {
           {...register("confirmpassword")}
           type="password"
           placeholder="Confirm password"
-          icon={<Image src={lockIcon} alt="Password" width={16} height={16} />}
+          icon={<Image src="/svg/lock.svg" alt="Password" width={16} height={16} />}
           error={errors.confirmpassword?.message}
         />
 

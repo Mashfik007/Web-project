@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import infoIcon from "@svg/info.svg";
 import {
   ConfirmModal,
   StatusModal,
@@ -17,7 +16,7 @@ export default function AutoHoldBanner() {
       <div className="flex items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
           <Image
-            src={infoIcon}
+            src="/svg/info.svg"
             alt="Info"
             width={16}
             height={16}

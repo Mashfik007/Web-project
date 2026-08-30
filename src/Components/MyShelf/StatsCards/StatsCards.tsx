@@ -1,8 +1,4 @@
 import Image from "next/image";
-import bookIcon from "@svg/book.svg";
-import bookOpenIcon from "@svg/book-open.svg";
-import flameIcon from "@svg/flame.svg";
-import heartIcon from "@svg/heart.svg";
 import type { ShelfStat } from "@/types/myShelf";
 
 interface StatsCardsProps {
@@ -36,7 +32,7 @@ function StatIcon({ id }: { id: string }) {
   if (id === "books-read") {
     return (
       <Image
-        src={bookIcon}
+        src="/svg/book.svg"
         alt="Book"
         width={16}
         height={16}
@@ -48,7 +44,7 @@ function StatIcon({ id }: { id: string }) {
   if (id === "currently-reading") {
     return (
       <Image
-        src={bookOpenIcon}
+        src="/svg/book-open.svg"
         alt="Reading"
         width={16}
         height={16}
@@ -60,7 +56,7 @@ function StatIcon({ id }: { id: string }) {
   if (id === "want-to-read") {
     return (
       <Image
-        src={heartIcon}
+        src="/svg/heart.svg"
         alt="Favorite"
         width={16}
         height={16}
@@ -71,7 +67,7 @@ function StatIcon({ id }: { id: string }) {
 
   return (
     <Image
-      src={flameIcon}
+      src="/svg/flame.svg"
       alt="Streak"
       width={16}
       height={16}

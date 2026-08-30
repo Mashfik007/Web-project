@@ -1,5 +1,4 @@
 import Image from "next/image";
-import searchIcon from "@svg/search.svg";
 import type { ReactNode } from "react";
 
 export default function AdminSearchRow({
@@ -13,7 +12,7 @@ export default function AdminSearchRow({
     <div className="border-base-200 flex flex-col gap-3 border-b p-4 md:flex-row md:items-center">
       <label className="input w-full min-w-0 flex-1">
         <Image
-          src={searchIcon}
+          src="/svg/search.svg"
           alt="Search"
           width={16}
           height={16}

@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import signOutIcon from "@svg/sign-out.svg";
 import { logout } from "@/Controller/users.controller";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -60,7 +59,7 @@ export default function SidebarProfile({
         data-tip="Sign out"
       >
         <Image
-          src={signOutIcon}
+          src="/svg/sign-out.svg"
           alt="Sign out"
           width={16}
           height={16}

@@ -1,4 +1,3 @@
-import heartIcon from "@svg/heart.svg";
 import Image from "next/image";
 import type { ReadingFeedItem } from "@/types/communityShelf";
 
@@ -42,7 +41,7 @@ export default function ReadingFeed({ items }: ReadingFeedProps) {
                 className="flex items-center gap-1 text-[10px] font-medium text-slate-400 hover:text-rose-500"
               >
                 <Image
-                  src={heartIcon}
+                  src="/svg/heart.svg"
                   alt="Favorite"
                   width={16}
                   height={16}

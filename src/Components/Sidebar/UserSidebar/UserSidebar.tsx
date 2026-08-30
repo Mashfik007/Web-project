@@ -1,13 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import bookIcon from "@svg/book.svg";
-import homeIcon from "@svg/home.svg";
-import packageIcon from "@svg/package.svg";
-import shelfIcon from "@svg/shelf.svg";
-import shuffleIcon from "@svg/shuffle.svg";
-import userPlusIcon from "@svg/user-plus.svg";
-import usersIcon from "@svg/users.svg";
 import AppDrawer, {
   closeDrawer,
   drawerItemClass,
@@ -36,7 +29,7 @@ const navItems: NavItem[] = [
     match: (pathname, userId) => pathname === `/user/${userId}`,
     icon: (
       <Image
-        src={homeIcon}
+        src="/svg/home.svg"
         alt="Home"
         width={16}
         height={16}
@@ -52,7 +45,7 @@ const navItems: NavItem[] = [
       pathname.startsWith(`/user/${userId}/checkout`),
     icon: (
       <Image
-        src={bookIcon}
+        src="/svg/book.svg"
         alt="Book"
         width={16}
         height={16}
@@ -68,7 +61,7 @@ const navItems: NavItem[] = [
       pathname === `/user/${userId}/profile`,
     icon: (
       <Image
-        src={shelfIcon}
+        src="/svg/shelf.svg"
         alt="Shelf"
         width={16}
         height={16}
@@ -82,7 +75,7 @@ const navItems: NavItem[] = [
     match: (pathname, userId) => pathname.startsWith(`/user/${userId}/foryou`),
     icon: (
       <Image
-        src={shuffleIcon}
+        src="/svg/shuffle.svg"
         alt="For You"
         width={16}
         height={16}
@@ -97,7 +90,7 @@ const navItems: NavItem[] = [
       pathname.startsWith(`/user/${userId}/community`),
     icon: (
       <Image
-        src={usersIcon}
+        src="/svg/users.svg"
         alt="Users"
         width={16}
         height={16}
@@ -112,7 +105,7 @@ const navItems: NavItem[] = [
       pathname.startsWith(`/user/${userId}/borrow-requests`),
     icon: (
       <Image
-        src={userPlusIcon}
+        src="/svg/user-plus.svg"
         alt="Add user"
         width={16}
         height={16}
@@ -126,7 +119,7 @@ const navItems: NavItem[] = [
     match: (pathname, userId) => pathname.startsWith(`/user/${userId}/orders`),
     icon: (
       <Image
-        src={packageIcon}
+        src="/svg/package.svg"
         alt="Orders"
         width={16}
         height={16}

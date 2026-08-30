@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import arrowRightIcon from "@svg/arrow-right.svg";
 import {
   deliveryFormSchema,
   type DeliveryFormValues,
@@ -171,7 +170,7 @@ export default function DeliveryForm({
           >
             {isSubmitting ? "Submitting..." : "Continue to Payment"}
             <Image
-              src={arrowRightIcon}
+              src="/svg/arrow-right.svg"
               alt="Continue"
               width={16}
               height={16}

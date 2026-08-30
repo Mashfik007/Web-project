@@ -1,8 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import heartIcon from "@svg/heart.svg";
-import sparklesIcon from "@svg/sparkles.svg";
 import {
   FormField,
   FormModal,
@@ -60,7 +58,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
           className="btn btn-primary"
         >
           <Image
-            src={heartIcon}
+            src="/svg/heart.svg"
             alt="Favorite"
             width={16}
             height={16}
@@ -75,7 +73,7 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
           className="btn btn-primary btn-outline"
         >
           <Image
-            src={sparklesIcon}
+            src="/svg/sparkles.svg"
             alt="Remix"
             width={16}
             height={16}

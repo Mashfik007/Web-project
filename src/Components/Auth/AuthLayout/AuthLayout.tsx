@@ -1,5 +1,4 @@
 import Image from "next/image";
-import bookIcon from "@svg/book.svg";
 import type { ReactNode } from "react";
 
 type AuthStat = {
@@ -48,7 +47,7 @@ export default function AuthLayout({
             }`}
           >
             <Image
-              src={bookIcon}
+              src="/svg/book.svg"
               alt="Folio"
               width={16}
               height={16}
@@ -112,7 +111,7 @@ export default function AuthLayout({
           <div className="mb-6 flex items-center justify-center gap-2.5 lg:hidden">
             <span className="flex size-9 items-center justify-center rounded-lg bg-slate-900 text-white">
               <Image
-                src={bookIcon}
+                src="/svg/book.svg"
                 alt="Folio"
                 width={16}
                 height={16}

@@ -1,12 +1,4 @@
 import Image from "next/image";
-import alertTriangleIcon from "@svg/alert-triangle.svg";
-import bookIcon from "@svg/book.svg";
-import calendarDaysIcon from "@svg/calendar-days.svg";
-import shieldIcon from "@svg/shield.svg";
-import targetIcon from "@svg/target.svg";
-import trendDownIcon from "@svg/trend-down.svg";
-import trendUpIcon from "@svg/trend-up.svg";
-import usersIcon from "@svg/users.svg";
 import type { AdminStat } from "@/types/adminDashboard";
 
 interface StatCardsProps {
@@ -26,7 +18,7 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
   if (id === "total-books") {
     return (
       <Image
-        src={bookIcon}
+        src="/svg/book.svg"
         alt="Book"
         width={16}
         height={16}
@@ -38,7 +30,7 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
   if (id === "active-users") {
     return (
       <Image
-        src={usersIcon}
+        src="/svg/users.svg"
         alt="Users"
         width={16}
         height={16}
@@ -50,7 +42,7 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
   if (id === "borrows-today") {
     return (
       <Image
-        src={calendarDaysIcon}
+        src="/svg/calendar-days.svg"
         alt="Borrows"
         width={16}
         height={16}
@@ -62,7 +54,7 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
   if (id === "overdue") {
     return (
       <Image
-        src={alertTriangleIcon}
+        src="/svg/alert-triangle.svg"
         alt="Overdue"
         width={16}
         height={16}
@@ -74,7 +66,7 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
   if (id === "fines-due") {
     return (
       <Image
-        src={targetIcon}
+        src="/svg/target.svg"
         alt="Fines"
         width={16}
         height={16}
@@ -85,7 +77,7 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
 
   return (
     <Image
-      src={shieldIcon}
+      src="/svg/shield.svg"
       alt="Reservations"
       width={16}
       height={16}
@@ -104,7 +96,7 @@ function Trend({ trend }: { trend: AdminStat["trend"] }) {
     >
       {trend.direction === "up" ? (
         <Image
-          src={trendUpIcon}
+          src="/svg/trend-up.svg"
           alt="Up"
           width={14}
           height={14}
@@ -112,7 +104,7 @@ function Trend({ trend }: { trend: AdminStat["trend"] }) {
         />
       ) : (
         <Image
-          src={trendDownIcon}
+          src="/svg/trend-down.svg"
           alt="Down"
           width={14}
           height={14}

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import pencilIcon from "@svg/pencil.svg";
 export default function EditButton({ onClick }: { onClick?: () => void }) {
   return (
     <button
@@ -9,7 +8,7 @@ export default function EditButton({ onClick }: { onClick?: () => void }) {
       className="btn btn-ghost btn-square btn-sm"
     >
       <Image
-        src={pencilIcon}
+        src="/svg/pencil.svg"
         alt="Edit"
         width={16}
         height={16}

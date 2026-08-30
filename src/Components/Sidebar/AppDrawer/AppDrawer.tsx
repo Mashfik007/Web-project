@@ -1,5 +1,4 @@
 import Image from "next/image";
-import sidebarToggleIcon from "@svg/sidebar-toggle.svg";
 import type { ReactNode } from "react";
 
 interface AppDrawerProps {
@@ -40,7 +39,7 @@ export default function AppDrawer({
           >
             <Image
               priority
-              src={sidebarToggleIcon}
+              src="/svg/sidebar-toggle.svg"
               alt="Toggle sidebar"
               width={16}
               height={16}

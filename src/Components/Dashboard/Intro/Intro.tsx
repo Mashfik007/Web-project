@@ -1,5 +1,4 @@
 import Image from "next/image";
-import shuffleIcon from "@svg/shuffle.svg";
 import Link from "next/link";
 import SearchButton from "@/Components/Button/SearchButton/SearchButton";
 import type { DashboardIntro } from "@/types/dashboard";
@@ -48,7 +47,7 @@ export default function Intro({ intro }: IntroProps) {
             className="flex items-center gap-2 rounded-xl bg-sky-400 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(56,189,248,0.35)] transition-all duration-200 hover:bg-sky-300"
           >
             <Image
-              src={shuffleIcon}
+              src="/svg/shuffle.svg"
               alt="For You"
               width={16}
               height={16}

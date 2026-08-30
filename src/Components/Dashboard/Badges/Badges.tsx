@@ -1,5 +1,4 @@
 import Image from "next/image";
-import openBookIcon from "@svg/open-book.svg";
 const badges = [
   {
     name: "Bookworm",
@@ -7,7 +6,7 @@ const badges = [
     active: true,
     icon: (
       <Image
-        src={openBookIcon}
+        src="/svg/open-book.svg"
         alt="Books"
         width={20}
         height={20}

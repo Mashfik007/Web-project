@@ -1,4 +1,3 @@
-import clockIcon from "@svg/clock.svg";
 import Image from "next/image";
 import type { DueDateItem } from "@/types/myShelf";
 
@@ -12,7 +11,7 @@ export default function DueDates({ dueDates }: DueDatesProps) {
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
           <Image
-            src={clockIcon}
+            src="/svg/clock.svg"
             alt="Time"
             width={16}
             height={16}

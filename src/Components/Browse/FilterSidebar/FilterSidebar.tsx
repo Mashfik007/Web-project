@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import filterIcon from "@svg/filter.svg";
 import FilterSection from "@/Components/Browse/FilterSection/FilterSection";
 
 const genres = [
@@ -57,7 +56,7 @@ export default function FilterSidebar({
       {/* Filter header */}
       <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
         <Image
-          src={filterIcon}
+          src="/svg/filter.svg"
           alt="Filter"
           width={16}
           height={16}

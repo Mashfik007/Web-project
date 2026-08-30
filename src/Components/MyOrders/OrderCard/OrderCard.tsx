@@ -1,6 +1,3 @@
-import mapPinIcon from "@svg/map-pin.svg";
-import phoneIcon from "@svg/phone.svg";
-import truckIcon from "@svg/truck.svg";
 import Image from "next/image";
 import OrderStepper from "../OrderStepper/OrderStepper";
 import {
@@ -63,7 +60,7 @@ function DeliveryAddress({ address }: { address: string }) {
     <div className="rounded-xl bg-sky-50 p-4">
       <div className="flex items-center gap-2 text-sm font-semibold text-sky-700">
         <Image
-          src={mapPinIcon}
+          src="/svg/map-pin.svg"
           alt="Location"
           width={16}
           height={16}
@@ -81,7 +78,7 @@ function DeliveryAgentCard({ agent }: { agent: DeliveryAgent }) {
     <div className="rounded-xl bg-violet-50 p-4">
       <div className="flex items-center gap-2 text-sm font-semibold text-violet-700">
         <Image
-          src={truckIcon}
+          src="/svg/truck.svg"
           alt="Delivery"
           width={16}
           height={16}
@@ -107,7 +104,7 @@ function DeliveryAgentCard({ agent }: { agent: DeliveryAgent }) {
             </span>
             <span className="flex items-center gap-1 text-sky-600">
               <Image
-                src={phoneIcon}
+                src="/svg/phone.svg"
                 alt="Phone"
                 width={14}
                 height={14}

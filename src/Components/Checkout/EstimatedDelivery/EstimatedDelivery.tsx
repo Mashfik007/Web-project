@@ -1,5 +1,4 @@
 import Image from "next/image";
-import truckIcon from "@svg/truck.svg";
 interface EstimatedDeliveryProps {
   message: string;
 }
@@ -9,7 +8,7 @@ export default function EstimatedDelivery({ message }: EstimatedDeliveryProps) {
     <div className="flex items-start gap-3 rounded-2xl border border-sky-100 bg-sky-50 p-4">
       <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
         <Image
-          src={truckIcon}
+          src="/svg/truck.svg"
           alt="Delivery"
           width={16}
           height={16}

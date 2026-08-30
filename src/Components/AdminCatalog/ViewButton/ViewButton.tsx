@@ -1,5 +1,4 @@
 import Image from "next/image";
-import eyeIcon from "@svg/eye.svg";
 export default function ViewButton({ onClick }: { onClick?: () => void }) {
   return (
     <button
@@ -9,7 +8,7 @@ export default function ViewButton({ onClick }: { onClick?: () => void }) {
       className="btn btn-ghost btn-square btn-sm"
     >
       <Image
-        src={eyeIcon}
+        src="/svg/eye.svg"
         alt="View"
         width={16}
         height={16}
