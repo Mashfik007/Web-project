@@ -51,7 +51,7 @@ export default function AuthLayout({
               alt="Folio"
               width={16}
               height={16}
-              className="size-4"
+              className={`size-4 ${isLogin ? "" : "brightness-0 invert"}`}
             />
           </span>
           <span
@@ -115,7 +115,7 @@ export default function AuthLayout({
                 alt="Folio"
                 width={16}
                 height={16}
-                className="size-4"
+                className="size-4 brightness-0 invert"
               />
             </span>
             <span className="font-serif text-xl font-semibold text-slate-900">
