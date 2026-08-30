@@ -1,5 +1,8 @@
 import AdminPlaceholderPage from "@/Components/AdminDashboard/AdminPlaceholderPage/AdminPlaceholderPage";
-import { adminSections, isAdminSection } from "@/Components/AdminSidebar/adminNav";
+import {
+  adminSections,
+  isAdminSection,
+} from "@/Components/AdminSidebar/adminNav";
 import { notFound } from "next/navigation";
 
 interface PageProps {

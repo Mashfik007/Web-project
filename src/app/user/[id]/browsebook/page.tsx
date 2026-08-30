@@ -1,5 +1,5 @@
 import BrowsePage from "@/Components/Browse/BrowsePage/BrowsePage";
-import { getBrowseBooksData } from "@/Components/Browse/data/fakeBrowseData";
+import { getBrowseBooksData } from "@/data/fakeBrowseData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

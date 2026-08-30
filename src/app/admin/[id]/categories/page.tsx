@@ -1,5 +1,5 @@
 import CategoriesPage from "@/Components/AdminCatalog/CategoriesPage/CategoriesPage";
-import { getCategoriesData } from "@/Components/AdminCatalog/data/getCategoriesData";
+import { getCategoriesData } from "@/data/getCategoriesData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

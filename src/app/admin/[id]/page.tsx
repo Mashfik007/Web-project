@@ -1,5 +1,5 @@
 import AdminDashboardPage from "@/Components/AdminDashboard/AdminDashboardPage/AdminDashboardPage";
-import { getAdminDashboardData } from "@/Components/AdminDashboard/data/getAdminDashboardData";
+import { getAdminDashboardData } from "@/data/getAdminDashboardData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

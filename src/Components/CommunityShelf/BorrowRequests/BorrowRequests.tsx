@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { CommunityBorrowTracker, CommunityBorrowStep } from "@/types/communityShelf";
+import type {
+  CommunityBorrowTracker,
+  CommunityBorrowStep,
+} from "@/types/communityShelf";
 
 interface BorrowRequestsProps {
   requests: CommunityBorrowTracker[];
@@ -102,9 +105,7 @@ export default function BorrowRequests({
             className="border-b border-slate-100 pb-5 last:border-0 last:pb-0"
           >
             <div className="flex items-center gap-2">
-              <span
-                className={`size-2 rounded-full ${request.dotColor}`}
-              />
+              <span className={`size-2 rounded-full ${request.dotColor}`} />
               <p className="text-xs text-slate-500">
                 Requested from{" "}
                 <span className="font-semibold text-slate-700">

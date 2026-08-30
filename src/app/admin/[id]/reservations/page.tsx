@@ -1,5 +1,5 @@
 import ReservationsPage from "@/Components/AdminOps/ReservationsPage/ReservationsPage";
-import { getAdminReservations } from "@/Components/AdminOps/data/adminOpsData";
+import { getAdminReservations } from "@/data/adminOpsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

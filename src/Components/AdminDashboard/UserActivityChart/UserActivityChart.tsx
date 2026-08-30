@@ -60,7 +60,9 @@ export default function UserActivityChart({
                 />
                 {slice.label}
               </span>
-              <span className="font-semibold text-slate-800">{slice.value}</span>
+              <span className="font-semibold text-slate-800">
+                {slice.value}
+              </span>
             </li>
           ))}
         </ul>

@@ -1,5 +1,5 @@
 import DashboardPage from "@/Components/Dashboard/DashboardPage/DashboardPage";
-import { getDashboardData } from "@/Components/Dashboard/data/getDashboardData";
+import { getDashboardData } from "@/data/getDashboardData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

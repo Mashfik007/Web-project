@@ -1,5 +1,5 @@
 import CommunityShelfPage from "@/Components/CommunityShelf/CommunityShelfPage/CommunityShelfPage";
-import { getCommunityShelfData } from "@/Components/CommunityShelf/data/fakeCommunityShelfData";
+import { getCommunityShelfData } from "@/data/fakeCommunityShelfData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

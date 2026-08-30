@@ -10,9 +10,7 @@ const stepIndex: Record<CheckoutStep, number> = {
   confirm: 2,
 };
 
-export default function CheckoutStepper({
-  currentStep,
-}: CheckoutStepperProps) {
+export default function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
   const currentIndex = stepIndex[currentStep];
   const progress =
     CHECKOUT_STEPS.length > 1

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import arrowRightIcon from "@svg/arrow-right.svg";
 import {
   deliveryFormSchema,
   type DeliveryFormValues,
@@ -59,7 +61,10 @@ export default function DeliveryForm({
         </h2>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
-          <input type="hidden" {...register("quantity", { valueAsNumber: true })} />
+          <input
+            type="hidden"
+            {...register("quantity", { valueAsNumber: true })}
+          />
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
               Full Name
@@ -110,10 +115,7 @@ export default function DeliveryForm({
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 City
               </label>
-              <select
-                {...register("city")}
-                className="select w-full"
-              >
+              <select {...register("city")} className="select w-full">
                 {delivery.cities.map((city) => (
                   <option key={city} value={city}>
                     {city}
@@ -168,19 +170,13 @@ export default function DeliveryForm({
             className="btn btn-primary mt-2 w-full"
           >
             {isSubmitting ? "Submitting..." : "Continue to Payment"}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <Image
+              src={arrowRightIcon}
+              alt="Continue"
+              width={16}
+              height={16}
               className="size-4"
-            >
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
+            />
           </button>
         </form>
       </div>

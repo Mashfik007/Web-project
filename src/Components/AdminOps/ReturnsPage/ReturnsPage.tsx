@@ -134,7 +134,10 @@ export default function ReturnsPage({ records }: ReturnsPageProps) {
         onSubmit={() => {
           const book = returning?.book;
           setReturning(null);
-          feedback.success("Book returned", `"${book}" was marked as returned.`);
+          feedback.success(
+            "Book returned",
+            `"${book}" was marked as returned.`,
+          );
         }}
       >
         <p className="text-sm text-slate-500">

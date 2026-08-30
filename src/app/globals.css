@@ -37,3 +37,8 @@
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-playfair);
 }
+
+/* next/image SVGs are painted black, so invert them on the dark active item */
+.menu :where(li > .menu-active) img {
+  filter: brightness(0) invert(1);
+}

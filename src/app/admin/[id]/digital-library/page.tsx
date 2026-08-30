@@ -1,5 +1,5 @@
 import DigitalLibraryPage from "@/Components/AdminOps/DigitalLibraryPage/DigitalLibraryPage";
-import { getAdminDigitalResources } from "@/Components/AdminOps/data/adminOpsData";
+import { getAdminDigitalResources } from "@/data/adminOpsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

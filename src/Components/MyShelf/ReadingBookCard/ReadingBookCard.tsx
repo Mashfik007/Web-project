@@ -1,5 +1,8 @@
 "use client";
 
+import arrowLeftIcon from "@svg/arrow-left.svg";
+import clockIcon from "@svg/clock.svg";
+import refreshIcon from "@svg/refresh.svg";
 import Image from "next/image";
 import {
   ConfirmModal,
@@ -49,19 +52,13 @@ export default function ReadingBookCard({
 
             {isReading && book.daysLeft > 0 && (
               <span className="flex shrink-0 items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-[10px] font-semibold text-sky-700">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <Image
+                  src={clockIcon}
+                  alt="Time"
+                  width={16}
+                  height={16}
                   className="size-3"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
+                />
                 {book.daysLeft}d left
               </span>
             )}
@@ -99,21 +96,13 @@ export default function ReadingBookCard({
                   onClick={() => openModal(renewId)}
                   className="btn btn-ghost btn-sm"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  <Image
+                    src={refreshIcon}
+                    alt="Refresh"
+                    width={14}
+                    height={14}
                     className="size-3.5"
-                  >
-                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                    <path d="M21 3v5h-5" />
-                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                    <path d="M8 16H3v5" />
-                  </svg>
+                  />
                   Renew
                 </button>
 
@@ -122,19 +111,13 @@ export default function ReadingBookCard({
                   onClick={() => openModal(returnId)}
                   className="btn btn-ghost btn-sm"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  <Image
+                    src={arrowLeftIcon}
+                    alt="Back"
+                    width={14}
+                    height={14}
                     className="size-3.5"
-                  >
-                    <path d="m12 19-7-7 7-7" />
-                    <path d="M19 12H5" />
-                  </svg>
+                  />
                   Return
                 </button>
               </div>
@@ -165,7 +148,10 @@ export default function ReadingBookCard({
         confirmLabel="Return"
         tone="success"
         onConfirm={() => {
-          feedback.success("Return started", `"${book.title}" is marked for return.`);
+          feedback.success(
+            "Return started",
+            `"${book.title}" is marked for return.`,
+          );
         }}
       />
       <StatusModal

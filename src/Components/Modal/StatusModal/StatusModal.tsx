@@ -1,5 +1,8 @@
 "use client";
 
+import Image from "next/image";
+import checkIcon from "@svg/check.svg";
+import xIcon from "@svg/x.svg";
 import AppModal from "@/Components/Modal/AppModal/AppModal";
 import ModalButton from "@/Components/Modal/ModalButton/ModalButton";
 
@@ -39,32 +42,25 @@ export default function StatusModal({
           }`}
         >
           {isSuccess ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
+            <Image
+              src={checkIcon}
+              alt="Confirm"
+              width={32}
+              height={32}
               className="size-8"
-            >
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
+            />
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
+            <Image
+              src={xIcon}
+              alt="Close"
+              width={32}
+              height={32}
               className="size-8"
-            >
-              <path d="M18 6 6 18" />
-              <path d="m6 6 12 12" />
-            </svg>
+            />
           )}
         </span>
         <h2 className="font-serif text-xl font-bold">{title}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-base-content/60">
+        <p className="text-base-content/60 mt-2 text-sm leading-relaxed">
           {message}
         </p>
       </div>

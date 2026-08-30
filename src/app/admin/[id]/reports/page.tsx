@@ -1,5 +1,5 @@
 import ReportsPage from "@/Components/AdminOps/ReportsPage/ReportsPage";
-import { getAdminReports } from "@/Components/AdminOps/data/adminOpsData";
+import { getAdminReports } from "@/data/adminOpsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

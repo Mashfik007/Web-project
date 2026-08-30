@@ -1,5 +1,5 @@
 import UsersPage from "@/Components/AdminCatalog/UsersPage/UsersPage";
-import { getUsersData } from "@/Components/AdminCatalog/data/getUsersData";
+import { getUsersData } from "@/data/getUsersData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

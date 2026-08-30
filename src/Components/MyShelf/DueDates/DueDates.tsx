@@ -1,3 +1,4 @@
+import clockIcon from "@svg/clock.svg";
 import Image from "next/image";
 import type { DueDateItem } from "@/types/myShelf";
 
@@ -10,19 +11,13 @@ export default function DueDates({ dueDates }: DueDatesProps) {
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <Image
+            src={clockIcon}
+            alt="Time"
+            width={16}
+            height={16}
             className="size-4"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
+          />
         </div>
         <h3 className="text-sm font-semibold text-slate-800">Due Dates</h3>
       </div>

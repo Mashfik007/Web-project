@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import userIcon from "@svg/user.svg";
 import type { BookDetails } from "@/types/bookDetails";
 import {
   PolarAngleAxis,
@@ -25,19 +27,13 @@ export default function MatchScore({ matchScore }: MatchScoreProps) {
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <Image
+            src={userIcon}
+            alt="User"
+            width={16}
+            height={16}
             className="size-4"
-          >
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+          />
         </div>
         <h3 className="text-sm font-semibold text-slate-800">
           Blind Date Match Score

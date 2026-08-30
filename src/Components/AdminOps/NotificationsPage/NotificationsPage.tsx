@@ -43,7 +43,9 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
               );
             }}
           >
-            <h2 className="font-semibold text-slate-800">Compose Notification</h2>
+            <h2 className="font-semibold text-slate-800">
+              Compose Notification
+            </h2>
             <FormField
               label="Title"
               name="title"
@@ -86,7 +88,9 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
 
         <AdminCard>
           <div className="p-5">
-            <h2 className="font-semibold text-slate-800">Notification History</h2>
+            <h2 className="font-semibold text-slate-800">
+              Notification History
+            </h2>
             <ul className="mt-4 divide-y divide-slate-100">
               {notices.map((notice) => (
                 <li key={notice.id} className="py-4">

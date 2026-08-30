@@ -19,7 +19,9 @@ export default function ShelfTabs({
   wantToRead,
   borrowedHistory,
 }: ShelfTabsProps) {
-  const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? "currently-reading");
+  const [activeTab, setActiveTab] = useState(
+    tabs[0]?.id ?? "currently-reading",
+  );
 
   const booksByTab: Record<string, MyShelfData["currentlyReading"]> = {
     "currently-reading": currentlyReading,

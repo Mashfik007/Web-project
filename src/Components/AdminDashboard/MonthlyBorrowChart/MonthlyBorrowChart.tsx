@@ -31,10 +31,7 @@ export default function MonthlyBorrowChart({
             Last 12 months — borrows vs returns
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn-ghost btn-xs"
-        >
+        <button type="button" className="btn btn-ghost btn-xs">
           {yearLabel}
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -53,7 +50,10 @@ export default function MonthlyBorrowChart({
 
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+          <AreaChart
+            data={data}
+            margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
+          >
             <defs>
               <linearGradient id="borrowFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#2DD4BF" stopOpacity={0.35} />
@@ -92,7 +92,12 @@ export default function MonthlyBorrowChart({
               stroke="#14B8A6"
               strokeWidth={2.4}
               fill="url(#borrowFill)"
-              activeDot={{ r: 5, stroke: "#14B8A6", fill: "#fff", strokeWidth: 2 }}
+              activeDot={{
+                r: 5,
+                stroke: "#14B8A6",
+                fill: "#fff",
+                strokeWidth: 2,
+              }}
             />
           </AreaChart>
         </ResponsiveContainer>

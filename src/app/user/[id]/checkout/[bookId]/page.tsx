@@ -1,5 +1,5 @@
 import CheckoutPage from "@/Components/Checkout/CheckoutPage/CheckoutPage";
-import { getCheckoutData } from "@/Components/Checkout/data/getCheckoutData";
+import { getCheckoutData } from "@/data/getCheckoutData";
 import { notFound } from "next/navigation";
 
 interface PageProps {

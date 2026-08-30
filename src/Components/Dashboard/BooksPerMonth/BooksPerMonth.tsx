@@ -28,7 +28,10 @@ export default function BooksPerMonth() {
 
       <div className="mt-4 h-36 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={books} margin={{ top: 16, right: 4, left: -28, bottom: 0 }}>
+          <BarChart
+            data={books}
+            margin={{ top: 16, right: 4, left: -28, bottom: 0 }}
+          >
             <XAxis
               dataKey="month"
               axisLine={false}

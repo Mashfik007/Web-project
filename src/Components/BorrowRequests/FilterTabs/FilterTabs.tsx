@@ -1,6 +1,9 @@
 "use client";
 
-import type { BorrowRequestFilter, BorrowRequestStatus } from "@/types/borrowRequests";
+import type {
+  BorrowRequestFilter,
+  BorrowRequestStatus,
+} from "@/types/borrowRequests";
 
 interface FilterTabsProps {
   filters: BorrowRequestFilter[];
@@ -25,12 +28,12 @@ export default function FilterTabs({
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(filter.status)}
-            className={`btn btn-sm ${
-              isActive ? "btn-primary" : "btn-ghost"
-            }`}
+            className={`btn btn-sm ${isActive ? "btn-primary" : "btn-ghost"}`}
           >
             {filter.label}
-            <span className={`badge badge-sm ${isActive ? "badge-ghost" : "badge-soft badge-info"}`}>
+            <span
+              className={`badge badge-sm ${isActive ? "badge-ghost" : "badge-soft badge-info"}`}
+            >
               {filter.count}
             </span>
           </button>

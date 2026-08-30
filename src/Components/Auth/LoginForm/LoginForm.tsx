@@ -1,14 +1,13 @@
 "use client";
 
 import AuthField from "@/Components/Auth/AuthField/AuthField";
-import {
-  EnvelopeIcon,
-  EyeIcon,
-  EyeOffIcon,
-  LockIcon,
-  LoginDoorIcon,
-} from "@/Components/Auth/AuthIcons/AuthIcons";
 import { login_user } from "@/Controller/users.controller";
+import Image from "next/image";
+import envelopeIcon from "@svg/envelope.svg";
+import eyeIcon from "@svg/eye.svg";
+import eyeOffIcon from "@svg/eye-off.svg";
+import lockIcon from "@svg/lock.svg";
+import loginIcon from "@svg/login.svg";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -67,7 +66,7 @@ export default function LoginForm() {
           {...register("email")}
           type="email"
           placeholder="Email address"
-          icon={<EnvelopeIcon />}
+          icon={<Image src={envelopeIcon} alt="Email" width={16} height={16} />}
           error={errors.email?.message}
         />
 
@@ -75,7 +74,7 @@ export default function LoginForm() {
           {...register("password")}
           type={showPassword ? "text" : "password"}
           placeholder="Password"
-          icon={<LockIcon />}
+          icon={<Image src={lockIcon} alt="Password" width={16} height={16} />}
           error={errors.password?.message}
           rightSlot={
             <button
@@ -84,18 +83,32 @@ export default function LoginForm() {
               className="text-slate-400 transition hover:text-slate-600"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              {showPassword ? (
+                <Image
+                  src={eyeOffIcon}
+                  alt="Hide password"
+                  width={16}
+                  height={16}
+                />
+              ) : (
+                <Image
+                  src={eyeIcon}
+                  alt="Show password"
+                  width={16}
+                  height={16}
+                />
+              )}
             </button>
           }
         />
 
         <div className="flex justify-end">
-        <button
-          type="button"
-          className="btn btn-link btn-sm px-0 text-primary"
-        >
-          Forgot password?
-        </button>
+          <button
+            type="button"
+            className="btn btn-link btn-sm text-primary px-0"
+          >
+            Forgot password?
+          </button>
         </div>
 
         <button
@@ -103,7 +116,7 @@ export default function LoginForm() {
           disabled={isSubmitting}
           className="btn btn-primary btn-block"
         >
-          <LoginDoorIcon />
+          <Image src={loginIcon} alt="Sign in" width={18} height={18} />
           {isSubmitting ? "Signing in..." : "Sign In to Folio"}
         </button>
       </form>

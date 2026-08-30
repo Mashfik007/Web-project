@@ -25,10 +25,30 @@ interface FinesPageProps {
 }
 
 const cards = [
-  { key: "totalCollected", label: "Total Collected", icon: "✓", color: "text-emerald-500 bg-emerald-50" },
-  { key: "pendingAmount", label: "Pending Amount", icon: "◷", color: "text-orange-500 bg-orange-50" },
-  { key: "waived", label: "Waived", icon: "↺", color: "text-violet-500 bg-violet-50" },
-  { key: "thisMonth", label: "This Month", icon: "↗", color: "text-sky-500 bg-sky-50" },
+  {
+    key: "totalCollected",
+    label: "Total Collected",
+    icon: "✓",
+    color: "text-emerald-500 bg-emerald-50",
+  },
+  {
+    key: "pendingAmount",
+    label: "Pending Amount",
+    icon: "◷",
+    color: "text-orange-500 bg-orange-50",
+  },
+  {
+    key: "waived",
+    label: "Waived",
+    icon: "↺",
+    color: "text-violet-500 bg-violet-50",
+  },
+  {
+    key: "thisMonth",
+    label: "This Month",
+    icon: "↗",
+    color: "text-sky-500 bg-sky-50",
+  },
 ] as const;
 
 export default function FinesPage({ summary, fines }: FinesPageProps) {
@@ -46,10 +66,7 @@ export default function FinesPage({ summary, fines }: FinesPageProps) {
     >
       <div className="mb-5 grid grid-cols-2 gap-4 xl:grid-cols-4">
         {cards.map((card) => (
-          <article
-            key={card.key}
-            className="card bg-base-100 p-4 shadow-sm"
-          >
+          <article key={card.key} className="card bg-base-100 p-4 shadow-sm">
             <span
               className={`flex size-9 items-center justify-center rounded-lg text-sm font-bold ${card.color}`}
             >
@@ -157,8 +174,13 @@ export default function FinesPage({ summary, fines }: FinesPageProps) {
         title="Add Fine"
         submitLabel="Add Fine"
         onSubmit={(form) => {
-          if (!formHasValues(form, ["member", "book", "type", "amount", "date"])) {
-            feedback.failed("Could not add fine", "Please complete every field.");
+          if (
+            !formHasValues(form, ["member", "book", "type", "amount", "date"])
+          ) {
+            feedback.failed(
+              "Could not add fine",
+              "Please complete every field.",
+            );
             return;
           }
           feedback.success("Fine added", "The fine was recorded successfully.");

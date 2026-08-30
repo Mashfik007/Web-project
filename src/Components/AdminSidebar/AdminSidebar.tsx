@@ -1,49 +1,153 @@
 "use client";
 
-import {
-  AuthorsIcon,
-  BarcodeIcon,
-  BooksIcon,
-  BorrowRequestsIcon,
-  CategoriesIcon,
-  DashboardIcon,
-  DigitalLibraryIcon,
-  FinesIcon,
-  FolioBookIcon,
-  NotificationsIcon,
-  PublishersIcon,
-  ReportsIcon,
-  ReservationsIcon,
-  ReturnsIcon,
-  SignOutIcon,
-  UsersIcon,
-} from "@/Components/AdminSidebar/AdminIcons/AdminIcons";
 import { adminHref, adminSections } from "@/Components/AdminSidebar/adminNav";
 import AppDrawer, {
   closeDrawer,
   drawerItemClass,
 } from "@/Components/Sidebar/AppDrawer/AppDrawer";
 import { logout } from "@/Controller/users.controller";
+import Image from "next/image";
+import barcodeIcon from "@svg/barcode.svg";
+import bellIcon from "@svg/bell.svg";
+import bookIcon from "@svg/book.svg";
+import buildingIcon from "@svg/building.svg";
+import calendarIcon from "@svg/calendar.svg";
+import chartIcon from "@svg/chart.svg";
+import clipboardIcon from "@svg/clipboard.svg";
+import creditCardIcon from "@svg/credit-card.svg";
+import dashboardIcon from "@svg/dashboard.svg";
+import pencilIcon from "@svg/pencil.svg";
+import rotateCcwIcon from "@svg/rotate-ccw.svg";
+import shelfIcon from "@svg/shelf.svg";
+import signOutIcon from "@svg/sign-out.svg";
+import tagIcon from "@svg/tag.svg";
+import usersIcon from "@svg/users.svg";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
 const DRAWER_ID = "admin-drawer";
+const iconClass =
+  "my-1.5 inline-block size-4 shrink-0 in-[.menu-active]:brightness-0 in-[.menu-active]:invert";
 
 const sectionIcons: Record<string, ReactNode> = {
-  books: <BooksIcon />,
-  categories: <CategoriesIcon />,
-  authors: <AuthorsIcon />,
-  publishers: <PublishersIcon />,
-  users: <UsersIcon />,
-  "borrow-requests": <BorrowRequestsIcon />,
-  returns: <ReturnsIcon />,
-  reservations: <ReservationsIcon />,
-  fines: <FinesIcon />,
-  "digital-library": <DigitalLibraryIcon />,
-  reports: <ReportsIcon />,
-  notifications: <NotificationsIcon />,
-  barcode: <BarcodeIcon />,
+  books: (
+    <Image
+      src={bookIcon}
+      alt="Books"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  categories: (
+    <Image
+      src={tagIcon}
+      alt="Categories"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  authors: (
+    <Image
+      src={pencilIcon}
+      alt="Authors"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  publishers: (
+    <Image
+      src={buildingIcon}
+      alt="Publishers"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  users: (
+    <Image
+      src={usersIcon}
+      alt="Users"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  "borrow-requests": (
+    <Image
+      src={clipboardIcon}
+      alt="Borrow requests"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  returns: (
+    <Image
+      src={rotateCcwIcon}
+      alt="Returns"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  reservations: (
+    <Image
+      src={calendarIcon}
+      alt="Reservations"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  fines: (
+    <Image
+      src={creditCardIcon}
+      alt="Fines"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  "digital-library": (
+    <Image
+      src={shelfIcon}
+      alt="Digital library"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  reports: (
+    <Image
+      src={chartIcon}
+      alt="Reports"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  notifications: (
+    <Image
+      src={bellIcon}
+      alt="Notifications"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
+  barcode: (
+    <Image
+      src={barcodeIcon}
+      alt="Barcode"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
 };
 
 export default function AdminSidebar({ children }: { children: ReactNode }) {
@@ -77,8 +181,14 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
       sidebar={
         <>
           <div className="flex w-full items-center gap-2 px-2 py-3">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content">
-              <FolioBookIcon />
+            <span className="bg-primary text-primary-content flex size-8 shrink-0 items-center justify-center rounded-lg">
+              <Image
+                src={bookIcon}
+                alt="Folio"
+                width={16}
+                height={16}
+                className="size-4"
+              />
             </span>
             <div className="is-drawer-close:hidden min-w-0">
               <p className="font-serif text-sm leading-none font-bold text-slate-800">
@@ -98,7 +208,13 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
                 className={drawerItemClass(isDashboard)}
                 data-tip="Dashboard"
               >
-                <DashboardIcon />
+                <Image
+                  src={dashboardIcon}
+                  alt="Dashboard"
+                  width={16}
+                  height={16}
+                  className={iconClass}
+                />
                 <span className="is-drawer-close:hidden">Dashboard</span>
               </Link>
             </li>
@@ -130,10 +246,16 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
               type="button"
               onClick={handleSignOut}
               disabled={isSigningOut}
-              className="btn btn-ghost btn-sm is-drawer-close:tooltip is-drawer-close:tooltip-right w-full justify-start text-error"
+              className="btn btn-ghost btn-sm is-drawer-close:tooltip is-drawer-close:tooltip-right text-error w-full justify-start"
               data-tip="Sign out"
             >
-              <SignOutIcon />
+              <Image
+                src={signOutIcon}
+                alt="Sign out"
+                width={16}
+                height={16}
+                className={iconClass}
+              />
               <span className="is-drawer-close:hidden">
                 {isSigningOut ? "Signing out..." : "Sign Out"}
               </span>

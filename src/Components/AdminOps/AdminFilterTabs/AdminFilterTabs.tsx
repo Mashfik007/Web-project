@@ -8,7 +8,7 @@ export default function AdminFilterTabs({
   onChange: (id: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2 border-b border-base-200 p-4">
+    <div className="border-base-200 flex flex-wrap gap-2 border-b p-4">
       {tabs.map((tab) => {
         const isActive = tab.id === active;
         return (

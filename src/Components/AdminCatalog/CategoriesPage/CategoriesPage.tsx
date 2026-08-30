@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import tagIcon from "@svg/tag.svg";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
@@ -29,7 +31,10 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
 
   function handleSave(form: HTMLFormElement) {
     if (!formHasValues(form, ["name", "description"])) {
-      feedback.failed("Could not save category", "Name and description are required.");
+      feedback.failed(
+        "Could not save category",
+        "Name and description are required.",
+      );
       return;
     }
     feedback.success(
@@ -60,17 +65,13 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
             <td className="px-4 py-3">
               <div className="flex items-center gap-2.5">
                 <span className="text-sky-500">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                  <Image
+                    src={tagIcon}
+                    alt="Category"
+                    width={16}
+                    height={16}
                     className="size-4"
-                  >
-                    <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-                    <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
-                  </svg>
+                  />
                 </span>
                 <span className="font-semibold text-slate-800">
                   {category.name}

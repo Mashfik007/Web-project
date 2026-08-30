@@ -1,5 +1,5 @@
 import BorrowRequestsPage from "@/Components/AdminOps/BorrowRequestsPage/BorrowRequestsPage";
-import { getAdminBorrowRequests } from "@/Components/AdminOps/data/adminOpsData";
+import { getAdminBorrowRequests } from "@/data/adminOpsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

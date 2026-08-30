@@ -1,5 +1,5 @@
 import BookDetailsPage from "@/Components/BookDetails/BookDetailsPage/BookDetailsPage";
-import { getBookDetailsData } from "@/Components/BookDetails/data/fakeBookData";
+import { getBookDetailsData } from "@/data/fakeBookData";
 import { notFound } from "next/navigation";
 
 interface PageProps {

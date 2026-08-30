@@ -1,5 +1,5 @@
 import BarcodePage from "@/Components/AdminOps/BarcodePage/BarcodePage";
-import { getAdminScans } from "@/Components/AdminOps/data/adminOpsData";
+import { getAdminScans } from "@/data/adminOpsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

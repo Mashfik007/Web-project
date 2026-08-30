@@ -1,19 +1,18 @@
+import Image from "next/image";
+import openBookIcon from "@svg/open-book.svg";
 const badges = [
   {
     name: "Bookworm",
     description: "Read 20+ books",
     active: true,
     icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
+      <Image
+        src={openBookIcon}
+        alt="Books"
+        width={20}
+        height={20}
         className="size-5"
-      >
-        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21z" />
-        <path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5A2.5 2.5 0 0 1 20 21z" />
-      </svg>
+      />
     ),
   },
   {

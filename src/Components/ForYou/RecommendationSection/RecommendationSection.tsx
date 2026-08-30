@@ -1,3 +1,6 @@
+import Image from "next/image";
+import expandIcon from "@svg/expand.svg";
+import plusIcon from "@svg/plus.svg";
 import RecommendationCard from "../RecommendationCard/RecommendationCard";
 import type { RecommendationSection as RecommendationSectionData } from "@/types/forYou";
 
@@ -16,52 +19,35 @@ const iconThemes = {
   },
 };
 
-function SectionIcon({ theme }: { theme: RecommendationSectionData["iconTheme"] }) {
+function SectionIcon({
+  theme,
+}: {
+  theme: RecommendationSectionData["iconTheme"];
+}) {
   if (theme === "orange") {
     return (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      <Image
+        src={plusIcon}
+        alt="Add"
+        width={16}
+        height={16}
         className="size-4"
-      >
-        <path d="M12 5v14" />
-        <path d="M5 12h14" />
-      </svg>
+      />
     );
   }
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <Image
+      src={expandIcon}
+      alt="Expand"
+      width={16}
+      height={16}
       className="size-4"
-    >
-      <path d="M16 3h5v5" />
-      <path d="M8 3H3v5" />
-      <path d="M21 3l-9 9" />
-      <path d="M3 3l9 9" />
-      <path d="M16 21h5v-5" />
-      <path d="M8 21H3v-5" />
-      <path d="M21 21l-9-9" />
-      <path d="M3 21l9-9" />
-    </svg>
+    />
   );
 }
 
-function renderDescription(
-  description: string,
-  highlightGenres?: string[],
-) {
+function renderDescription(description: string, highlightGenres?: string[]) {
   if (!highlightGenres?.length) {
     return description;
   }

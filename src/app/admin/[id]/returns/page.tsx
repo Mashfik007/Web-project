@@ -1,5 +1,5 @@
 import ReturnsPage from "@/Components/AdminOps/ReturnsPage/ReturnsPage";
-import { getAdminReturns } from "@/Components/AdminOps/data/adminOpsData";
+import { getAdminReturns } from "@/data/adminOpsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

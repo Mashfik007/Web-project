@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  paymentFormSchema,
-  type PaymentFormValues,
-} from "@/Shchema/checkout";
+import arrowRightIcon from "@svg/arrow-right.svg";
+import { paymentFormSchema, type PaymentFormValues } from "@/Shchema/checkout";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useState } from "react";
@@ -175,11 +173,7 @@ export default function PaymentForm({
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[auto_1fr]">
-            <button
-              type="button"
-              onClick={onBack}
-              className="btn btn-outline"
-            >
+            <button type="button" onClick={onBack} className="btn btn-outline">
               Back
             </button>
             <button
@@ -188,19 +182,13 @@ export default function PaymentForm({
               className="btn btn-primary"
             >
               {isSubmitting ? "Submitting..." : "Review Order"}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <Image
+                src={arrowRightIcon}
+                alt="Continue"
+                width={16}
+                height={16}
                 className="size-4"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
+              />
             </button>
           </div>
         </form>

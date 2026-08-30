@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import buildingIcon from "@svg/building.svg";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
@@ -68,22 +70,13 @@ export default function PublishersPage({ publishers }: PublishersPageProps) {
             <td className="px-4 py-3">
               <div className="flex items-center gap-2.5">
                 <span className="text-sky-500">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                  <Image
+                    src={buildingIcon}
+                    alt="Publisher"
+                    width={16}
+                    height={16}
                     className="size-4"
-                  >
-                    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18" />
-                    <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
-                    <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
-                    <path d="M10 6h4" />
-                    <path d="M10 10h4" />
-                    <path d="M10 14h4" />
-                    <path d="M10 18h4" />
-                  </svg>
+                  />
                 </span>
                 <span className="font-semibold text-slate-800">
                   {publisher.name}

@@ -1,5 +1,5 @@
 import ForYouPage from "@/Components/ForYou/ForYouPage/ForYouPage";
-import { getForYouData } from "@/Components/ForYou/data/fakeForYouData";
+import { getForYouData } from "@/data/fakeForYouData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

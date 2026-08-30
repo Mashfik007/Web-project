@@ -17,9 +17,7 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(
           <input ref={ref} {...props} />
           {rightSlot}
         </label>
-        {error ? (
-          <p className="mt-1.5 text-sm text-error">{error}</p>
-        ) : null}
+        {error ? <p className="text-error mt-1.5 text-sm">{error}</p> : null}
       </div>
     );
   },

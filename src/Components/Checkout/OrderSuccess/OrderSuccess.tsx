@@ -1,3 +1,5 @@
+import Image from "next/image";
+import checkCircleIcon from "@svg/check-circle.svg";
 import Link from "next/link";
 import type { PlacedOrder } from "@/types/checkout";
 
@@ -16,19 +18,13 @@ export default function OrderSuccess({
     <section className="card mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white shadow-lg">
       <div className="card-body items-center gap-5 p-8 text-center">
         <div className="flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <Image
+            src={checkCircleIcon}
+            alt="Success"
+            width={32}
+            height={32}
             className="size-8"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="m9 12 2 2 4-4" />
-          </svg>
+          />
         </div>
 
         <div>
@@ -43,11 +39,15 @@ export default function OrderSuccess({
         <div className="w-full rounded-xl bg-sky-50 p-4 text-left text-sm">
           <div className="flex justify-between gap-4 py-2">
             <span className="text-sky-600">Order ID</span>
-            <span className="font-semibold text-slate-800">{order.orderId}</span>
+            <span className="font-semibold text-slate-800">
+              {order.orderId}
+            </span>
           </div>
           <div className="flex justify-between gap-4 py-2">
             <span className="text-sky-600">Book</span>
-            <span className="font-semibold text-slate-800">{order.bookTitle}</span>
+            <span className="font-semibold text-slate-800">
+              {order.bookTitle}
+            </span>
           </div>
           <div className="flex justify-between gap-4 py-2">
             <span className="text-sky-600">Total Paid</span>
@@ -65,16 +65,10 @@ export default function OrderSuccess({
         </div>
 
         <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-          <Link
-            href={ordersHref}
-            className="btn btn-primary"
-          >
+          <Link href={ordersHref} className="btn btn-primary">
             View My Orders
           </Link>
-          <Link
-            href={browseHref}
-            className="btn btn-outline btn-primary"
-          >
+          <Link href={browseHref} className="btn btn-outline btn-primary">
             Keep Browsing
           </Link>
         </div>

@@ -13,7 +13,7 @@ export default function AdminDashboardPage({
   dashboard,
 }: AdminDashboardPageProps) {
   return (
-    <main className="min-h-full bg-base-200 p-5 md:p-7 lg:p-8">
+    <main className="bg-base-200 min-h-full p-5 md:p-7 lg:p-8">
       <header className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight text-slate-800">
           Dashboard

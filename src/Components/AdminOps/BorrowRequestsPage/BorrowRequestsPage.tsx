@@ -135,7 +135,9 @@ export default function BorrowRequestsPage({
 
       <ConfirmModal
         id="admin-borrow-confirm"
-        title={confirm?.action === "approve" ? "Approve request" : "Reject request"}
+        title={
+          confirm?.action === "approve" ? "Approve request" : "Reject request"
+        }
         message={
           confirm
             ? `${confirm.action === "approve" ? "Approve" : "Reject"} ${confirm.item.member}'s request for "${confirm.item.book}"?`

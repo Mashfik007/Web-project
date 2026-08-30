@@ -25,9 +25,7 @@ export default function OrderFilterTabs({
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(filter.status)}
-            className={`btn btn-sm ${
-              isActive ? "btn-primary" : "btn-ghost"
-            }`}
+            className={`btn btn-sm ${isActive ? "btn-primary" : "btn-ghost"}`}
           >
             {filter.label}
           </button>

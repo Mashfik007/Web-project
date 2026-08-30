@@ -1,5 +1,5 @@
 import MyShelfPage from "@/Components/MyShelf/MyShelfPage/MyShelfPage";
-import { getShelfData } from "@/Components/MyShelf/data/fakeShelfData";
+import { getShelfData } from "@/data/fakeShelfData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

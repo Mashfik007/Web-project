@@ -1,5 +1,10 @@
+import checkIcon from "@svg/check.svg";
+import xIcon from "@svg/x.svg";
 import Image from "next/image";
-import type { BorrowRequestStatus, IncomingBorrowRequest } from "@/types/borrowRequests";
+import type {
+  BorrowRequestStatus,
+  IncomingBorrowRequest,
+} from "@/types/borrowRequests";
 
 interface RequestCardProps {
   request: IncomingBorrowRequest;
@@ -82,18 +87,13 @@ export default function RequestCard({
               onClick={() => onApprove?.(request.id)}
               className="btn btn-success btn-sm flex-1 sm:flex-none"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <Image
+                src={checkIcon}
+                alt="Confirm"
+                width={16}
+                height={16}
                 className="size-4"
-              >
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
+              />
               Approve
             </button>
 
@@ -102,19 +102,13 @@ export default function RequestCard({
               onClick={() => onDecline?.(request.id)}
               className="btn btn-error btn-outline btn-sm flex-1 sm:flex-none"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <Image
+                src={xIcon}
+                alt="Close"
+                width={16}
+                height={16}
                 className="size-4"
-              >
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
+              />
               Decline
             </button>
           </div>

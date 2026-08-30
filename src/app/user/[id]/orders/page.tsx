@@ -1,5 +1,5 @@
 import MyOrdersPage from "@/Components/MyOrders/MyOrdersPage/MyOrdersPage";
-import { getMyOrdersData } from "@/Components/MyOrders/data/fakeMyOrdersData";
+import { getMyOrdersData } from "@/data/fakeMyOrdersData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

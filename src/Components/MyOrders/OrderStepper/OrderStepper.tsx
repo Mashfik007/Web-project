@@ -23,9 +23,7 @@ export default function OrderStepper({ currentStep }: OrderStepperProps) {
         return (
           <li
             key={step.id}
-            className={`step ${
-              isComplete || isCurrent ? "step-primary" : ""
-            }`}
+            className={`step ${isComplete || isCurrent ? "step-primary" : ""}`}
             data-content={isComplete ? "✓" : index + 1}
           >
             {step.label}

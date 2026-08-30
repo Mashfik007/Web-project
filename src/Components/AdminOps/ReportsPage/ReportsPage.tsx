@@ -35,14 +35,20 @@ export default function ReportsPage({ trends, topBooks }: ReportsPageProps) {
           <ModalButton
             tone="secondary"
             onClick={() =>
-              feedback.success("CSV exported", "Borrow activity was downloaded as CSV.")
+              feedback.success(
+                "CSV exported",
+                "Borrow activity was downloaded as CSV.",
+              )
             }
           >
             Export CSV
           </ModalButton>
           <ModalButton
             onClick={() =>
-              feedback.success("PDF exported", "The report PDF is ready to share.")
+              feedback.success(
+                "PDF exported",
+                "The report PDF is ready to share.",
+              )
             }
           >
             Export PDF
@@ -96,9 +102,23 @@ export default function ReportsPage({ trends, topBooks }: ReportsPageProps) {
                     margin={{ left: -18, right: 8, top: 8 }}
                   >
                     <defs>
-                      <linearGradient id="reportFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.02} />
+                      <linearGradient
+                        id="reportFill"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#8B5CF6"
+                          stopOpacity={0.25}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#8B5CF6"
+                          stopOpacity={0.02}
+                        />
                       </linearGradient>
                     </defs>
                     <CartesianGrid
@@ -135,7 +155,7 @@ export default function ReportsPage({ trends, topBooks }: ReportsPageProps) {
         <AdminCard>
           <div className="p-5">
             <h2 className="font-semibold text-slate-800">Top Borrowed Books</h2>
-            <table className="table mt-4">
+            <table className="mt-4 table">
               <thead>
                 <tr>
                   <th>Book</th>

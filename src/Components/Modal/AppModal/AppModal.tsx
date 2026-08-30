@@ -29,7 +29,12 @@ interface AppModalProps {
   footer?: ReactNode;
 }
 
-export default function AppModal({ id, title, children, footer }: AppModalProps) {
+export default function AppModal({
+  id,
+  title,
+  children,
+  footer,
+}: AppModalProps) {
   return (
     <dialog id={id} className="modal">
       <div className="modal-box">

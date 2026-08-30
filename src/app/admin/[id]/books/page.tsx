@@ -1,5 +1,5 @@
 import BooksPage from "@/Components/AdminCatalog/BooksPage/BooksPage";
-import { getBooksData } from "@/Components/AdminCatalog/data/getBooksData";
+import { getBooksData } from "@/data/getBooksData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

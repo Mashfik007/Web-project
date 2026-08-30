@@ -33,7 +33,7 @@ export default function RootLayout({
       data-theme="light"
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-base-200 font-sans text-base-content">
+      <body className="bg-base-200 text-base-content flex min-h-full flex-col font-sans">
         {children}
       </body>
     </html>

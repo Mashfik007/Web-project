@@ -43,7 +43,9 @@ export default function RequestList({ filters, requests }: RequestListProps) {
   function handleApprove(id: string) {
     setLocalRequests((prev) =>
       prev.map((request) =>
-        request.id === id ? { ...request, status: "approved" as const } : request,
+        request.id === id
+          ? { ...request, status: "approved" as const }
+          : request,
       ),
     );
   }
@@ -51,7 +53,9 @@ export default function RequestList({ filters, requests }: RequestListProps) {
   function handleDecline(id: string) {
     setLocalRequests((prev) =>
       prev.map((request) =>
-        request.id === id ? { ...request, status: "declined" as const } : request,
+        request.id === id
+          ? { ...request, status: "declined" as const }
+          : request,
       ),
     );
   }
@@ -106,7 +110,9 @@ export default function RequestList({ filters, requests }: RequestListProps) {
 
       <ConfirmModal
         id="user-borrow-confirm"
-        title={confirm?.action === "approve" ? "Approve request" : "Decline request"}
+        title={
+          confirm?.action === "approve" ? "Approve request" : "Decline request"
+        }
         message={
           confirm
             ? `${confirm.action === "approve" ? "Approve" : "Decline"} the request for "${confirm.title}"?`

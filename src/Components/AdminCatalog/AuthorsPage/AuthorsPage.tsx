@@ -29,7 +29,10 @@ export default function AuthorsPage({ authors }: AuthorsPageProps) {
 
   function handleSave(form: HTMLFormElement) {
     if (!formHasValues(form, ["name", "nationality"])) {
-      feedback.failed("Could not save author", "Name and nationality are required.");
+      feedback.failed(
+        "Could not save author",
+        "Name and nationality are required.",
+      );
       return;
     }
     feedback.success(

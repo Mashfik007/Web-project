@@ -1,5 +1,5 @@
 import AuthorsPage from "@/Components/AdminCatalog/AuthorsPage/AuthorsPage";
-import { getAuthorsData } from "@/Components/AdminCatalog/data/getAuthorsData";
+import { getAuthorsData } from "@/data/getAuthorsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

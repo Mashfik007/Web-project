@@ -1,3 +1,5 @@
+import Image from "next/image";
+import eyeIcon from "@svg/eye.svg";
 export default function ViewButton({ onClick }: { onClick?: () => void }) {
   return (
     <button
@@ -6,17 +8,13 @@ export default function ViewButton({ onClick }: { onClick?: () => void }) {
       onClick={onClick}
       className="btn btn-ghost btn-square btn-sm"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
+      <Image
+        src={eyeIcon}
+        alt="View"
+        width={16}
+        height={16}
         className="size-4"
-      >
-        <path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
+      />
     </button>
   );
 }

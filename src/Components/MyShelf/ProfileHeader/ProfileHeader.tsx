@@ -26,7 +26,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
             {user.name}
           </h1>
 
-          <p className="mt-1 text-sm italic text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 italic">
             &ldquo;{user.quote}&rdquo;
           </p>
 

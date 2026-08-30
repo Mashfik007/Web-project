@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import bookIcon from "@svg/book.svg";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminSearchRow from "@/Components/AdminCatalog/AdminSearchRow/AdminSearchRow";
@@ -36,10 +38,7 @@ export default function DigitalLibraryPage({
     >
       <AdminCard>
         <AdminSearchRow placeholder="Search digital resources...">
-          <FilterSelect
-            name="format"
-            options={["All", "PDF", "EPUB"]}
-          />
+          <FilterSelect name="format" options={["All", "PDF", "EPUB"]} />
         </AdminSearchRow>
       </AdminCard>
 
@@ -52,17 +51,13 @@ export default function DigitalLibraryPage({
             <div
               className={`relative flex h-28 items-center justify-center ${resource.coverClass}`}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
+              <Image
+                src={bookIcon}
+                alt="Book"
+                width={16}
+                height={16}
                 className="size-10"
-              >
-                <path d="M12 7v14" />
-                <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
-              </svg>
+              />
               <span
                 className={`badge badge-sm absolute top-3 right-3 ${
                   resource.format === "PDF" ? "badge-error" : "badge-secondary"
@@ -122,15 +117,26 @@ export default function DigitalLibraryPage({
         submitLabel="Upload"
         onSubmit={(form) => {
           if (!formHasValues(form, ["title", "author", "format", "category"])) {
-            feedback.failed("Upload failed", "Please fill in all resource details.");
+            feedback.failed(
+              "Upload failed",
+              "Please fill in all resource details.",
+            );
             return;
           }
-          feedback.success("Resource uploaded", "The digital file is now in the library.");
+          feedback.success(
+            "Resource uploaded",
+            "The digital file is now in the library.",
+          );
         }}
       >
         <FormField label="Title" name="title" placeholder="Resource title" />
         <FormField label="Author" name="author" placeholder="Author" />
-        <FormField label="Format" name="format" as="select" options={["PDF", "EPUB"]} />
+        <FormField
+          label="Format"
+          name="format"
+          as="select"
+          options={["PDF", "EPUB"]}
+        />
         <FormField
           label="Category"
           name="category"

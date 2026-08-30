@@ -58,7 +58,7 @@ export default function ReadingTabs() {
                 value={62}
                 max={100}
               />
-              <span className="text-xs font-medium text-primary">62%</span>
+              <span className="text-primary text-xs font-medium">62%</span>
             </div>
 
             <p className="mt-2 text-xs text-slate-500">

@@ -38,7 +38,10 @@ export default function UsersPage({ users }: UsersPageProps) {
 
   function handleSave(form: HTMLFormElement) {
     if (!formHasValues(form, ["name", "email", "phone", "role"])) {
-      feedback.failed("Could not save user", "Please fill in all user details.");
+      feedback.failed(
+        "Could not save user",
+        "Please fill in all user details.",
+      );
       return;
     }
     feedback.success(
@@ -90,7 +93,9 @@ export default function UsersPage({ users }: UsersPageProps) {
                 >
                   {user.initials}
                 </span>
-                <span className="font-semibold text-slate-800">{user.name}</span>
+                <span className="font-semibold text-slate-800">
+                  {user.name}
+                </span>
               </div>
             </td>
             <td className="px-4 py-3 text-slate-500">{user.email}</td>

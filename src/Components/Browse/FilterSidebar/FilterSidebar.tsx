@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import filterIcon from "@svg/filter.svg";
 import FilterSection from "@/Components/Browse/FilterSection/FilterSection";
 
 const genres = [
@@ -38,7 +40,10 @@ interface FilterSidebarProps {
   onChange: (filters: BrowseFilters) => void;
 }
 
-export default function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
+export default function FilterSidebar({
+  filters,
+  onChange,
+}: FilterSidebarProps) {
   const toggleGenre = (genre: string) => {
     const selected = filters.genres.includes(genre)
       ? filters.genres.filter((item) => item !== genre)
@@ -51,16 +56,13 @@ export default function FilterSidebar({ filters, onChange }: FilterSidebarProps)
     <aside className="h-fit overflow-hidden rounded-2xl border border-slate-200 bg-white">
       {/* Filter header */}
       <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
+        <Image
+          src={filterIcon}
+          alt="Filter"
+          width={16}
+          height={16}
           className="size-4 text-sky-600"
-        >
-          <path d="M4 4h16l-6 7v6l-4 3v-9z" />
-        </svg>
+        />
 
         <span className="text-sm font-semibold text-slate-600">Filters</span>
       </div>

@@ -44,9 +44,7 @@ export default function OrderSummary({
 
         <div className="space-y-2 border-t border-slate-100 pt-4 text-sm">
           <div className="flex justify-between text-slate-600">
-            <span>
-              Subtotal ({quantity}x)
-            </span>
+            <span>Subtotal ({quantity}x)</span>
             <span>
               {pricing.currency}
               {subtotal}

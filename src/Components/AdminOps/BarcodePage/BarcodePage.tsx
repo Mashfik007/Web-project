@@ -29,9 +29,13 @@ export default function BarcodePage({ scans }: BarcodePageProps) {
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <AdminCard>
           <div className="p-5">
-            <h2 className="font-semibold text-slate-800">Scan to Issue / Return</h2>
+            <h2 className="font-semibold text-slate-800">
+              Scan to Issue / Return
+            </h2>
             <div className="mt-4 flex h-44 flex-col items-center justify-center rounded-xl border border-dashed border-sky-200 bg-sky-50/40 text-center">
-              <p className="font-medium text-sky-700">Point scanner at barcode</p>
+              <p className="font-medium text-sky-700">
+                Point scanner at barcode
+              </p>
               <p className="mt-1 text-xs text-slate-400">
                 Supports Code 128, QR, ISBN.
               </p>
@@ -41,10 +45,16 @@ export default function BarcodePage({ scans }: BarcodePageProps) {
               onSubmit={(event) => {
                 event.preventDefault();
                 if (!formHasValues(event.currentTarget, ["bookId"])) {
-                  feedback.failed("Book not found", "Enter a Book ID to search.");
+                  feedback.failed(
+                    "Book not found",
+                    "Enter a Book ID to search.",
+                  );
                   return;
                 }
-                feedback.success("Book found", "Ready to issue or return this copy.");
+                feedback.success(
+                  "Book found",
+                  "Ready to issue or return this copy.",
+                );
               }}
             >
               <input
@@ -93,12 +103,18 @@ export default function BarcodePage({ scans }: BarcodePageProps) {
               onSubmit={(event) => {
                 event.preventDefault();
                 if (!formHasValues(event.currentTarget, ["qrBookId"])) {
-                  feedback.failed("Could not generate", "Enter a Book ID first.");
+                  feedback.failed(
+                    "Could not generate",
+                    "Enter a Book ID first.",
+                  );
                   setGenerated(false);
                   return;
                 }
                 setGenerated(true);
-                feedback.success("QR generated", "Print or scan this code at the desk.");
+                feedback.success(
+                  "QR generated",
+                  "Print or scan this code at the desk.",
+                );
               }}
             >
               <FormField
@@ -111,11 +127,21 @@ export default function BarcodePage({ scans }: BarcodePageProps) {
               </div>
             </form>
             <div className="mt-5 flex h-40 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-center text-sm text-slate-400">
-              {generated ? "QR preview ready" : "Enter a Book ID and click Generate."}
+              {generated
+                ? "QR preview ready"
+                : "Enter a Book ID and click Generate."}
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <FormField label="Member ID" name="memberId" placeholder="LIB-XXXX" />
-              <FormField label="Book ID" name="issueBookId" placeholder="LIB-XXXX" />
+              <FormField
+                label="Member ID"
+                name="memberId"
+                placeholder="LIB-XXXX"
+              />
+              <FormField
+                label="Book ID"
+                name="issueBookId"
+                placeholder="LIB-XXXX"
+              />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <ModalButton
@@ -128,7 +154,10 @@ export default function BarcodePage({ scans }: BarcodePageProps) {
               <ModalButton
                 tone="success"
                 onClick={() =>
-                  feedback.success("Book returned", "The copy is back in stock.")
+                  feedback.success(
+                    "Book returned",
+                    "The copy is back in stock.",
+                  )
                 }
               >
                 Return Book

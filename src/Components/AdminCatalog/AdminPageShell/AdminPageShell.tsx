@@ -22,13 +22,13 @@ export default function AdminPageShell({
   children,
 }: AdminPageShellProps) {
   return (
-    <main className="min-h-full bg-base-200 p-5 md:p-7 lg:p-8">
+    <main className="bg-base-200 min-h-full p-5 md:p-7 lg:p-8">
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-serif text-2xl font-bold tracking-tight">
             {title}
           </h1>
-          <p className="mt-1 text-sm text-base-content/50">{subtitle}</p>
+          <p className="text-base-content/50 mt-1 text-sm">{subtitle}</p>
         </div>
         {headerRight ??
           (addLabel ? (

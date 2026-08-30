@@ -1,3 +1,5 @@
+import Image from "next/image";
+import shuffleIcon from "@svg/shuffle.svg";
 import Link from "next/link";
 import SearchButton from "@/Components/Button/SearchButton/SearchButton";
 import type { DashboardIntro } from "@/types/dashboard";
@@ -45,21 +47,13 @@ export default function Intro({ intro }: IntroProps) {
             href={intro.forYouHref}
             className="flex items-center gap-2 rounded-xl bg-sky-400 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_20px_rgba(56,189,248,0.35)] transition-all duration-200 hover:bg-sky-300"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <Image
+              src={shuffleIcon}
+              alt="For You"
+              width={16}
+              height={16}
               className="size-4"
-            >
-              <path d="m16 3 4 4-4 4" />
-              <path d="M4 7h3c4 0 5 10 9 10h4" />
-              <path d="m16 13 4 4-4 4" />
-              <path d="M4 17h3c1.5 0 2.5-1.5 3.5-3.5" />
-            </svg>
+            />
             For You
           </Link>
         </div>

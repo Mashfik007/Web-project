@@ -19,7 +19,11 @@ export default function TextAction({
   };
 
   return (
-    <button type="button" onClick={onClick} className={`btn btn-xs ${tones[tone]}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`btn btn-xs ${tones[tone]}`}
+    >
       {icon}
       {label}
     </button>

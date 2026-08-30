@@ -1,5 +1,5 @@
 import BorrowRequestsPage from "@/Components/BorrowRequests/BorrowRequestsPage/BorrowRequestsPage";
-import { getBorrowRequestsData } from "@/Components/BorrowRequests/data/fakeBorrowRequestsData";
+import { getBorrowRequestsData } from "@/data/fakeBorrowRequestsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

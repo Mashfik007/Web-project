@@ -1,3 +1,5 @@
+import Image from "next/image";
+import plusIcon from "@svg/plus.svg";
 import type { CommunityShelfHeader } from "@/types/communityShelf";
 
 interface CommunityHeaderProps {
@@ -17,23 +19,14 @@ export default function CommunityHeader({ header }: CommunityHeaderProps) {
         <p className="mt-1 text-sm text-sky-600">{header.subtitle}</p>
       </div>
 
-      <button
-        type="button"
-        className="btn btn-primary"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      <button type="button" className="btn btn-primary">
+        <Image
+          src={plusIcon}
+          alt="Add"
+          width={16}
+          height={16}
           className="size-4"
-        >
-          <path d="M12 5v14" />
-          <path d="M5 12h14" />
-        </svg>
+        />
         Request a Book
       </button>
     </div>

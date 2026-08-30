@@ -1,5 +1,5 @@
 import NotificationsPage from "@/Components/AdminOps/NotificationsPage/NotificationsPage";
-import { getAdminNotices } from "@/Components/AdminOps/data/adminOpsData";
+import { getAdminNotices } from "@/data/adminOpsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

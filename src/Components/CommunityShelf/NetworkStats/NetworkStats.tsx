@@ -1,3 +1,7 @@
+import Image from "next/image";
+import bookIcon from "@svg/book.svg";
+import refreshIcon from "@svg/refresh.svg";
+import usersIcon from "@svg/users.svg";
 import type { NetworkStat } from "@/types/communityShelf";
 
 interface NetworkStatsProps {
@@ -23,62 +27,38 @@ const themeStyles = {
 };
 
 function StatIcon({ id }: { id: string }) {
-  const className = "size-4";
-
   if (id === "total-books") {
     return (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-      >
-        <path d="M12 7v14" />
-        <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
-      </svg>
+      <Image
+        src={bookIcon}
+        alt="Book"
+        width={16}
+        height={16}
+        className="size-4"
+      />
     );
   }
 
   if (id === "active-members") {
     return (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-      >
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
+      <Image
+        src={usersIcon}
+        alt="Users"
+        width={16}
+        height={16}
+        className="size-4"
+      />
     );
   }
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-      <path d="M21 3v5h-5" />
-      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-      <path d="M8 16H3v5" />
-    </svg>
+    <Image
+      src={refreshIcon}
+      alt="Refresh"
+      width={16}
+      height={16}
+      className="size-4"
+    />
   );
 }
 

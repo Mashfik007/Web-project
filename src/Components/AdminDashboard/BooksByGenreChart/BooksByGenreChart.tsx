@@ -25,7 +25,10 @@ export default function BooksByGenreChart({ data }: BooksByGenreChartProps) {
 
       <div className="mt-4 h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+          <BarChart
+            data={data}
+            margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
+          >
             <CartesianGrid
               vertical={false}
               stroke="#E5E7EB"

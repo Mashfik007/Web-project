@@ -108,7 +108,10 @@ export default function ReservationsPage({
         onConfirm={() => {
           const name = notifying?.member;
           setNotifying(null);
-          feedback.success("Notice sent", `${name} was notified that the book is ready.`);
+          feedback.success(
+            "Notice sent",
+            `${name} was notified that the book is ready.`,
+          );
         }}
       />
 
@@ -120,7 +123,10 @@ export default function ReservationsPage({
         tone="danger"
         onConfirm={() => {
           setCancelling(null);
-          feedback.success("Reservation cancelled", "The hold was removed from the queue.");
+          feedback.success(
+            "Reservation cancelled",
+            "The hold was removed from the queue.",
+          );
         }}
       />
 

@@ -44,7 +44,7 @@ export default function ConfirmModal({
         </>
       }
     >
-      <p className="text-sm leading-relaxed text-base-content/60">{message}</p>
+      <p className="text-base-content/60 text-sm leading-relaxed">{message}</p>
     </AppModal>
   );
 }

@@ -1,5 +1,5 @@
 import FinesPage from "@/Components/AdminOps/FinesPage/FinesPage";
-import { getAdminFines } from "@/Components/AdminOps/data/adminOpsData";
+import { getAdminFines } from "@/data/adminOpsData";
 
 interface PageProps {
   params: Promise<{ id: string }>;

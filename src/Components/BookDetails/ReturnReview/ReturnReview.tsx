@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import rotateCcwIcon from "@svg/rotate-ccw.svg";
 import { useState } from "react";
 import { StatusModal, useFeedback } from "@/Components/Modal";
 
@@ -15,19 +17,13 @@ export default function ReturnReview() {
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <Image
+            src={rotateCcwIcon}
+            alt="Return"
+            width={16}
+            height={16}
             className="size-4"
-          >
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path d="M3 3v5h5" />
-          </svg>
+          />
         </div>
         <h3 className="text-sm font-semibold text-slate-800">
           Leave a Return Review

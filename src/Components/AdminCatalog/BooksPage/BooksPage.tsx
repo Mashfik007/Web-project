@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import bookIcon from "@svg/book.svg";
 // books catalog for admin — add, edit, delete
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
@@ -45,7 +47,9 @@ export default function BooksPage({ books }: BooksPageProps) {
   const feedback = useFeedback();
 
   function handleSave(form: HTMLFormElement) {
-    if (!formHasValues(form, ["title", "author", "isbn", "category", "copies"])) {
+    if (
+      !formHasValues(form, ["title", "author", "isbn", "category", "copies"])
+    ) {
       feedback.failed(
         "Could not save book",
         "Please fill in every field and try again.",
@@ -108,17 +112,13 @@ export default function BooksPage({ books }: BooksPageProps) {
               <span
                 className={`flex size-9 items-center justify-center rounded-lg ${book.coverClass}`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                <Image
+                  src={bookIcon}
+                  alt="Book"
+                  width={16}
+                  height={16}
                   className="size-4"
-                >
-                  <path d="M12 7v14" />
-                  <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
-                </svg>
+                />
               </span>
             </td>
             <td className="px-4 py-3">
@@ -193,7 +193,13 @@ export default function BooksPage({ books }: BooksPageProps) {
           name="category"
           as="select"
           defaultValue={editing?.category ?? "Fiction"}
-          options={["Fiction", "Science", "Technology", "History", "Non-Fiction"]}
+          options={[
+            "Fiction",
+            "Science",
+            "Technology",
+            "History",
+            "Non-Fiction",
+          ]}
         />
         <FormField
           label="Copies"
@@ -212,7 +218,10 @@ export default function BooksPage({ books }: BooksPageProps) {
         tone="danger"
         onConfirm={() => {
           setDeleting(null);
-          feedback.success("Book deleted", "The book was removed from the catalog.");
+          feedback.success(
+            "Book deleted",
+            "The book was removed from the catalog.",
+          );
         }}
       />
 

@@ -7,7 +7,9 @@ interface RecentActivityProps {
 export default function RecentActivity({ items }: RecentActivityProps) {
   return (
     <article className="card bg-base-100 p-5 shadow-sm">
-      <h2 className="text-base font-semibold text-slate-800">Recent Activity</h2>
+      <h2 className="text-base font-semibold text-slate-800">
+        Recent Activity
+      </h2>
 
       <ul className="mt-4 space-y-4">
         {items.map((item) => (
@@ -22,7 +24,9 @@ export default function RecentActivity({ items }: RecentActivityProps) {
                 <p className="truncate text-sm font-semibold text-slate-800">
                   {item.name}
                 </p>
-                <span className="shrink-0 text-xs text-slate-400">{item.time}</span>
+                <span className="shrink-0 text-xs text-slate-400">
+                  {item.time}
+                </span>
               </div>
               <p className="mt-0.5 text-sm text-slate-500">{item.action}</p>
             </div>

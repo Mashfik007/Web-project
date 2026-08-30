@@ -29,8 +29,8 @@ export default function AdminTable({
           <tbody>{children}</tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between border-t border-base-200 px-4 py-3">
-        <p className="text-xs text-base-content/40">
+      <div className="border-base-200 flex items-center justify-between border-t px-4 py-3">
+        <p className="text-base-content/40 text-xs">
           Showing {from}-{to} of {total} records
         </p>
         <div className="join">
