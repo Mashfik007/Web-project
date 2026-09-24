@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { requireUserId } from "@/Helper/userFromToken";
 import { closeOpenReturn } from "@/data/libraryLink";
 import { Book } from "@/Model/Books";
 import { ShelfLoan } from "@/Model/ShelfLoans";
@@ -18,7 +19,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { userId, loanId } = parsed.data;
+    const session = await requireUserId();
+    if (session instanceof Response) return session;
+    const userId = session;
+    const { loanId } = parsed.data;
     if (!mongoose.Types.ObjectId.isValid(loanId)) {
       return new Response(JSON.stringify(new ApiError(400, "Invalid loan id")), {
         status: 400,

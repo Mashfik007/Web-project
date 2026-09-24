@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { requireUserId } from "@/Helper/userFromToken";
 import { Follow } from "@/Model/Follows";
 import { FollowAction_schema } from "@/Shchema/shelf";
 import ApiError from "@/Utils/Api_error";
@@ -14,7 +15,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { userId, targetId } = parsed.data;
+    const session = await requireUserId();
+    if (session instanceof Response) return session;
+    const userId = session;
+    const { targetId } = parsed.data;
     if (userId === targetId) {
       return new Response(JSON.stringify(new ApiError(400, "You cannot follow yourself")), {
         status: 400,

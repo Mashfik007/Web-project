@@ -56,19 +56,27 @@ User_schema.pre("save", async function () {
 //   if (!this.isModified("refreshToken")) return;
 //   this.refreshToken = await bcrypt.hash(this.refreshToken, 10);
 // });
-User_schema.methods.genAccessToken = function () {
+function genAccessToken(this: {
+  _id: { toString(): string };
+  name: string;
+  email: string;
+  isAdmin?: boolean;
+}) {
   return jwt.sign(
     {
-      _id: this._id,
+      _id: this._id.toString(),
       name: this.name,
       email: this.email,
+      isAdmin: Boolean(this.isAdmin),
     },
     process.env.SECRET_ACCESS_TOKEN!,
     {
       expiresIn: "15m",
     },
   );
-};
+}
+
+User_schema.methods.genAccessToken = genAccessToken;
 
 User_schema.methods.genRefreshToken = function () {
   return jwt.sign(
@@ -97,6 +105,12 @@ User_schema.methods.isPasswordCorrect = async function (password: string) {
   return bcrypt.compare(password, this.password);
 };
 
-const User = mongoose.models.users || mongoose.model("users", User_schema);
+const existingUser = mongoose.models.users;
+if (existingUser) {
+  existingUser.schema.methods.genAccessToken = genAccessToken;
+  existingUser.prototype.genAccessToken = genAccessToken;
+}
+
+const User = existingUser || mongoose.model("users", User_schema);
 
 export { User, User_schema };

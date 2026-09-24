@@ -1,38 +1,47 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { readAccessToken } from "@/Helper/userFromToken";
 import { User } from "@/Model/Users";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import { NextResponse } from "next/server";
 
-
 export async function POST(request: Request) {
-  connectDB();
   try {
+    await connectDB();
     const body = await request.json();
-    const { email } = body;
+    const email = String(body.email ?? "").trim().toLowerCase();
+    const password = String(body.password ?? "");
 
-    // Find user
-    const user = await User.findOne({ email }).select("_id");
-
-    if (!user) {
-      return NextResponse.json(new ApiError(401, "User does not exist"), {
+    const user = await User.findOne({ email });
+    if (!user || !(await user.isPasswordCorrect(password))) {
+      return NextResponse.json(new ApiError(401, "Email or password is incorrect"), {
         status: 401,
       });
     }
 
-    // Generate tokens
+    const isAdmin = Boolean(user.isAdmin);
     const accessToken = user.genAccessToken();
+    readAccessToken(accessToken);
+    user.accessToken = accessToken;
+    await user.save();
 
-    // Create response
     const response = NextResponse.json(
-      new ApiResponce(200, null, "Logged in successfully"),
+      new ApiResponce(
+        200,
+        {
+          _id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          isAdmin,
+        },
+        "Logged in successfully",
+      ),
       { status: 200 },
     );
 
-    // Set access token cookie
     response.cookies.set("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // ✅ Only secure in production
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 15,
@@ -40,8 +49,6 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error: any) {
-    console.error(error);
-
     return NextResponse.json(
       new ApiError(500, error.message || "Internal Server Error"),
       { status: 500 },

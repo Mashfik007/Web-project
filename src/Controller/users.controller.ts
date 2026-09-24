@@ -42,16 +42,10 @@ export async function login_user(form: loginForm) {
       body: JSON.stringify(form),
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.log(data.message);
-      return;
-    }
-
-    console.log(data.message);
+    return await res.json();
   } catch (error) {
     console.error(error);
+    return null;
   }
 }
 

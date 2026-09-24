@@ -7,7 +7,7 @@ import AppDrawer, {
 } from "@/Components/Sidebar/AppDrawer/AppDrawer";
 import SidebarProfile from "@/Components/Sidebar/SidebarProfile/SidebarProfile";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 const DRAWER_ID = "user-drawer";
@@ -129,10 +129,18 @@ const navItems: NavItem[] = [
   },
 ];
 
-export default function SideBar({ children }: { children: React.ReactNode }) {
-  const params = useParams();
+export default function SideBar({
+  children,
+  userId,
+  name,
+  initials,
+}: {
+  children: React.ReactNode;
+  userId: string;
+  name: string;
+  initials: string;
+}) {
   const pathname = usePathname();
-  const userId = params.id as string;
   const activeItem = navItems.find((item) => item.match(pathname, userId));
 
   return (
@@ -161,7 +169,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
               );
             })}
           </ul>
-          <SidebarProfile userId={userId} />
+          <SidebarProfile userId={userId} name={name} initials={initials} />
         </>
       }
     >

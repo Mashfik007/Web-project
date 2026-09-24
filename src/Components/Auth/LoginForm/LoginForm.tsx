@@ -35,13 +35,19 @@ export default function LoginForm() {
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     try {
       const res = await login_user(data);
-      console.log(res);
-
-      if (true) {
-        router.push("/profile/123");
+      const id = res?.data?._id;
+      const isAdmin = res?.data?.isAdmin === true;
+      if (!res?.success || !id) {
+        setError("email", {
+          message: res?.message || "Email or password is incorrect",
+        });
+        return;
       }
-    } catch (error) {
-      setError("email", { message: "The email is already taken" });
+
+      router.push(isAdmin ? `/admin/${id}` : `/user/${id}`);
+      router.refresh();
+    } catch {
+      setError("email", { message: "Could not reach the server." });
     }
   };
 

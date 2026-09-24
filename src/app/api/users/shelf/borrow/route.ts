@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { requireUserId } from "@/Helper/userFromToken";
 import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
 import { ShelfLoan } from "@/Model/ShelfLoans";
@@ -19,7 +20,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { userId, bookId, returnDate } = parsed.data;
+    const session = await requireUserId();
+    if (session instanceof Response) return session;
+    const userId = session;
+    const { bookId, returnDate } = parsed.data;
     if (!mongoose.Types.ObjectId.isValid(bookId)) {
       return new Response(JSON.stringify(new ApiError(400, "Invalid book id")), {
         status: 400,

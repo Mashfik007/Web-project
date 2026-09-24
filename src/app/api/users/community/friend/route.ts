@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { requireUserId } from "@/Helper/userFromToken";
 import { FriendRequest } from "@/Model/FriendRequests";
 import { User } from "@/Model/Users";
 import { FriendAction_schema } from "@/Shchema/shelf";
@@ -18,7 +19,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { userId, targetId, action } = parsed.data;
+    const session = await requireUserId();
+    if (session instanceof Response) return session;
+    const userId = session;
+    const { targetId, action } = parsed.data;
     if (userId === targetId) {
       return new Response(
         JSON.stringify(new ApiError(400, "You cannot send a request to yourself")),

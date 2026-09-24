@@ -1,16 +1,12 @@
+import { requireUserId } from "@/Helper/userFromToken";
 import { getMyShelf } from "@/data/getMyShelf";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const userId = new URL(request.url).searchParams.get("userId")?.trim();
-    if (!userId) {
-      return new Response(JSON.stringify(new ApiError(400, "User is required")), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    const userId = await requireUserId();
+    if (userId instanceof Response) return userId;
 
     const shelf = await getMyShelf(userId);
     return new Response(JSON.stringify(new ApiResponce(200, shelf, "Shelf found")), {

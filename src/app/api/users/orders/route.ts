@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { requireUserId } from "@/Helper/userFromToken";
 import { Book } from "@/Model/Books";
 import { Order } from "@/Model/Orders";
 import ApiError from "@/Utils/Api_error";
@@ -16,8 +17,10 @@ function orderNumber() {
 
 export async function POST(request: Request) {
   try {
+    const session = await requireUserId();
+    if (session instanceof Response) return session;
+    const userId = session;
     const body = await request.json();
-    const userId = String(body.userId ?? "").trim();
     const bookId = String(body.bookId ?? "").trim();
     const quantity = Number(body.quantity);
     const fullName = String(body.fullName ?? "").trim();
@@ -27,7 +30,7 @@ export async function POST(request: Request) {
     const paymentMethod = String(body.paymentMethod ?? "").trim();
     const transactionId = String(body.transactionId ?? "").trim();
 
-    if (!userId || !mongoose.Types.ObjectId.isValid(bookId)) {
+    if (!mongoose.Types.ObjectId.isValid(bookId)) {
       return new Response(JSON.stringify(new ApiError(400, "Choose a valid book")), {
         status: 400,
         headers: { "Content-Type": "application/json" },
