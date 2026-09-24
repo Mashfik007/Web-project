@@ -33,6 +33,7 @@ export type PaymentMethod = {
 };
 
 export type CheckoutData = {
+  userId: string;
   title: string;
   subtitle: string;
   book: CheckoutBook;

@@ -10,6 +10,7 @@ type StoredRequest = {
   requested: string;
   expectedReturn: string;
   status: AdminBorrowStatus;
+  reason?: string;
 };
 
 const avatarClasses = [
@@ -53,5 +54,6 @@ export async function getAdminBorrowRequests(
     requested: request.requested,
     expectedReturn: request.expectedReturn,
     status: request.status,
+    reason: request.reason ?? "",
   }));
 }

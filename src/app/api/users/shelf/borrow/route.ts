@@ -1,6 +1,8 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { Book } from "@/Model/Books";
+import { BorrowRequest } from "@/Model/BorrowRequests";
 import { ShelfLoan } from "@/Model/ShelfLoans";
+import { memberBorrowBlock } from "@/data/libraryLink";
 import { recordBorrowRequest } from "@/data/recordBorrowRequest";
 import { ShelfBookAction_schema } from "@/Shchema/shelf";
 import ApiError from "@/Utils/Api_error";
@@ -35,6 +37,14 @@ export async function POST(request: Request) {
     }
 
     await connectDB();
+    const blocked = await memberBorrowBlock(userId);
+    if (blocked) {
+      return new Response(JSON.stringify(new ApiError(400, blocked)), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const book = await Book.findById(bookId);
     if (!book) {
       return new Response(JSON.stringify(new ApiError(404, "Book not found")), {
@@ -50,39 +60,46 @@ export async function POST(request: Request) {
       });
     }
 
-    const existing = await ShelfLoan.findOne({ userId, bookId });
-    if (existing?.status === "reading") {
+    const pending = await BorrowRequest.findOne({
+      userId,
+      bookId,
+      status: "Pending",
+    });
+    if (pending) {
+      return new Response(
+        JSON.stringify(new ApiError(400, "You already requested this book")),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    const approved = await BorrowRequest.findOne({
+      userId,
+      bookId,
+      status: "Approved",
+    });
+    const reading = await ShelfLoan.findOne({ userId, bookId, status: "reading" });
+    if (approved && reading) {
       return new Response(
         JSON.stringify(new ApiError(400, "This book is already on your shelf")),
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    book.availability.current -= 1;
-    await book.save();
-
-    const loan = existing
-      ? existing
-      : new ShelfLoan({
-          userId,
-          bookId,
-          status: "reading",
-          currentPage: 0,
-        });
-
-    loan.status = "reading";
-    loan.dueDate = dueDate;
-    loan.returnedAt = null;
-    await loan.save();
     await recordBorrowRequest({
       userId,
       bookId,
       dueDate,
-      createdAt: loan.createdAt,
+      createdAt: new Date(),
     });
 
     return new Response(
-      JSON.stringify(new ApiResponce(201, null, "Book added to your shelf")),
+      JSON.stringify(
+        new ApiResponce(
+          201,
+          null,
+          "Request sent. It appears under Currently Reading after the library approves it.",
+        ),
+      ),
       { status: 201, headers: { "Content-Type": "application/json" } },
     );
   } catch (error: any) {

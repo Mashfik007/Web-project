@@ -67,6 +67,11 @@ export default function RequestCard({
               ? ` · return ${request.expectedReturn}`
               : ""}
           </p>
+          {request.status === "declined" && request.reason ? (
+            <p className="mt-2 text-sm text-red-600">
+              Cancelled: {request.reason}
+            </p>
+          ) : null}
         </div>
 
         <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl">

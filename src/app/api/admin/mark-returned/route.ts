@@ -1,4 +1,5 @@
 import { daysAfter } from "@/data/getAdminReturns";
+import { returnShelfCopy } from "@/data/libraryLink";
 import connectDB from "@/dbConfig/dbConfig";
 import { Fine } from "@/Model/Fines";
 import { Reservation } from "@/Model/Reservations";
@@ -50,6 +51,11 @@ export async function POST(request: Request) {
     record.fine = daysOverdue * finePerDay;
     record.status = "Returned";
     await record.save();
+    await returnShelfCopy({
+      userId: record.userId,
+      bookId: record.bookId,
+      bookTitle: record.book,
+    });
 
     await Reservation.findOneAndUpdate(
       { book: record.book, status: "Waiting" },

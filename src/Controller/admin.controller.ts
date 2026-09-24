@@ -275,8 +275,12 @@ export async function restoreUser(id: string) {
     return postCategory("/api/admin/restore-users", { id });
 }
 
-export async function decideBorrowRequest(id: string, action: "approve" | "reject") {
-    return postCategory("/api/admin/borrow-request-status", { id, action });
+export async function decideBorrowRequest(
+    id: string,
+    action: "approve" | "reject",
+    reason?: string,
+) {
+    return postCategory("/api/admin/borrow-request-status", { id, action, reason });
 }
 
 export async function markReturned(id: string, returnDate: string) {

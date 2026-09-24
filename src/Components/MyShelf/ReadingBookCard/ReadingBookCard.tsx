@@ -157,11 +157,24 @@ export default function ReadingBookCard({
               </div>
             </>
           ) : (
-            <p className="mt-3 text-xs text-slate-500">
-              {book.currentPage >= book.pages
-                ? `Completed · returned ${book.dueDate}`
-                : "On your wishlist"}
-            </p>
+            <div className="mt-3">
+              <p className="text-xs text-slate-500">
+                {book.currentPage >= book.pages && book.pages > 0
+                  ? `Completed · ${book.dueDate}`
+                  : book.checkedOut
+                    ? "Returned to the library"
+                    : "On your wishlist"}
+              </p>
+              {book.checkedOut ? (
+                <button
+                  type="button"
+                  onClick={() => openModal(returnId)}
+                  className="btn btn-ghost btn-sm mt-3"
+                >
+                  Return
+                </button>
+              ) : null}
+            </div>
           )}
         </div>
       </div>

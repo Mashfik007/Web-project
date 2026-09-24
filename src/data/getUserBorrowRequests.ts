@@ -13,6 +13,7 @@ type StoredRequest = {
   requested: string;
   expectedReturn: string;
   status: "Pending" | "Approved" | "Rejected";
+  reason?: string;
 };
 
 const statusMap: Record<StoredRequest["status"], BorrowRequestStatus> = {
@@ -56,6 +57,7 @@ export async function getUserBorrowRequests(
     status: statusMap[record.status] ?? "pending",
     requestedAt: record.requested,
     expectedReturn: record.expectedReturn,
+    reason: record.reason ?? "",
   }));
 
   const count = (status: BorrowRequestStatus | "all") =>

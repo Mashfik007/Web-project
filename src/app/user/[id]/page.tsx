@@ -1,6 +1,8 @@
 import DashboardPage from "@/Components/Dashboard/DashboardPage/DashboardPage";
 import { getDashboardData } from "@/data/getDashboardData";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }

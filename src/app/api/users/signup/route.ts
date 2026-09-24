@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { syncLibraryMember } from "@/data/libraryLink";
 import { User } from "@/Model/Users";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
@@ -27,6 +28,11 @@ export  async function POST(request: Request) {
     user.forgotPassToken = user.genforgotPassToken();
 
     await user.save();
+    await syncLibraryMember({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+    });
 
     return new Response(
       JSON.stringify(new ApiResponce(201, null, "Saved user successfully")),

@@ -11,9 +11,7 @@ interface OrderListProps {
 }
 
 export default function OrderList({ filters, orders }: OrderListProps) {
-  const [activeStatus, setActiveStatus] = useState<OrderStatus | "all">(
-    "in-transit",
-  );
+  const [activeStatus, setActiveStatus] = useState<OrderStatus | "all">("all");
 
   const visibleOrders = useMemo(
     () =>

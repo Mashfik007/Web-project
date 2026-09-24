@@ -35,6 +35,7 @@ export type ShelfBook = {
   dueDate: string;
   daysLeft: number;
   blindDate?: boolean;
+  checkedOut?: boolean;
 };
 
 export type DueDateItem = {

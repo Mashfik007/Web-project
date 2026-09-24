@@ -16,6 +16,11 @@ export const FollowAction_schema = ShelfUser_schema.extend({
   targetId: z.string().min(1, "member is required"),
 });
 
+export const FriendAction_schema = ShelfUser_schema.extend({
+  targetId: z.string().min(1, "member is required"),
+  action: z.enum(["request", "accept", "decline", "cancel"]),
+});
+
 export const ShelfBookAction_schema = ShelfUser_schema.extend({
   bookId: z.string().min(1, "book is required"),
   returnDate: z.string().optional(),

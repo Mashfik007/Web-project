@@ -1,5 +1,6 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { Book } from "@/Model/Books";
+import { BorrowRequest } from "@/Model/BorrowRequests";
 import { Follow } from "@/Model/Follows";
 import { ReadingActivity } from "@/Model/ReadingActivities";
 import { ShelfLoan } from "@/Model/ShelfLoans";
@@ -22,6 +23,7 @@ type LoanRecord = {
   dueDate?: Date | null;
   returnedAt?: Date | null;
   blindDate?: boolean;
+  updatedAt?: Date;
 };
 
 type StoredBook = {
@@ -88,7 +90,12 @@ function toShelfBook(loan: LoanRecord, book: StoredBook): ShelfBook {
     dueDate: formatDue(loan.returnedAt ?? loan.dueDate),
     daysLeft: loan.status === "reading" ? daysUntil(loan.dueDate) : 0,
     blindDate: Boolean(loan.blindDate) && loan.status !== "reading",
+    checkedOut: loan.status === "reading",
   };
+}
+
+function finishedBook(book: ShelfBook) {
+  return book.pages > 0 && book.currentPage >= book.pages;
 }
 
 function activityLevels(logs: ActivityRecord[]) {
@@ -158,6 +165,18 @@ export async function getMyShelf(userId: string): Promise<MyShelfData> {
       >(),
     ]);
 
+  const approvedRequests = await BorrowRequest.find({
+    userId,
+    status: "Approved",
+  })
+    .select("bookId")
+    .lean<{ bookId?: string }[]>();
+  const approvedBookIds = new Set(
+    approvedRequests
+      .map((request) => request.bookId)
+      .filter((id): id is string => Boolean(id)),
+  );
+
   const bookIds = loans
     .map((loan) => loan.bookId)
     .filter((id) => mongoose.Types.ObjectId.isValid(id));
@@ -170,19 +189,26 @@ export async function getMyShelf(userId: string): Promise<MyShelfData> {
   });
 
   const currentlyReading = shelfBooks
-    .filter((item) => item.loan.status === "reading")
+    .filter(
+      (item) =>
+        item.loan.status === "reading" &&
+        approvedBookIds.has(item.loan.bookId) &&
+        !finishedBook(item.book),
+    )
     .map((item) => item.book);
   const wantToRead = shelfBooks
     .filter((item) => item.loan.status === "wishlist")
     .map((item) => item.book);
   const returned = shelfBooks.filter((item) => item.loan.status === "returned");
-  const completed = returned
-    .filter((item) => item.book.currentPage >= item.book.pages && item.book.pages > 0)
+  const completed = shelfBooks
+    .filter((item) => item.loan.status !== "wishlist" && finishedBook(item.book))
     .map((item) => item.book);
   const borrowedHistory = returned.map((item) => item.book);
 
   const year = new Date().getFullYear();
-  const booksThisYear = returned.filter((item) => {
+  const booksThisYear = shelfBooks.filter((item) => {
+    if (item.loan.status === "wishlist" || !finishedBook(item.book)) return false;
+    if (item.loan.status === "reading") return true;
     const returnedAt = item.loan.returnedAt ? new Date(item.loan.returnedAt) : null;
     return returnedAt?.getFullYear() === year;
   }).length;

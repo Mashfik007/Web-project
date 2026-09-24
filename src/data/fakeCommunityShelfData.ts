@@ -4,6 +4,7 @@ const midnightLibraryCover =
   "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=300&q=80";
 
 export const fakeCommunityShelfData: CommunityShelfData = {
+  viewerId: "demo",
   header: {
     brand: "FOLIO NETWORK",
     title: "Community Shelf",
@@ -42,6 +43,10 @@ export const fakeCommunityShelfData: CommunityShelfData = {
       avatarColor: "bg-sky-500",
       location: "Riverside District",
       isFriend: true,
+      friendStatus: "friends",
+      streakDays: 4,
+      readingNow: [],
+      finished: [],
       booksBorrowed: 41,
       currentlyReading: {
         title: "The Midnight Library",
@@ -56,6 +61,10 @@ export const fakeCommunityShelfData: CommunityShelfData = {
       avatarColor: "bg-violet-500",
       location: "Westside Branch",
       isFriend: true,
+      friendStatus: "friends",
+      streakDays: 4,
+      readingNow: [],
+      finished: [],
       booksBorrowed: 38,
       currentlyReading: {
         title: "Project Hail Mary",
@@ -71,6 +80,10 @@ export const fakeCommunityShelfData: CommunityShelfData = {
       avatarColor: "bg-emerald-500",
       location: "Northside Library",
       isFriend: true,
+      friendStatus: "friends",
+      streakDays: 4,
+      readingNow: [],
+      finished: [],
       booksBorrowed: 29,
       currentlyReading: {
         title: "Klara and the Sun",
@@ -86,6 +99,10 @@ export const fakeCommunityShelfData: CommunityShelfData = {
       avatarColor: "bg-amber-500",
       location: "Downtown Hub",
       isFriend: true,
+      friendStatus: "friends",
+      streakDays: 4,
+      readingNow: [],
+      finished: [],
       booksBorrowed: 52,
       currentlyReading: {
         title: "Piranesi",
@@ -101,6 +118,10 @@ export const fakeCommunityShelfData: CommunityShelfData = {
       avatarColor: "bg-rose-500",
       location: "Riverside District",
       isFriend: true,
+      friendStatus: "friends",
+      streakDays: 4,
+      readingNow: [],
+      finished: [],
       booksBorrowed: 33,
       currentlyReading: {
         title: "The Vanishing Half",
@@ -116,6 +137,10 @@ export const fakeCommunityShelfData: CommunityShelfData = {
       avatarColor: "bg-indigo-500",
       location: "Westside Branch",
       isFriend: true,
+      friendStatus: "friends",
+      streakDays: 4,
+      readingNow: [],
+      finished: [],
       booksBorrowed: 27,
       currentlyReading: {
         title: "Lessons in Chemistry",

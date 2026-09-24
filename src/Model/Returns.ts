@@ -46,13 +46,28 @@ const Return_schema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    userId: {
+      type: String,
+      trim: true,
+    },
+    bookId: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,
   },
 );
 
-const ReturnRecord =
-  mongoose.models.returns || mongoose.model("returns", Return_schema);
+const existingReturn = mongoose.models.returns;
+if (existingReturn && !existingReturn.schema.path("userId")) {
+  existingReturn.schema.add({
+    userId: { type: String, trim: true },
+    bookId: { type: String, trim: true },
+  });
+}
+
+const ReturnRecord = existingReturn || mongoose.model("returns", Return_schema);
 
 export { ReturnRecord, Return_schema };

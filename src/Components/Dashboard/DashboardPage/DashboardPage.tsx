@@ -18,7 +18,7 @@ export default function DashboardPage({ dashboard }: DashboardPageProps) {
 
       <div className="grid w-full grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-4">
-          <ReadingTabs />
+          <ReadingTabs reading={dashboard.reading} />
           <RecentActivity />
         </div>
 

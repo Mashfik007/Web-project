@@ -10,6 +10,7 @@ export type IncomingBorrowRequest = {
   status: BorrowRequestStatus;
   requestedAt: string;
   expectedReturn?: string;
+  reason?: string;
 };
 
 export type BorrowRequestFilter = {

@@ -5,6 +5,14 @@ export type NetworkStat = {
   theme: "blue" | "purple" | "green";
 };
 
+export type CommunityBook = {
+  title: string;
+  author: string;
+  coverImage: string;
+};
+
+export type FriendStatus = "none" | "outgoing" | "incoming" | "friends";
+
 export type CommunityMember = {
   id: string;
   name: string;
@@ -12,12 +20,12 @@ export type CommunityMember = {
   avatarColor: string;
   location: string;
   isFriend: boolean;
+  friendStatus: FriendStatus;
+  streakDays: number;
   booksBorrowed: number;
-  currentlyReading: {
-    title: string;
-    author: string;
-    coverImage: string;
-  };
+  readingNow: CommunityBook[];
+  finished: CommunityBook[];
+  currentlyReading: CommunityBook;
 };
 
 export type CommunityBorrowStep = "pending" | "approved" | "on-loan" | "returned";
@@ -58,6 +66,7 @@ export type CommunityShelfHeader = {
 };
 
 export type CommunityShelfData = {
+  viewerId: string;
   header: CommunityShelfHeader;
   stats: NetworkStat[];
   tabs: CommunityTab[];

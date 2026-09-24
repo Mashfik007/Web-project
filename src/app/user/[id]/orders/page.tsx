@@ -1,5 +1,7 @@
 import MyOrdersPage from "@/Components/MyOrders/MyOrdersPage/MyOrdersPage";
-import { getMyOrdersData } from "@/data/fakeMyOrdersData";
+import { getMyOrders } from "@/data/getMyOrders";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -7,7 +9,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
-  const myOrders = await getMyOrdersData(id);
+  const myOrders = await getMyOrders(id);
 
   return <MyOrdersPage myOrders={myOrders} />;
 }

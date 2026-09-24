@@ -35,14 +35,31 @@ const BorrowRequest_schema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    reason: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    decidedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
   },
 );
 
+const existingBorrowRequest = mongoose.models.borrowRequests;
+if (existingBorrowRequest && !existingBorrowRequest.schema.path("reason")) {
+  existingBorrowRequest.schema.add({
+    reason: { type: String, trim: true, default: "" },
+    decidedAt: { type: Date, default: null },
+  });
+}
+
 const BorrowRequest =
-  mongoose.models.borrowRequests ||
+  existingBorrowRequest ||
   mongoose.model("borrowRequests", BorrowRequest_schema);
 
 export { BorrowRequest, BorrowRequest_schema };

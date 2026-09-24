@@ -9,6 +9,7 @@ export type AdminBorrowRequest = {
   requested: string;
   expectedReturn: string;
   status: AdminBorrowStatus;
+  reason: string;
 };
 
 export type AdminReturnStatus = "Returned" | "Overdue" | "Due Today" | "Active";

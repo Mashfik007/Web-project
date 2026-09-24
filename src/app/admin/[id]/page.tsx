@@ -1,6 +1,8 @@
 import AdminDashboardPage from "@/Components/AdminDashboard/AdminDashboardPage/AdminDashboardPage";
 import { getAdminDashboardData } from "@/data/getAdminDashboardData";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }

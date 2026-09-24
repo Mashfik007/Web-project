@@ -48,6 +48,7 @@ export async function POST(request: Request) {
     }
 
     loan.currentPage = page;
+    const finished = pages > 0 && page >= pages;
     await loan.save();
     await ReadingActivity.create({
       userId,
@@ -59,7 +60,15 @@ export async function POST(request: Request) {
     });
 
     return new Response(
-      JSON.stringify(new ApiResponce(201, { hours: 1, page }, "Logged 1 hour of reading")),
+      JSON.stringify(
+        new ApiResponce(
+          201,
+          { hours: 1, page, finished },
+          finished
+            ? "You finished this book. It is now in Completed."
+            : "Logged 1 hour of reading",
+        ),
+      ),
       { status: 201, headers: { "Content-Type": "application/json" } },
     );
   } catch (error: any) {

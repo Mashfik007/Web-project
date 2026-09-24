@@ -40,6 +40,7 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
     transactionId: "",
     paymentPhone: "",
   });
+  const [orderError, setOrderError] = useState("");
 
   const orderQuantity =
     step === "details" ? summaryQuantity : deliveryForm.quantity;
@@ -50,15 +51,37 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
     setStep("payment");
   }
 
-  function handlePaymentSubmit(data: PaymentFormData) {
+  async function handlePaymentSubmit(data: PaymentFormData) {
     setPaymentForm(data);
+    setOrderError("");
 
     const paymentMethod =
       checkout.paymentMethods.find((method) => method.id === data.methodId)
         ?.name ?? data.methodId;
 
+    const response = await fetch("/api/users/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: checkout.userId,
+        bookId: String(checkout.book.id),
+        quantity: deliveryForm.quantity,
+        fullName: deliveryForm.fullName,
+        phone: deliveryForm.phone,
+        address: deliveryForm.address,
+        city: deliveryForm.city,
+        paymentMethod,
+        transactionId: data.transactionId,
+      }),
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      setOrderError(payload.message || "Could not place the order");
+      return;
+    }
+
     setPlacedOrder({
-      orderId: generateOrderId(),
+      orderId: payload.data?.orderNumber || generateOrderId(),
       bookTitle: checkout.book.title,
       totalPaid: calculateCheckoutTotal(
         checkout.book,
@@ -112,9 +135,14 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
                 paymentMethods={checkout.paymentMethods}
                 defaultValues={paymentForm}
                 onBack={() => setStep("details")}
-                onSubmit={handlePaymentSubmit}
+                onSubmit={(data) => {
+                  void handlePaymentSubmit(data);
+                }}
               />
             )}
+            {orderError ? (
+              <p className="text-sm text-red-600">{orderError}</p>
+            ) : null}
           </div>
 
           <aside className="space-y-4">

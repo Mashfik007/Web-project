@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { recordMemberBorrow } from "@/data/libraryLink";
 import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
 import { Reservation } from "@/Model/Reservations";
@@ -11,7 +12,8 @@ import mongoose from "mongoose";
 export async function POST(request: Request) {
   try {
     await connectDB();
-    const { id, action } = await request.json();
+    const { id, action, reason } = await request.json();
+    const rejectionReason = String(reason ?? "").trim();
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return new Response(JSON.stringify(new ApiError(400, "Invalid request id")), {
@@ -42,7 +44,18 @@ export async function POST(request: Request) {
       );
     }
 
+    if (action === "reject" && !rejectionReason) {
+      return new Response(
+        JSON.stringify(new ApiError(400, "A reason is required to reject this request")),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     borrowRequest.status = action === "approve" ? "Approved" : "Rejected";
+    borrowRequest.decidedAt = new Date();
+    if (action === "reject") {
+      borrowRequest.reason = rejectionReason;
+    }
     await borrowRequest.save();
 
     if (borrowRequest.status === "Rejected") {
@@ -78,6 +91,46 @@ export async function POST(request: Request) {
     }
 
     if (borrowRequest.status === "Approved") {
+      const book = await Book.findById(borrowRequest.bookId);
+      const loan = borrowRequest.userId
+        ? await ShelfLoan.findOne({
+            userId: borrowRequest.userId,
+            bookId: borrowRequest.bookId,
+          })
+        : null;
+      const alreadyReading = loan?.status === "reading";
+
+      if (!alreadyReading && (book?.availability?.current ?? 0) <= 0) {
+        borrowRequest.status = "Pending";
+        borrowRequest.decidedAt = null;
+        await borrowRequest.save();
+        return new Response(
+          JSON.stringify(new ApiError(400, "No copies are available")),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      if (book && !alreadyReading && book.availability) {
+        book.availability.current -= 1;
+        await book.save();
+      }
+
+      const dueDate = new Date(borrowRequest.expectedReturn);
+      const shelfLoan =
+        loan ??
+        new ShelfLoan({
+          userId: borrowRequest.userId,
+          bookId: borrowRequest.bookId,
+          currentPage: 0,
+        });
+      shelfLoan.status = "reading";
+      shelfLoan.dueDate = Number.isNaN(dueDate.getTime()) ? new Date() : dueDate;
+      shelfLoan.returnedAt = null;
+      await shelfLoan.save();
+      if (!alreadyReading && borrowRequest.userId) {
+        await recordMemberBorrow(borrowRequest.userId);
+      }
+
       const existingReturn = await ReturnRecord.findOne({
         borrowRequestId: borrowRequest._id,
       });
@@ -105,6 +158,8 @@ export async function POST(request: Request) {
             dueDate: borrowRequest.expectedReturn,
             status: "Active",
             borrowRequestId: borrowRequest._id,
+            userId: borrowRequest.userId,
+            bookId: borrowRequest.bookId,
           });
         }
       }

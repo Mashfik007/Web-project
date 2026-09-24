@@ -13,7 +13,10 @@ import MemberCell from "@/Components/AdminOps/MemberCell/MemberCell";
 import TextAction from "@/Components/AdminOps/TextAction/TextAction";
 import {
   ConfirmModal,
+  FormField,
+  FormModal,
   StatusModal,
+  formHasValues,
   openModal,
   useFeedback,
 } from "@/Components/Modal";
@@ -117,7 +120,7 @@ export default function BorrowRequestsPage({
                     tone="red"
                     onClick={() => {
                       setConfirm({ item, action: "reject" });
-                      openModal("admin-borrow-confirm");
+                      openModal("admin-borrow-reject");
                     }}
                   />
                 </div>
@@ -126,7 +129,9 @@ export default function BorrowRequestsPage({
                   onClick={() =>
                     feedback.success(
                       item.book,
-                      `${item.member} · ${item.status} · requested ${item.requested}`,
+                      `${item.member} · ${item.status} · requested ${item.requested}${
+                        item.reason ? ` · ${item.reason}` : ""
+                      }`,
                     )
                   }
                 />
@@ -138,43 +143,74 @@ export default function BorrowRequestsPage({
 
       <ConfirmModal
         id="admin-borrow-confirm"
-        title={
-          confirm?.action === "approve" ? "Approve request" : "Reject request"
-        }
+        title="Approve request"
         message={
           confirm
-            ? `${confirm.action === "approve" ? "Approve" : "Reject"} ${confirm.item.member}'s request for "${confirm.item.book}"?`
+            ? `Approve ${confirm.item.member}'s request for "${confirm.item.book}"? It will show under Currently Reading.`
             : ""
         }
-        confirmLabel={confirm?.action === "approve" ? "Approve" : "Reject"}
-        tone={confirm?.action === "approve" ? "success" : "danger"}
+        confirmLabel="Approve"
+        tone="success"
         onConfirm={() => {
           const current = confirm;
           setConfirm(null);
           if (!current) return;
 
-          void decideBorrowRequest(current.item.id, current.action).then(
-            (result) => {
-              if (!result.ok) {
-                feedback.failed(
-                  current.action === "approve"
-                    ? "Could not approve request"
-                    : "Could not reject request",
-                  result.message,
-                );
-                return;
-              }
-              feedback.success(
-                current.action === "approve"
-                  ? "Request approved"
-                  : "Request rejected",
-                result.message,
-              );
-              router.refresh();
-            },
-          );
+          void decideBorrowRequest(current.item.id, "approve").then((result) => {
+            if (!result.ok) {
+              feedback.failed("Could not approve request", result.message);
+              return;
+            }
+            feedback.success("Request approved", result.message);
+            router.refresh();
+          });
         }}
       />
+
+      <FormModal
+        id="admin-borrow-reject"
+        title="Reject request"
+        submitLabel="Reject"
+        onSubmit={async (form) => {
+          if (!formHasValues(form, ["reason"])) {
+            feedback.failed(
+              "Could not reject request",
+              "Write a reason before rejecting.",
+            );
+            return;
+          }
+
+          const current = confirm;
+          setConfirm(null);
+          if (!current) return;
+
+          const reason = String(new FormData(form).get("reason") ?? "").trim();
+          const result = await decideBorrowRequest(
+            current.item.id,
+            "reject",
+            reason,
+          );
+          if (!result.ok) {
+            feedback.failed("Could not reject request", result.message);
+            return;
+          }
+          feedback.success("Request rejected", result.message);
+          router.refresh();
+        }}
+      >
+        <p className="text-sm text-slate-500">
+          {confirm
+            ? `Reject ${confirm.item.member}'s request for "${confirm.item.book}".`
+            : "This book will not be added to Currently Reading."}
+        </p>
+        <FormField
+          label="Reason"
+          name="reason"
+          as="textarea"
+          placeholder="Why is this request being rejected?"
+          required
+        />
+      </FormModal>
 
       <StatusModal
         id={feedback.id}

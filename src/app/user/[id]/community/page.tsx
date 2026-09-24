@@ -1,5 +1,7 @@
 import CommunityShelfPage from "@/Components/CommunityShelf/CommunityShelfPage/CommunityShelfPage";
-import { getCommunityShelfData } from "@/data/fakeCommunityShelfData";
+import { getCommunityShelf } from "@/data/getCommunityShelf";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -7,7 +9,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
-  const community = await getCommunityShelfData(id);
+  const community = await getCommunityShelf(id);
 
   return <CommunityShelfPage community={community} />;
 }
