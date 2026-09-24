@@ -17,6 +17,12 @@ type StoredBook = {
   };
 };
 
+export type BookFilters = {
+  author?: string;
+  category?: string;
+  available?: string;
+};
+
 const coverByGenre: Record<string, string> = {
   Fiction: "bg-sky-100 text-sky-600",
   History: "bg-emerald-100 text-emerald-600",
@@ -25,10 +31,39 @@ const coverByGenre: Record<string, string> = {
   Science: "bg-blue-100 text-blue-600",
 };
 
-export async function getBooksData(_adminId: string): Promise<AdminBook[]> {
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export async function getBooksData(
+  _adminId: string,
+  filters: BookFilters = {},
+): Promise<AdminBook[]> {
   await connectDB();
 
-  const books = await Book.find()
+  const query: Record<string, unknown> = {};
+  const author = filters.author?.trim();
+  const category = filters.category?.trim();
+  const available = filters.available?.trim().toLowerCase();
+
+  if (author && author.toLowerCase() !== "all") {
+    const pattern = new RegExp(escapeRegex(author), "i");
+    query.$or = [{ title: pattern }, { author: pattern }];
+  }
+
+  if (category && category.toLowerCase() !== "all") {
+    query["metadata.genre"] = new RegExp(`^${escapeRegex(category)}$`, "i");
+  }
+
+  if (available === "available") {
+    query["availability.current"] = { $gt: 0 };
+  } else if (available === "on loan") {
+    query["availability.current"] = { $lte: 0 };
+  } else if (available === "reserved") {
+    query["availability.current"] = { $lt: 0 };
+  }
+
+  const books = await Book.find(query)
     .sort({ createdAt: -1 })
     .lean<StoredBook[]>();
 

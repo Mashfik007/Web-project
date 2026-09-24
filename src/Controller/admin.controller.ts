@@ -3,6 +3,26 @@ import { z } from "zod";
 
 type BookData = z.infer<typeof Book_shema>;
 
+type ServerResult = {
+    ok: boolean;
+    message: string;
+};
+
+async function readResult(res: Response): Promise<ServerResult> {
+    try {
+        const data = await res.json();
+        return {
+            ok: res.ok,
+            message: data.message || (res.ok ? "Saved" : "Request failed"),
+        };
+    } catch {
+        return {
+            ok: false,
+            message: "Could not read the server response.",
+        };
+    }
+}
+
 export async function addBooks(book: BookData, image: File) {
     try {
         const formData = new FormData();
@@ -14,19 +34,92 @@ export async function addBooks(book: BookData, image: File) {
             body: formData,
         });
 
-        const data = await res.json();
+        return readResult(res);
+    } catch (error) {
+        console.error(error);
+        return { ok: false, message: "Could not reach the server." };
+    }
+}
 
+export async function searchBooks(filters: {
+    author?: string;
+    category?: string;
+    available?: string;
+}) {
+    try {
+        const params = new URLSearchParams({
+            author: filters.author?.trim() || "all",
+            category: filters.category?.trim() || "all",
+            available: filters.available?.trim() || "all",
+        });
+
+        const res = await fetch(`/api/admin/books?${params.toString()}`);
+        const data = await res.json();
 
         if (!res.ok) {
             console.log(data.message);
-            return false;
+            return null;
         }
 
-        console.log(data.message);
-        return true;
+        return data.data;
     } catch (error) {
         console.error(error);
-        return false;
+        return null;
+    }
+}
+
+export async function getBook(id: string) {
+    try {
+        const res = await fetch(`/api/admin/books/${id}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+            console.log(data.message);
+            return null;
+        }
+
+        return data.data;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+export async function updateBook(id: string, book: BookData, image?: File) {
+    try {
+        const formData = new FormData();
+        formData.append("id", id);
+        formData.append("book", JSON.stringify(book));
+        if (image && image.size > 0) {
+            formData.append("image", image);
+        }
+
+        const res = await fetch("/api/admin/update-books", {
+            method: "POST",
+            body: formData,
+        });
+
+        return readResult(res);
+    } catch (error) {
+        console.error(error);
+        return { ok: false, message: "Could not reach the server." };
+    }
+}
+
+export async function restoreBook(id: string) {
+    try {
+        const res = await fetch("/api/admin/restore-books", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id }),
+        });
+
+        return readResult(res);
+    } catch (error) {
+        console.error(error);
+        return { ok: false, message: "Could not reach the server." };
     }
 }
 
@@ -40,18 +133,10 @@ export async function deleteBook(id: string) {
             body: JSON.stringify({ id }),
         });
 
-        const data = await res.json();
-
-        if (!res.ok) {
-            console.log(data.message);
-            return false;
-        }
-
-        console.log(data.message);
-        return true;
+        return readResult(res);
     } catch (error) {
         console.error(error);
-        return false;
+        return { ok: false, message: "Could not reach the server." };
     }
 }
 

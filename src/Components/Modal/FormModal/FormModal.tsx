@@ -9,7 +9,7 @@ interface FormModalProps {
   title: string;
   children: ReactNode;
   submitLabel?: string;
-  onSubmit: (form: HTMLFormElement) => void;
+  onSubmit: (form: HTMLFormElement) => void | Promise<void>;
 }
 
 export default function FormModal({
@@ -19,9 +19,9 @@ export default function FormModal({
   submitLabel = "Save",
   onSubmit,
 }: FormModalProps) {
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onSubmit(event.currentTarget);
+    await onSubmit(event.currentTarget);
     closeModal(id);
   }
 

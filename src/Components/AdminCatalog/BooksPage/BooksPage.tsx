@@ -3,7 +3,7 @@
 import Image from "next/image";
 // books catalog for admin — add, edit, delete
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminSearchRow from "@/Components/AdminCatalog/AdminSearchRow/AdminSearchRow";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
@@ -20,7 +20,14 @@ import {
   openModal,
   useFeedback,
 } from "@/Components/Modal";
-import { addBooks, deleteBook } from "@/Controller/admin.controller";
+import {
+  addBooks,
+  deleteBook,
+  getBook,
+  restoreBook,
+  updateBook,
+} from "@/Controller/admin.controller";
+import type { ArchivedBookItem } from "@/data/getArchivedBooks";
 import type { AdminBook } from "@/types/adminCatalog";
 
 const categoryClass: Record<string, string> = {
@@ -134,19 +141,155 @@ function readBookForm(form: HTMLFormElement) {
   };
 }
 
-interface BooksPageProps {
-  books: AdminBook[];
+type EditableBook = {
+  title?: string;
+  author?: string;
+  coverImage?: string;
+  tags?: string[];
+  description?: string;
+  rating?: {
+    score?: number;
+    totalRatings?: number;
+    totalReviews?: number;
+  };
+  price?: {
+    amount?: number;
+    currency?: string;
+  };
+  availability?: {
+    current?: number;
+    total?: number;
+  };
+  metadata?: {
+    publisher?: string;
+    language?: string;
+    series?: string;
+    isbn?: string;
+    published?: number;
+    copiesHeld?: string;
+    pages?: number;
+    genre?: string;
+    deweyDecimal?: string;
+  };
+  community?: {
+    totalOnShelf?: number;
+    members?: {
+      id: string;
+      name: string;
+      initials: string;
+      color: string;
+    }[];
+  };
+  matchScore?: {
+    score?: number;
+    maxScore?: number;
+    label?: string;
+    description?: string;
+  };
+};
+
+function fieldText(value: string | number | undefined | null) {
+  return value == null ? "" : String(value);
 }
 
-export default function BooksPage({ books }: BooksPageProps) {
+interface BooksPageProps {
+  adminId: string;
+  books: AdminBook[];
+  archivedBooks: ArchivedBookItem[];
+  author: string;
+  category: string;
+  available: string;
+}
+
+export default function BooksPage({
+  adminId,
+  books,
+  archivedBooks,
+  author,
+  category,
+  available,
+}: BooksPageProps) {
   const router = useRouter();
   const [formMode, setFormMode] = useState<"add" | "edit" | null>(null);
+  const [formVersion, setFormVersion] = useState(0);
   const [editing, setEditing] = useState<AdminBook | null>(null);
+  const [editingBook, setEditingBook] = useState<EditableBook | null>(null);
   const [deleting, setDeleting] = useState<AdminBook | null>(null);
+  const [search, setSearch] = useState(author.toLowerCase() === "all" ? "" : author);
+  const [archiveId, setArchiveId] = useState("");
   const feedback = useFeedback();
 
+  useEffect(() => {
+    setSearch(author.toLowerCase() === "all" ? "" : author);
+  }, [author]);
+
+  useEffect(() => {
+    const nextAuthor = search.trim() || "all";
+    if (nextAuthor === author) return;
+
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams({
+        author: nextAuthor,
+        category,
+        available,
+      });
+      router.replace(`/admin/${adminId}/books?${params.toString()}`);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search, author, category, available, adminId, router]);
+
+  async function handleRestore() {
+    if (!archiveId) {
+      feedback.failed(
+        "Could not restore book",
+        "Select an archived book first.",
+      );
+      return;
+    }
+
+    const result = await restoreBook(archiveId);
+    if (!result.ok) {
+      feedback.failed("Could not restore book", result.message);
+      return;
+    }
+
+    setArchiveId("");
+    router.refresh();
+    feedback.success("Book restored", result.message);
+  }
+
+  function updateFilters(next: { category?: string; available?: string }) {
+    const params = new URLSearchParams({
+      author,
+      category: next.category ?? category,
+      available: next.available ?? available,
+    });
+    router.replace(`/admin/${adminId}/books?${params.toString()}`);
+  }
+
+  async function openEditor(book: AdminBook) {
+    const details = (await getBook(book.id)) as EditableBook | null;
+    if (!details) {
+      feedback.failed(
+        "Could not open book",
+        "The book details could not be loaded.",
+      );
+      return;
+    }
+    setEditing(book);
+    setEditingBook(details);
+    setFormMode("edit");
+    setFormVersion((version) => version + 1);
+    openModal("book-form");
+  }
+
   async function handleSave(form: HTMLFormElement) {
-    if (!formHasValues(form, bookFormFields)) {
+    const requiredFields =
+      formMode === "edit"
+        ? bookFormFields.filter((name) => name !== "coverImage")
+        : bookFormFields;
+    if (!formHasValues(form, requiredFields)) {
       feedback.failed(
         "Could not save book",
         "Please fill in every field and try again.",
@@ -162,26 +305,53 @@ export default function BooksPage({ books }: BooksPageProps) {
         );
         return;
       }
-      const saved = await addBooks(
+      const result = await addBooks(
         {
           ...book,
           coverImage: book.coverImage.name,
         },
         book.coverImage,
       );
-      if (!saved) {
-        feedback.failed(
-          "Could not save book",
-          "The book could not be saved.",
-        );
+      if (!result.ok) {
+        feedback.failed("Could not save book", result.message);
         return;
       }
       router.refresh();
+      feedback.success("Book added", result.message);
+      return;
     }
-    feedback.success(
-      formMode === "edit" ? "Book updated" : "Book added",
-      "The catalog was saved successfully.",
-    );
+    if (formMode === "edit") {
+      if (!editing || !editingBook) {
+        feedback.failed(
+          "Could not update book",
+          "The book details could not be loaded.",
+        );
+        return;
+      }
+      const book = readBookForm(form);
+      const image =
+        book.coverImage && book.coverImage.size > 0
+          ? book.coverImage
+          : undefined;
+      const result = await updateBook(
+        editing.id,
+        {
+          ...book,
+          coverImage: editingBook.coverImage || editing.coverImage,
+          community: {
+            totalOnShelf: book.community.totalOnShelf,
+            members: editingBook.community?.members ?? [],
+          },
+        },
+        image,
+      );
+      if (!result.ok) {
+        feedback.failed("Could not update book", result.message);
+        return;
+      }
+      router.refresh();
+      feedback.success("Book updated", result.message);
+    }
   }
 
   return (
@@ -191,19 +361,51 @@ export default function BooksPage({ books }: BooksPageProps) {
       addLabel="Add Book"
       onAdd={() => {
         setEditing(null);
+        setEditingBook(null);
         setFormMode("add");
+        setFormVersion((version) => version + 1);
         openModal("book-form");
       }}
     >
-      <AdminSearchRow placeholder="Search title or author...">
+      <AdminSearchRow
+        placeholder="Search title or author..."
+        value={search}
+        onChange={setSearch}
+      >
         <FilterSelect
           name="category"
-          options={["All", ...genres]}
+          options={["all", ...genres]}
+          value={category}
+          onChange={(value) => updateFilters({ category: value })}
         />
         <FilterSelect
-          name="status"
-          options={["All", "Available", "On Loan", "Reserved"]}
+          name="available"
+          options={["all", "Available", "On Loan", "Reserved"]}
+          value={available}
+          onChange={(value) => updateFilters({ available: value })}
         />
+        <select
+          name="archive"
+          className="select"
+          value={archiveId}
+          onChange={(event) => setArchiveId(event.target.value)}
+        >
+          <option value="">Restore from archive</option>
+          {archivedBooks.map((archive) => (
+            <option key={archive.id} value={archive.id}>
+              {archive.title} — {archive.author}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="btn btn-outline"
+          onClick={() => {
+            void handleRestore();
+          }}
+        >
+          Restore
+        </button>
       </AdminSearchRow>
 
       <AdminTable
@@ -217,7 +419,7 @@ export default function BooksPage({ books }: BooksPageProps) {
           "Status",
           "Actions",
         ]}
-        from={1}
+        from={books.length === 0 ? 0 : 1}
         to={books.length}
         total={books.length}
       >
@@ -269,9 +471,7 @@ export default function BooksPage({ books }: BooksPageProps) {
               <div className="flex items-center gap-1">
                 <EditButton
                   onClick={() => {
-                    setEditing(book);
-                    setFormMode("edit");
-                    openModal("book-form");
+                    void openEditor(book);
                   }}
                 />
                 <DeleteButton
@@ -288,7 +488,7 @@ export default function BooksPage({ books }: BooksPageProps) {
 
       <FormModal
         id="book-form"
-        key={editing?.id ?? "add"}
+        key={formVersion}
         title={formMode === "edit" ? "Edit Book" : "Add Book"}
         submitLabel={formMode === "edit" ? "Update Book" : "Add Book"}
         onSubmit={handleSave}
@@ -299,27 +499,39 @@ export default function BooksPage({ books }: BooksPageProps) {
             label="Title"
             name="title"
             placeholder="The Midnight Library"
-            defaultValue={editing?.title}
+            defaultValue={editingBook?.title ?? editing?.title}
             required
           />
           <FormField
             label="Author"
             name="author"
             placeholder="Matt Haig"
-            defaultValue={editing?.author}
+            defaultValue={editingBook?.author ?? editing?.author}
             required
           />
+          {formMode === "edit" && editing?.coverImage ? (
+            <img
+              src={editing.coverImage}
+              alt={editing.title}
+              className="size-16 rounded-lg object-cover"
+            />
+          ) : null}
           <FormField
-            label="Cover image"
+            label={
+              formMode === "edit"
+                ? "Cover image (leave empty to keep the current one)"
+                : "Cover image"
+            }
             name="coverImage"
             type="file"
             accept="image/*"
-            required
+            required={formMode !== "edit"}
           />
           <FormField
             label="Tags"
             name="tags"
             placeholder="Fiction, 2020, 288 pages"
+            defaultValue={editingBook?.tags?.join(", ")}
             required
           />
           <FormField
@@ -327,6 +539,7 @@ export default function BooksPage({ books }: BooksPageProps) {
             name="description"
             as="textarea"
             placeholder="Book description"
+            defaultValue={editingBook?.description}
             required
           />
 
@@ -339,6 +552,7 @@ export default function BooksPage({ books }: BooksPageProps) {
             min={0}
             max={5}
             step={0.1}
+            defaultValue={fieldText(editingBook?.rating?.score)}
             required
           />
           <FormField
@@ -348,6 +562,7 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="1836"
             min={0}
             step={1}
+            defaultValue={fieldText(editingBook?.rating?.totalRatings)}
             required
           />
           <FormField
@@ -357,6 +572,7 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="581"
             min={0}
             step={1}
+            defaultValue={fieldText(editingBook?.rating?.totalReviews)}
             required
           />
 
@@ -368,13 +584,14 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="350"
             min={0}
             step={1}
+            defaultValue={fieldText(editingBook?.price?.amount)}
             required
           />
           <FormField
             label="Currency"
             name="price.currency"
             placeholder="৳"
-            defaultValue="৳"
+            defaultValue={editingBook?.price?.currency ?? "৳"}
             required
           />
 
@@ -386,7 +603,9 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="2"
             min={0}
             step={1}
-            defaultValue={editing ? String(editing.available) : ""}
+            defaultValue={fieldText(
+              editingBook?.availability?.current ?? editing?.available,
+            )}
             required
           />
           <FormField
@@ -396,7 +615,9 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="4"
             min={0}
             step={1}
-            defaultValue={editing ? String(editing.copies) : ""}
+            defaultValue={fieldText(
+              editingBook?.availability?.total ?? editing?.copies,
+            )}
             required
           />
 
@@ -405,26 +626,28 @@ export default function BooksPage({ books }: BooksPageProps) {
             label="Publisher"
             name="metadata.publisher"
             placeholder="Canongate Books"
+            defaultValue={editingBook?.metadata?.publisher}
             required
           />
           <FormField
             label="Language"
             name="metadata.language"
             placeholder="English"
-            defaultValue="English"
+            defaultValue={editingBook?.metadata?.language ?? "English"}
             required
           />
           <FormField
             label="Series"
             name="metadata.series"
             placeholder="Standalone"
+            defaultValue={editingBook?.metadata?.series}
             required
           />
           <FormField
             label="ISBN"
             name="metadata.isbn"
             placeholder="978-1-78689-274-4"
-            defaultValue={editing?.isbn}
+            defaultValue={editingBook?.metadata?.isbn ?? editing?.isbn}
             required
           />
           <FormField
@@ -434,12 +657,14 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="2020"
             min={0}
             step={1}
+            defaultValue={fieldText(editingBook?.metadata?.published)}
             required
           />
           <FormField
             label="Copies held"
             name="metadata.copiesHeld"
             placeholder="4 copies across 3 branches"
+            defaultValue={editingBook?.metadata?.copiesHeld}
             required
           />
           <FormField
@@ -449,20 +674,29 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="288"
             min={1}
             step={1}
+            defaultValue={fieldText(editingBook?.metadata?.pages)}
             required
           />
           <FormField
             label="Genre"
             name="metadata.genre"
             as="select"
-            defaultValue={editing?.category ?? "Fiction"}
-            options={genres}
+            defaultValue={
+              editingBook?.metadata?.genre ?? editing?.category ?? "Fiction"
+            }
+            options={
+              editingBook?.metadata?.genre &&
+              !genres.includes(editingBook.metadata.genre)
+                ? [...genres, editingBook.metadata.genre]
+                : genres
+            }
             required
           />
           <FormField
             label="Dewey decimal"
             name="metadata.deweyDecimal"
             placeholder="823.14"
+            defaultValue={editingBook?.metadata?.deweyDecimal}
             required
           />
 
@@ -474,6 +708,7 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="7"
             min={0}
             step={1}
+            defaultValue={fieldText(editingBook?.community?.totalOnShelf)}
             required
           />
 
@@ -485,6 +720,7 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="87"
             min={0}
             step={1}
+            defaultValue={fieldText(editingBook?.matchScore?.score)}
             required
           />
           <FormField
@@ -494,13 +730,14 @@ export default function BooksPage({ books }: BooksPageProps) {
             placeholder="100"
             min={0}
             step={1}
-            defaultValue="100"
+            defaultValue={fieldText(editingBook?.matchScore?.maxScore ?? 100)}
             required
           />
           <FormField
             label="Label"
             name="matchScore.label"
             placeholder="Strong Match"
+            defaultValue={editingBook?.matchScore?.label}
             required
           />
           <FormField
@@ -508,6 +745,7 @@ export default function BooksPage({ books }: BooksPageProps) {
             name="matchScore.description"
             as="textarea"
             placeholder="Why this book matches the reader"
+            defaultValue={editingBook?.matchScore?.description}
             required
           />
         </div>
@@ -524,18 +762,12 @@ export default function BooksPage({ books }: BooksPageProps) {
           setDeleting(null);
           if (!id) return;
 
-          void deleteBook(id).then((deleted) => {
-            if (!deleted) {
-              feedback.failed(
-                "Could not delete book",
-                "The book is still in the catalog.",
-              );
+          void deleteBook(id).then((result) => {
+            if (!result.ok) {
+              feedback.failed("Could not delete book", result.message);
               return;
             }
-            feedback.success(
-              "Book deleted",
-              "The book was removed from the catalog.",
-            );
+            feedback.success("Book deleted", result.message);
             router.refresh();
           });
         }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { openModal } from "@/Components/Modal/AppModal/AppModal";
 
 export type FeedbackStatus = {
@@ -18,6 +18,12 @@ export function useFeedback(id?: string) {
     title: "",
     message: "",
   });
+  const [ticket, setTicket] = useState(0);
+
+  useEffect(() => {
+    if (ticket === 0) return;
+    openModal(modalId);
+  }, [ticket, modalId]);
 
   function show(
     variant: FeedbackStatus["variant"],
@@ -25,7 +31,7 @@ export function useFeedback(id?: string) {
     message: string,
   ) {
     setStatus({ variant, title, message });
-    openModal(modalId);
+    setTicket((current) => current + 1);
   }
 
   return {
