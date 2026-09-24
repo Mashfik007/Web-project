@@ -72,17 +72,31 @@ export async function POST(request: Request) {
       );
     }
 
+    const stillOut = await ShelfLoan.findOne({ userId, bookId, status: "reading" });
+    if (stillOut) {
+      return new Response(
+        JSON.stringify(
+          new ApiError(400, "Return this book before you can borrow it again"),
+        ),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     const approved = await BorrowRequest.findOne({
       userId,
       bookId,
       status: "Approved",
     });
-    const reading = await ShelfLoan.findOne({ userId, bookId, status: "reading" });
-    if (approved && reading) {
-      return new Response(
-        JSON.stringify(new ApiError(400, "This book is already on your shelf")),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      );
+    if (approved) {
+      const returned = await ShelfLoan.findOne({ userId, bookId, status: "returned" });
+      if (!returned) {
+        return new Response(
+          JSON.stringify(
+            new ApiError(400, "You already requested this book and it has not been returned"),
+          ),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
     }
 
     await recordBorrowRequest({

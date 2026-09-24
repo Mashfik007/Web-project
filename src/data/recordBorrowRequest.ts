@@ -26,12 +26,26 @@ export async function recordBorrowRequest(loan: {
   dueDate?: Date | null;
   createdAt?: Date | null;
 }) {
-  const existing = await BorrowRequest.findOne({
+  const pending = await BorrowRequest.findOne({
     userId: loan.userId,
     bookId: loan.bookId,
-    status: { $ne: "Rejected" },
+    status: "Pending",
   });
-  if (existing) return existing;
+  if (pending) return pending;
+
+  const stillOut = await ShelfLoan.findOne({
+    userId: loan.userId,
+    bookId: loan.bookId,
+    status: "reading",
+  });
+  if (stillOut) {
+    const approved = await BorrowRequest.findOne({
+      userId: loan.userId,
+      bookId: loan.bookId,
+      status: "Approved",
+    });
+    if (approved) return approved;
+  }
 
   const book = await Book.findById(loan.bookId).select("title");
   if (!book) return null;

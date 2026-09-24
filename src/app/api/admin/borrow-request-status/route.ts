@@ -126,6 +126,7 @@ export async function POST(request: Request) {
       shelfLoan.status = "reading";
       shelfLoan.dueDate = Number.isNaN(dueDate.getTime()) ? new Date() : dueDate;
       shelfLoan.returnedAt = null;
+      if (!alreadyReading) shelfLoan.currentPage = 0;
       await shelfLoan.save();
       if (!alreadyReading && borrowRequest.userId) {
         await recordMemberBorrow(borrowRequest.userId);
