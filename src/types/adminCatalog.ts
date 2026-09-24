@@ -1,9 +1,10 @@
 export type AdminBookStatus = "Available" | "On Loan" | "Reserved";
 
 export type AdminBook = {
-  id: number;
+  id: string;
   title: string;
   author: string;
+  coverImage: string;
   isbn: string;
   category: string;
   copies: number;

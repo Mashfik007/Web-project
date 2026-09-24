@@ -1,118 +1,54 @@
-import type { AdminBook } from "@/types/adminCatalog";
+import connectDB from "@/dbConfig/dbConfig";
+import { Book } from "@/Model/Books";
+import type { AdminBook, AdminBookStatus } from "@/types/adminCatalog";
 
-const books: AdminBook[] = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    isbn: "978-0743273565",
-    category: "Fiction",
-    copies: 12,
-    available: 4,
-    status: "Available",
-    coverClass: "bg-sky-100 text-sky-600",
-  },
-  {
-    id: 2,
-    title: "Sapiens",
-    author: "Yuval Noah Harari",
-    isbn: "978-0062316097",
-    category: "Non-Fiction",
-    copies: 8,
-    available: 0,
-    status: "On Loan",
-    coverClass: "bg-violet-100 text-violet-600",
-  },
-  {
-    id: 3,
-    title: "A Brief History of Time",
-    author: "Stephen Hawking",
-    isbn: "978-0553380163",
-    category: "Science",
-    copies: 6,
-    available: 2,
-    status: "Available",
-    coverClass: "bg-emerald-100 text-emerald-600",
-  },
-  {
-    id: 4,
-    title: "The Midnight Library",
-    author: "Matt Haig",
-    isbn: "978-0525559474",
-    category: "Fiction",
-    copies: 10,
-    available: 1,
-    status: "Reserved",
-    coverClass: "bg-orange-100 text-orange-600",
-  },
-  {
-    id: 5,
-    title: "Clean Code",
-    author: "Robert C. Martin",
-    isbn: "978-0132350884",
-    category: "Technology",
-    copies: 5,
-    available: 5,
-    status: "Available",
-    coverClass: "bg-rose-100 text-rose-600",
-  },
-  {
-    id: 6,
-    title: "Guns, Germs, and Steel",
-    author: "Jared Diamond",
-    isbn: "978-0393317558",
-    category: "History",
-    copies: 7,
-    available: 3,
-    status: "Available",
-    coverClass: "bg-cyan-100 text-cyan-600",
-  },
-  {
-    id: 7,
-    title: "Project Hail Mary",
-    author: "Andy Weir",
-    isbn: "978-0593135204",
-    category: "Science",
-    copies: 9,
-    available: 0,
-    status: "On Loan",
-    coverClass: "bg-indigo-100 text-indigo-600",
-  },
-  {
-    id: 8,
-    title: "Atomic Habits",
-    author: "James Clear",
-    isbn: "978-0735211292",
-    category: "Non-Fiction",
-    copies: 14,
-    available: 6,
-    status: "Available",
-    coverClass: "bg-teal-100 text-teal-600",
-  },
-  {
-    id: 9,
-    title: "The Pragmatic Programmer",
-    author: "Andrew Hunt",
-    isbn: "978-0135957059",
-    category: "Technology",
-    copies: 4,
-    available: 1,
-    status: "Reserved",
-    coverClass: "bg-blue-100 text-blue-600",
-  },
-  {
-    id: 10,
-    title: "1984",
-    author: "George Orwell",
-    isbn: "978-0451524935",
-    category: "Fiction",
-    copies: 11,
-    available: 8,
-    status: "Available",
-    coverClass: "bg-amber-100 text-amber-600",
-  },
-];
+type StoredBook = {
+  _id: { toString(): string };
+  title: string;
+  author: string;
+  coverImage?: string;
+  availability?: {
+    current?: number;
+    total?: number;
+  };
+  metadata?: {
+    isbn?: string;
+    genre?: string;
+  };
+};
+
+const coverByGenre: Record<string, string> = {
+  Fiction: "bg-sky-100 text-sky-600",
+  History: "bg-emerald-100 text-emerald-600",
+  "Non-Fiction": "bg-teal-100 text-teal-600",
+  Technology: "bg-cyan-100 text-cyan-600",
+  Science: "bg-blue-100 text-blue-600",
+};
 
 export async function getBooksData(_adminId: string): Promise<AdminBook[]> {
-  return books;
+  await connectDB();
+
+  const books = await Book.find()
+    .sort({ createdAt: -1 })
+    .lean<StoredBook[]>();
+
+  return books.map((book) => {
+    const available = book.availability?.current ?? 0;
+    const copies = book.availability?.total ?? 0;
+    const category = book.metadata?.genre ?? "";
+    const status: AdminBookStatus = available === 0 ? "On Loan" : "Available";
+
+    return {
+      id: book._id.toString(),
+      title: book.title,
+      author: book.author,
+      coverImage: book.coverImage ? `/api/uploads/${book.coverImage}` : "",
+      isbn: book.metadata?.isbn ?? "",
+      category,
+      copies,
+      available,
+      status,
+      coverClass: coverByGenre[category] ?? "bg-slate-100 text-slate-600",
+    };
+  });
 }

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 // books catalog for admin — add, edit, delete
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminSearchRow from "@/Components/AdminCatalog/AdminSearchRow/AdminSearchRow";
@@ -19,7 +20,7 @@ import {
   openModal,
   useFeedback,
 } from "@/Components/Modal";
-import { addBooks } from "@/Controller/admin.controller";
+import { addBooks, deleteBook } from "@/Controller/admin.controller";
 import type { AdminBook } from "@/types/adminCatalog";
 
 const categoryClass: Record<string, string> = {
@@ -138,12 +139,13 @@ interface BooksPageProps {
 }
 
 export default function BooksPage({ books }: BooksPageProps) {
+  const router = useRouter();
   const [formMode, setFormMode] = useState<"add" | "edit" | null>(null);
   const [editing, setEditing] = useState<AdminBook | null>(null);
   const [deleting, setDeleting] = useState<AdminBook | null>(null);
   const feedback = useFeedback();
 
-  function handleSave(form: HTMLFormElement) {
+  async function handleSave(form: HTMLFormElement) {
     if (!formHasValues(form, bookFormFields)) {
       feedback.failed(
         "Could not save book",
@@ -153,10 +155,28 @@ export default function BooksPage({ books }: BooksPageProps) {
     }
     if (formMode === "add") {
       const book = readBookForm(form);
-      addBooks({
-        ...book,
-        coverImage: book.coverImage?.name ?? "",
-      });
+      if (!book.coverImage) {
+        feedback.failed(
+          "Could not save book",
+          "Please choose a cover image.",
+        );
+        return;
+      }
+      const saved = await addBooks(
+        {
+          ...book,
+          coverImage: book.coverImage.name,
+        },
+        book.coverImage,
+      );
+      if (!saved) {
+        feedback.failed(
+          "Could not save book",
+          "The book could not be saved.",
+        );
+        return;
+      }
+      router.refresh();
     }
     feedback.success(
       formMode === "edit" ? "Book updated" : "Book added",
@@ -204,17 +224,25 @@ export default function BooksPage({ books }: BooksPageProps) {
         {books.map((book) => (
           <tr key={book.id} className="text-sm">
             <td className="px-4 py-3">
-              <span
-                className={`flex size-9 items-center justify-center rounded-lg ${book.coverClass}`}
-              >
-                <Image
-                  src="/svg/book.svg"
-                  alt="Book"
-                  width={16}
-                  height={16}
-                  className="size-4"
+              {book.coverImage ? (
+                <img
+                  src={book.coverImage}
+                  alt={book.title}
+                  className="size-9 rounded-lg object-cover"
                 />
-              </span>
+              ) : (
+                <span
+                  className={`flex size-9 items-center justify-center rounded-lg ${book.coverClass}`}
+                >
+                  <Image
+                    src="/svg/book.svg"
+                    alt="Book"
+                    width={16}
+                    height={16}
+                    className="size-4"
+                  />
+                </span>
+              )}
             </td>
             <td className="px-4 py-3">
               <p className="font-semibold text-slate-800">{book.title}</p>
@@ -492,11 +520,24 @@ export default function BooksPage({ books }: BooksPageProps) {
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {
+          const id = deleting?.id;
           setDeleting(null);
-          feedback.success(
-            "Book deleted",
-            "The book was removed from the catalog.",
-          );
+          if (!id) return;
+
+          void deleteBook(id).then((deleted) => {
+            if (!deleted) {
+              feedback.failed(
+                "Could not delete book",
+                "The book is still in the catalog.",
+              );
+              return;
+            }
+            feedback.success(
+              "Book deleted",
+              "The book was removed from the catalog.",
+            );
+            router.refresh();
+          });
         }}
       />
 

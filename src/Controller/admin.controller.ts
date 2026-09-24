@@ -3,14 +3,15 @@ import { z } from "zod";
 
 type BookData = z.infer<typeof Book_shema>;
 
-export async function addBooks(Book: BookData) {
+export async function addBooks(book: BookData, image: File) {
     try {
+        const formData = new FormData();
+        formData.append("image", image);
+        formData.append("book", JSON.stringify(book));
+
         const res = await fetch("/api/admin/add-books", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(Book),
+            body: formData,
         });
 
         const data = await res.json();
@@ -18,12 +19,39 @@ export async function addBooks(Book: BookData) {
 
         if (!res.ok) {
             console.log(data.message);
-            return;
+            return false;
         }
 
         console.log(data.message);
+        return true;
     } catch (error) {
         console.error(error);
+        return false;
+    }
+}
+
+export async function deleteBook(id: string) {
+    try {
+        const res = await fetch("/api/admin/delete-books", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            console.log(data.message);
+            return false;
+        }
+
+        console.log(data.message);
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
     }
 }
 

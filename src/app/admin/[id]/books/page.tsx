@@ -1,6 +1,8 @@
 import BooksPage from "@/Components/AdminCatalog/BooksPage/BooksPage";
 import { getBooksData } from "@/data/getBooksData";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
