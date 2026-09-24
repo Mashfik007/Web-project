@@ -8,7 +8,7 @@ export async function addBooks(book: BookData, image: File) {
         const formData = new FormData();
         formData.append("image", image);
         formData.append("book", JSON.stringify(book));
-
+        // image added
         const res = await fetch("/api/admin/add-books", {
             method: "POST",
             body: formData,
