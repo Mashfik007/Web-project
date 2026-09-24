@@ -2,6 +2,8 @@ import CheckoutPage from "@/Components/Checkout/CheckoutPage/CheckoutPage";
 import { getCheckoutData } from "@/data/getCheckoutData";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ id: string; bookId: string }>;
 }

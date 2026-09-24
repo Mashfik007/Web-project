@@ -27,6 +27,14 @@ const BorrowRequest_schema = new mongoose.Schema(
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
+    userId: {
+      type: String,
+      trim: true,
+    },
+    bookId: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,

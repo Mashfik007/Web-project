@@ -1,7 +1,9 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
 import { Reservation } from "@/Model/Reservations";
 import { ReturnRecord } from "@/Model/Returns";
+import { ShelfLoan } from "@/Model/ShelfLoans";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
@@ -42,6 +44,38 @@ export async function POST(request: Request) {
 
     borrowRequest.status = action === "approve" ? "Approved" : "Rejected";
     await borrowRequest.save();
+
+    if (borrowRequest.status === "Rejected") {
+      const loan = await ShelfLoan.findOne({
+        userId: borrowRequest.userId,
+        bookId: borrowRequest.bookId,
+        status: "reading",
+      });
+      if (loan && (loan.currentPage ?? 0) === 0) {
+        const requestCreated = borrowRequest.createdAt
+          ? new Date(borrowRequest.createdAt).getTime()
+          : 0;
+        const loanCreated = loan.createdAt
+          ? new Date(loan.createdAt).getTime()
+          : 0;
+        const wasAlreadyOnShelf =
+          Boolean(loan.blindDate) || loanCreated < requestCreated - 60_000;
+
+        if (wasAlreadyOnShelf) {
+          loan.status = "wishlist";
+          loan.dueDate = null;
+          await loan.save();
+        } else {
+          await ShelfLoan.deleteOne({ _id: loan._id });
+        }
+
+        const book = await Book.findById(borrowRequest.bookId);
+        if (book && book.availability) {
+          book.availability.current += 1;
+          await book.save();
+        }
+      }
+    }
 
     if (borrowRequest.status === "Approved") {
       const existingReturn = await ReturnRecord.findOne({

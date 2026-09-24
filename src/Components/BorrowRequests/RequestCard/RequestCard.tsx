@@ -23,8 +23,8 @@ const statusBadge: Record<
     className: "badge-soft badge-success",
   },
   declined: {
-    label: "Declined",
-    className: "badge-ghost",
+    label: "Cancelled",
+    className: "badge-soft badge-error",
   },
 };
 
@@ -34,7 +34,8 @@ export default function RequestCard({
   onDecline,
 }: RequestCardProps) {
   const badge = statusBadge[request.status];
-  const showActions = request.status === "pending";
+  const showActions =
+    request.status === "pending" && (onApprove != null || onDecline != null);
 
   return (
     <article className="card rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -49,7 +50,7 @@ export default function RequestCard({
 
         <div className="min-w-[200px] flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-slate-800">{request.userName}</h3>
+            <h3 className="font-semibold text-slate-800">{request.bookTitle}</h3>
             <span className={`badge badge-sm gap-1 ${badge.className}`}>
               {request.status === "pending" && (
                 <span className="size-1.5 rounded-full bg-sky-500" />
@@ -58,14 +59,14 @@ export default function RequestCard({
             </span>
           </div>
 
-          <p className="mt-1 text-sm text-sky-600">
-            Wants to borrow{" "}
-            <span className="font-semibold text-slate-800">
-              &ldquo;{request.bookTitle}&rdquo;
-            </span>
-          </p>
+          <p className="mt-1 text-sm text-sky-600">Your request to the library</p>
 
-          <p className="mt-1 text-xs text-slate-400">{request.requestedAt}</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Requested {request.requestedAt}
+            {request.expectedReturn
+              ? ` · return ${request.expectedReturn}`
+              : ""}
+          </p>
         </div>
 
         <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl">

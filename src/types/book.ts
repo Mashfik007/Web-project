@@ -2,7 +2,7 @@ export type BookFormat = "PHYSICAL" | "DIGITAL";
 export type BookAvailability = "Available" | "On Loan";
 
 export type Book = {
-  id: number;
+  id: string | number;
   title: string;
   author: string;
   rating: number;

@@ -21,7 +21,9 @@ export default function ReadingActivity({
           <h3 className="text-sm font-semibold text-slate-800">
             Reading Activity
           </h3>
-          <p className="mt-0.5 text-xs text-slate-500">Last 12 weeks</p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Last 12 weeks · each mark is 1 hour
+          </p>
         </div>
         <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-600">
           🔥 {streakDays} streak

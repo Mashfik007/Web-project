@@ -1,5 +1,7 @@
 import MyShelfPage from "@/Components/MyShelf/MyShelfPage/MyShelfPage";
-import { getShelfData } from "@/data/fakeShelfData";
+import { getMyShelf } from "@/data/getMyShelf";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -7,7 +9,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
-  const shelf = await getShelfData(id);
+  const shelf = await getMyShelf(id);
 
   return <MyShelfPage shelf={shelf} />;
 }

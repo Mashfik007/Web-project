@@ -9,6 +9,7 @@ export type IncomingBorrowRequest = {
   coverImage: string;
   status: BorrowRequestStatus;
   requestedAt: string;
+  expectedReturn?: string;
 };
 
 export type BorrowRequestFilter = {

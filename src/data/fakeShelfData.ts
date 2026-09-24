@@ -4,6 +4,7 @@ const midnightLibraryCover =
   "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=300&q=80";
 
 export const fakeShelfData: MyShelfData = {
+  userId: "1",
   user: {
     initials: "EA",
     name: "Elara Ashford",
@@ -223,6 +224,7 @@ export const fakeShelfData: MyShelfData = {
     { genre: "Mystery", count: 3, percentage: 13 },
     { genre: "Non-Fiction", count: 1, percentage: 5 },
   ],
+  people: [],
 };
 
 export async function getShelfData(_userId: string): Promise<MyShelfData> {

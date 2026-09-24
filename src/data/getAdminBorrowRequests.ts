@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { syncShelfBorrows } from "@/data/recordBorrowRequest";
 import { BorrowRequest } from "@/Model/BorrowRequests";
 import type { AdminBorrowRequest, AdminBorrowStatus } from "@/types/adminOps";
 
@@ -37,6 +38,7 @@ export async function getAdminBorrowRequests(
   _adminId: string,
 ): Promise<AdminBorrowRequest[]> {
   await connectDB();
+  await syncShelfBorrows();
 
   const requests = await BorrowRequest.find()
     .sort({ createdAt: -1 })

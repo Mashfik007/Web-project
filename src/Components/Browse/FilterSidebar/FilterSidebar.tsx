@@ -3,16 +3,6 @@
 import Image from "next/image";
 import FilterSection from "@/Components/Browse/FilterSection/FilterSection";
 
-const genres = [
-  "Fiction",
-  "Mystery",
-  "Sci-Fi",
-  "Romance",
-  "Fantasy",
-  "Non-Fiction",
-  "Literary",
-];
-
 export type AvailabilityFilter = "All" | "Available" | "On Loan";
 export type FormatFilter = "All" | "Physical" | "Digital";
 
@@ -29,18 +19,22 @@ export const defaultBrowseFilters: BrowseFilters = {
   genres: [],
   availability: "All",
   format: "All",
-  minRating: 1,
-  yearFrom: 2000,
-  yearTo: 2024,
+  minRating: 0,
+  yearFrom: 0,
+  yearTo: 99999,
 };
 
 interface FilterSidebarProps {
   filters: BrowseFilters;
+  genres: string[];
+  defaults: BrowseFilters;
   onChange: (filters: BrowseFilters) => void;
 }
 
 export default function FilterSidebar({
   filters,
+  genres,
+  defaults,
   onChange,
 }: FilterSidebarProps) {
   const toggleGenre = (genre: string) => {
@@ -137,7 +131,7 @@ export default function FilterSidebar({
 
         <input
           type="range"
-          min={1}
+          min={0}
           max={5}
           step={0.5}
           value={filters.minRating}
@@ -148,7 +142,7 @@ export default function FilterSidebar({
         />
 
         <div className="flex justify-between px-1 text-[10px] text-slate-400">
-          <span>1</span>
+          <span>0</span>
           <span>2</span>
           <span>3</span>
           <span>4</span>
@@ -161,7 +155,7 @@ export default function FilterSidebar({
         <div className="flex items-center gap-2">
           <input
             type="number"
-            min={1900}
+            min={0}
             max={filters.yearTo}
             value={filters.yearFrom}
             onChange={(event) =>
@@ -175,7 +169,7 @@ export default function FilterSidebar({
           <input
             type="number"
             min={filters.yearFrom}
-            max={2026}
+            max={Math.max(filters.yearTo, defaults.yearTo, 9999)}
             value={filters.yearTo}
             onChange={(event) =>
               onChange({ ...filters, yearTo: Number(event.target.value) })
@@ -189,7 +183,7 @@ export default function FilterSidebar({
       <div className="p-4 text-center">
         <button
           type="button"
-          onClick={() => onChange(defaultBrowseFilters)}
+          onClick={() => onChange(defaults)}
           className="btn btn-ghost btn-xs"
         >
           Reset all filters

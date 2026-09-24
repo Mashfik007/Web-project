@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ConfirmModal,
   FormField,
@@ -13,11 +14,39 @@ import {
 import type { BookDetails } from "@/types/bookDetails";
 
 interface BookSidebarProps {
-  book: Pick<BookDetails, "title" | "author" | "coverImage" | "availability">;
+  userId: string;
+  book: Pick<
+    BookDetails,
+    "id" | "title" | "author" | "coverImage" | "availability"
+  >;
 }
 
-export default function BookSidebar({ book }: BookSidebarProps) {
+export default function BookSidebar({ userId, book }: BookSidebarProps) {
+  const router = useRouter();
   const feedback = useFeedback();
+
+  async function saveToShelf(path: "borrow" | "wishlist", returnDate?: string) {
+    const response = await fetch(`/api/users/shelf/${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        bookId: String(book.id),
+        returnDate,
+      }),
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      feedback.failed("Could not update shelf", payload.message || "Request failed");
+      return;
+    }
+
+    feedback.success(
+      path === "borrow" ? "Borrow saved" : "Wishlist saved",
+      payload.message,
+    );
+    router.refresh();
+  }
 
   return (
     <aside className="flex flex-col gap-4">
@@ -43,12 +72,9 @@ export default function BookSidebar({ book }: BookSidebarProps) {
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
-          onClick={() =>
-            feedback.success(
-              "Added to wishlist",
-              `"${book.title}" is now on your shelf.`,
-            )
-          }
+          onClick={() => {
+            void saveToShelf("wishlist");
+          }}
           className="btn btn-ghost"
         >
           Wishlist
@@ -81,7 +107,7 @@ export default function BookSidebar({ book }: BookSidebarProps) {
         id="borrow-book"
         title="Borrow this book"
         submitLabel="Send request"
-        onSubmit={(form) => {
+        onSubmit={async (form) => {
           if (!formHasValues(form, ["returnDate"])) {
             feedback.failed(
               "Request not sent",
@@ -89,9 +115,9 @@ export default function BookSidebar({ book }: BookSidebarProps) {
             );
             return;
           }
-          feedback.success(
-            "Borrow request sent",
-            `We'll notify you when "${book.title}" is approved.`,
+          await saveToShelf(
+            "borrow",
+            String(new FormData(form).get("returnDate") ?? ""),
           );
         }}
       >

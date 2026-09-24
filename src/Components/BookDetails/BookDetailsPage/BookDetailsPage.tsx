@@ -11,12 +11,14 @@ import type { BookDetails } from "@/types/bookDetails";
 
 interface BookDetailsPageProps {
   book: BookDetails;
+  userId: string;
   backHref: string;
   checkoutHref: string;
 }
 
 export default function BookDetailsPage({
   book,
+  userId,
   backHref,
   checkoutHref,
 }: BookDetailsPageProps) {
@@ -26,7 +28,7 @@ export default function BookDetailsPage({
         <BackLink href={backHref} />
 
         <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
-          <BookSidebar book={book} />
+          <BookSidebar book={book} userId={userId} />
 
           <div>
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_220px]">

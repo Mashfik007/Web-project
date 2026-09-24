@@ -1,5 +1,7 @@
-import { getBookDetailsData } from "@/data/fakeBookData";
+import connectDB from "@/dbConfig/dbConfig";
+import { Book } from "@/Model/Books";
 import type { CheckoutData } from "@/types/checkout";
+import mongoose from "mongoose";
 
 const defaultPaymentMethods: CheckoutData["paymentMethods"] = [
   {
@@ -38,32 +40,50 @@ const defaultPaymentMethods: CheckoutData["paymentMethods"] = [
   },
 ];
 
+type CheckoutBookRecord = {
+  _id: { toString(): string };
+  title: string;
+  author: string;
+  coverImage?: string;
+  price?: {
+    amount?: number;
+    currency?: string;
+  };
+};
+
 export async function getCheckoutData(
   userId: string,
   bookId: string,
 ): Promise<CheckoutData | null> {
-  const result = await getBookDetailsData(userId, bookId);
-
-  if (!result) {
+  if (!mongoose.Types.ObjectId.isValid(bookId)) {
     return null;
   }
 
-  const { book } = result;
+  await connectDB();
+  const book = await Book.findById(bookId).lean<CheckoutBookRecord | null>();
+
+  if (!book) {
+    return null;
+  }
+
+  const currency = book.price?.currency ?? "৳";
 
   return {
     title: "Checkout",
     subtitle: "Complete your purchase securely",
     book: {
-      id: book.id,
+      id: book._id.toString(),
       title: book.title,
       author: book.author,
-      coverImage: book.coverImage,
-      unitPrice: book.price.amount,
-      currency: book.price.currency,
+      coverImage: book.coverImage
+        ? `/api/uploads/${book.coverImage}`
+        : "/svg/book.svg",
+      unitPrice: book.price?.amount ?? 0,
+      currency,
     },
     pricing: {
       deliveryFee: 60,
-      currency: book.price.currency,
+      currency,
     },
     delivery: {
       cities: ["Dhaka", "Chittagong", "Sylhet", "Rajshahi"],

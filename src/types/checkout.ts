@@ -1,7 +1,7 @@
 export type CheckoutStep = "details" | "payment" | "confirm";
 
 export type CheckoutBook = {
-  id: number;
+  id: string | number;
   title: string;
   author: string;
   coverImage: string;

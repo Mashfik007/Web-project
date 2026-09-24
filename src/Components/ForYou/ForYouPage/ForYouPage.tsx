@@ -6,9 +6,10 @@ import type { ForYouData } from "@/types/forYou";
 
 interface ForYouPageProps {
   forYou: ForYouData;
+  userId: string;
 }
 
-export default function ForYouPage({ forYou }: ForYouPageProps) {
+export default function ForYouPage({ forYou, userId }: ForYouPageProps) {
   return (
     <main className="min-h-screen w-full bg-slate-50">
       <div className="mx-auto max-w-6xl space-y-8">
@@ -17,9 +18,15 @@ export default function ForYouPage({ forYou }: ForYouPageProps) {
           <BorrowingHabitsCard habits={forYou.borrowingHabits} />
         </div>
 
-        {forYou.sections.map((section) => (
-          <RecommendationSection key={section.id} section={section} />
-        ))}
+        {forYou.sections
+          .filter((section) => section.books.length > 0)
+          .map((section) => (
+            <RecommendationSection
+              key={section.id}
+              section={section}
+              userId={userId}
+            />
+          ))}
 
         <ExploreByGenre
           genres={forYou.exploreGenres}

@@ -4,6 +4,7 @@ import type { RecommendationSection as RecommendationSectionData } from "@/types
 
 interface RecommendationSectionProps {
   section: RecommendationSectionData;
+  userId: string;
 }
 
 const iconThemes = {
@@ -67,6 +68,7 @@ function renderDescription(description: string, highlightGenres?: string[]) {
 
 export default function RecommendationSection({
   section,
+  userId,
 }: RecommendationSectionProps) {
   const theme = iconThemes[section.iconTheme];
 
@@ -100,7 +102,7 @@ export default function RecommendationSection({
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {section.books.map((book) => (
-          <RecommendationCard key={book.id} book={book} />
+          <RecommendationCard key={book.id} book={book} userId={userId} />
         ))}
       </div>
     </section>

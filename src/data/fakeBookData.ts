@@ -57,22 +57,23 @@ export const fakeBookData: BookDetails = {
 };
 
 function buildBookDetailsFromCatalog(catalogBook: Book): BookDetails {
-  const pages = 280 + (catalogBook.id % 120);
+  const id = Number(catalogBook.id);
+  const pages = 280 + (id % 120);
 
   return {
-    id: catalogBook.id,
+    id,
     title: catalogBook.title,
     author: catalogBook.author,
     coverImage: catalogBook.image,
     tags: [catalogBook.genre, String(catalogBook.year), `${pages} pages`],
     rating: {
       score: catalogBook.rating,
-      totalRatings: 500 + catalogBook.id * 137,
-      totalReviews: 120 + catalogBook.id * 41,
+      totalRatings: 500 + id * 137,
+      totalReviews: 120 + id * 41,
     },
     description: `Discover ${catalogBook.title} by ${catalogBook.author}, a ${catalogBook.genre.toLowerCase()} title from ${catalogBook.year}. Borrow it today from your local branch or add it to your shelf.`,
     price: {
-      amount: 300 + (catalogBook.id % 5) * 50,
+      amount: 300 + (id % 5) * 50,
       currency: "৳",
     },
     availability: {
@@ -83,7 +84,7 @@ function buildBookDetailsFromCatalog(catalogBook: Book): BookDetails {
       publisher: "Library Press",
       language: "English",
       series: "Standalone",
-      isbn: `978-1-78689-${2740 + catalogBook.id}`,
+      isbn: `978-1-78689-${2740 + id}`,
       published: catalogBook.year,
       copiesHeld: "4 copies across 3 branches",
       pages,
@@ -92,7 +93,7 @@ function buildBookDetailsFromCatalog(catalogBook: Book): BookDetails {
     },
     community: fakeBookData.community,
     matchScore: {
-      score: 70 + (catalogBook.id % 25),
+      score: 70 + (id % 25),
       maxScore: 100,
       label: "Good Match",
       description: `Based on your interest in ${catalogBook.genre.toLowerCase()} books.`,
@@ -115,12 +116,12 @@ export async function getBookDetailsData(
   }
 
   const book =
-    catalogBook.id === fakeBookData.id
+    Number(catalogBook.id) === fakeBookData.id
       ? fakeBookData
       : buildBookDetailsFromCatalog(catalogBook);
 
   return {
-    book: { ...book, id: catalogBook.id },
+    book: { ...book, id: Number(catalogBook.id) },
     backHref: `/user/${userId}/browsebook`,
     checkoutHref: `/user/${userId}/checkout/${bookId}`,
   };

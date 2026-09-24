@@ -3,12 +3,6 @@
 import { useMemo, useState } from "react";
 import FilterTabs from "../FilterTabs/FilterTabs";
 import RequestCard from "../RequestCard/RequestCard";
-import {
-  ConfirmModal,
-  StatusModal,
-  openModal,
-  useFeedback,
-} from "@/Components/Modal";
 import type {
   BorrowRequestFilter,
   BorrowRequestStatus,
@@ -22,51 +16,23 @@ interface RequestListProps {
 
 export default function RequestList({ filters, requests }: RequestListProps) {
   const [activeStatus, setActiveStatus] = useState<BorrowRequestStatus | "all">(
-    "pending",
+    "all",
   );
-  const [localRequests, setLocalRequests] = useState(requests);
-  const [confirm, setConfirm] = useState<{
-    id: string;
-    action: "approve" | "decline";
-    title: string;
-  } | null>(null);
-  const feedback = useFeedback();
 
   const visibleRequests = useMemo(
     () =>
       activeStatus === "all"
-        ? localRequests
-        : localRequests.filter((request) => request.status === activeStatus),
-    [activeStatus, localRequests],
+        ? requests
+        : requests.filter((request) => request.status === activeStatus),
+    [activeStatus, requests],
   );
-
-  function handleApprove(id: string) {
-    setLocalRequests((prev) =>
-      prev.map((request) =>
-        request.id === id
-          ? { ...request, status: "approved" as const }
-          : request,
-      ),
-    );
-  }
-
-  function handleDecline(id: string) {
-    setLocalRequests((prev) =>
-      prev.map((request) =>
-        request.id === id
-          ? { ...request, status: "declined" as const }
-          : request,
-      ),
-    );
-  }
 
   const liveFilters = filters.map((filter) => ({
     ...filter,
     count:
       filter.status === "all"
-        ? localRequests.length
-        : localRequests.filter((request) => request.status === filter.status)
-            .length,
+        ? requests.length
+        : requests.filter((request) => request.status === filter.status).length,
   }));
 
   return (
@@ -84,62 +50,10 @@ export default function RequestList({ filters, requests }: RequestListProps) {
           </div>
         ) : (
           visibleRequests.map((request) => (
-            <RequestCard
-              key={request.id}
-              request={request}
-              onApprove={(id) => {
-                setConfirm({
-                  id,
-                  action: "approve",
-                  title: request.bookTitle,
-                });
-                openModal("user-borrow-confirm");
-              }}
-              onDecline={(id) => {
-                setConfirm({
-                  id,
-                  action: "decline",
-                  title: request.bookTitle,
-                });
-                openModal("user-borrow-confirm");
-              }}
-            />
+            <RequestCard key={request.id} request={request} />
           ))
         )}
       </div>
-
-      <ConfirmModal
-        id="user-borrow-confirm"
-        title={
-          confirm?.action === "approve" ? "Approve request" : "Decline request"
-        }
-        message={
-          confirm
-            ? `${confirm.action === "approve" ? "Approve" : "Decline"} the request for "${confirm.title}"?`
-            : ""
-        }
-        confirmLabel={confirm?.action === "approve" ? "Approve" : "Decline"}
-        tone={confirm?.action === "approve" ? "success" : "danger"}
-        onConfirm={() => {
-          if (!confirm) return;
-          if (confirm.action === "approve") handleApprove(confirm.id);
-          else handleDecline(confirm.id);
-          const title = confirm.title;
-          const action = confirm.action;
-          setConfirm(null);
-          feedback.success(
-            action === "approve" ? "Request approved" : "Request declined",
-            `"${title}" was ${action === "approve" ? "approved" : "declined"}.`,
-          );
-        }}
-      />
-
-      <StatusModal
-        id={feedback.id}
-        variant={feedback.status.variant}
-        title={feedback.status.title}
-        message={feedback.status.message}
-      />
     </div>
   );
 }

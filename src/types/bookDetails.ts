@@ -6,7 +6,7 @@ export type BookCommunityMember = {
 };
 
 export type BookDetails = {
-  id: number;
+  id: string | number;
   title: string;
   author: string;
   coverImage: string;

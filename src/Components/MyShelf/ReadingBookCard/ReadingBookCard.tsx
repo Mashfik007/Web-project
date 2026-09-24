@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ConfirmModal,
   StatusModal,
@@ -10,32 +11,68 @@ import {
 import type { ShelfBook } from "@/types/myShelf";
 
 interface ReadingBookCardProps {
+  userId: string;
   book: ShelfBook;
   variant?: "reading" | "simple";
 }
 
 export default function ReadingBookCard({
+  userId,
   book,
   variant = "reading",
 }: ReadingBookCardProps) {
-  const progress = Math.round((book.currentPage / book.pages) * 100);
+  const router = useRouter();
+  const progress =
+    book.pages > 0 ? Math.round((book.currentPage / book.pages) * 100) : 0;
   const pagesLeft = book.pages - book.currentPage;
   const isReading = variant === "reading" && book.currentPage > 0;
   const feedback = useFeedback();
   const renewId = `renew-${book.id}`;
   const returnId = `return-${book.id}`;
 
+  async function updateLoan(action: "renew" | "return") {
+    try {
+      const response = await fetch(`/api/users/shelf/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, loanId: book.id }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        feedback.failed(
+          action === "renew" ? "Could not renew" : "Could not return",
+          payload.message || "Request failed",
+        );
+        return;
+      }
+
+      feedback.success(
+        action === "renew" ? "Book renewed" : "Book returned",
+        payload.message,
+      );
+      router.refresh();
+    } catch {
+      feedback.failed("Request failed", "Could not reach the server.");
+    }
+  }
+
   return (
     <article className="rounded-2xl border border-sky-100 bg-slate-50/80 p-5">
       <div className="flex gap-4">
         <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-xl shadow-sm">
-          <Image
-            src={book.coverImage}
-            alt={book.title}
-            fill
-            sizes="80px"
-            className="object-cover"
-          />
+          {book.blindDate ? (
+            <div className="flex h-full w-full items-center justify-center bg-slate-800 px-1 text-center text-[10px] font-bold tracking-wide text-white uppercase">
+              Blind date
+            </div>
+          ) : (
+            <Image
+              src={book.coverImage}
+              alt={book.title}
+              fill
+              sizes="80px"
+              className="object-cover"
+            />
+          )}
         </div>
 
         <div className="min-w-0 flex-1">
@@ -132,10 +169,10 @@ export default function ReadingBookCard({
       <ConfirmModal
         id={renewId}
         title="Renew this book"
-        message={`Extend the due date for "${book.title}"?`}
+        message={`Extend the due date for "${book.title}" by 14 days?`}
         confirmLabel="Renew"
         onConfirm={() => {
-          feedback.success("Book renewed", `"${book.title}" is due later.`);
+          void updateLoan("renew");
         }}
       />
       <ConfirmModal
@@ -145,10 +182,7 @@ export default function ReadingBookCard({
         confirmLabel="Return"
         tone="success"
         onConfirm={() => {
-          feedback.success(
-            "Return started",
-            `"${book.title}" is marked for return.`,
-          );
+          void updateLoan("return");
         }}
       />
       <StatusModal

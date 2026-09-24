@@ -27,7 +27,7 @@ export type BorrowingHabits = {
 };
 
 export type RecommendedBook = {
-  id: number;
+  id: string | number;
   title: string;
   author: string;
   coverImage: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ConfirmModal,
   StatusModal,
@@ -11,6 +12,7 @@ import type { RecommendedBook } from "@/types/forYou";
 
 interface RecommendationCardProps {
   book: RecommendedBook;
+  userId: string;
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -26,9 +28,36 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export default function RecommendationCard({ book }: RecommendationCardProps) {
+export default function RecommendationCard({
+  book,
+  userId,
+}: RecommendationCardProps) {
+  const router = useRouter();
   const feedback = useFeedback();
   const dateModalId = `date-${book.id}`;
+
+  async function wrapForShelf() {
+    const response = await fetch("/api/users/shelf/wishlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        bookId: String(book.id),
+        blindDate: true,
+      }),
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      feedback.failed(
+        "Could not wrap this book",
+        payload.message || "Request failed",
+      );
+      return;
+    }
+
+    feedback.success("Blind date booked", payload.message);
+    router.refresh();
+  }
 
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -100,10 +129,7 @@ export default function RecommendationCard({ book }: RecommendationCardProps) {
         message={`Wrap "${book.title}" as a surprise pick? The cover stays hidden until you start reading.`}
         confirmLabel="Wrap it"
         onConfirm={() => {
-          feedback.success(
-            "Blind date booked",
-            `"${book.title}" is wrapped and waiting on your shelf.`,
-          );
+          void wrapForShelf();
         }}
       />
       <StatusModal

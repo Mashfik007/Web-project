@@ -18,8 +18,14 @@ export type ShelfStat = {
   theme: "blue" | "purple" | "pink" | "amber";
 };
 
+export type ShelfPerson = {
+  id: string;
+  name: string;
+  following: boolean;
+};
+
 export type ShelfBook = {
-  id: number;
+  id: string | number;
   title: string;
   author: string;
   genre: string;
@@ -28,10 +34,11 @@ export type ShelfBook = {
   coverImage: string;
   dueDate: string;
   daysLeft: number;
+  blindDate?: boolean;
 };
 
 export type DueDateItem = {
-  id: number;
+  id: string | number;
   title: string;
   coverImage: string;
   dueDate: string;
@@ -50,6 +57,7 @@ export type ShelfTab = {
 };
 
 export type MyShelfData = {
+  userId: string;
   user: ShelfUser;
   stats: ShelfStat[];
   tabs: ShelfTab[];
@@ -60,4 +68,5 @@ export type MyShelfData = {
   activity: number[];
   dueDates: DueDateItem[];
   genres: GenreStat[];
+  people: ShelfPerson[];
 };

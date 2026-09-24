@@ -1,5 +1,7 @@
 import BorrowRequestsPage from "@/Components/BorrowRequests/BorrowRequestsPage/BorrowRequestsPage";
-import { getBorrowRequestsData } from "@/data/fakeBorrowRequestsData";
+import { getUserBorrowRequests } from "@/data/getUserBorrowRequests";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -7,7 +9,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
-  const borrowRequests = await getBorrowRequestsData(id);
+  const borrowRequests = await getUserBorrowRequests(id);
 
   return <BorrowRequestsPage borrowRequests={borrowRequests} />;
 }

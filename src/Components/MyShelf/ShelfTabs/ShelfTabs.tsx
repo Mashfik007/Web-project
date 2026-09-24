@@ -5,6 +5,7 @@ import ReadingBookCard from "../ReadingBookCard/ReadingBookCard";
 import type { MyShelfData, ShelfTab } from "@/types/myShelf";
 
 interface ShelfTabsProps {
+  userId: string;
   tabs: ShelfTab[];
   currentlyReading: MyShelfData["currentlyReading"];
   completed: MyShelfData["completed"];
@@ -13,6 +14,7 @@ interface ShelfTabsProps {
 }
 
 export default function ShelfTabs({
+  userId,
   tabs,
   currentlyReading,
   completed,
@@ -60,6 +62,7 @@ export default function ShelfTabs({
           activeBooks.map((book) => (
             <ReadingBookCard
               key={book.id}
+              userId={userId}
               book={book}
               variant={activeTab === "currently-reading" ? "reading" : "simple"}
             />

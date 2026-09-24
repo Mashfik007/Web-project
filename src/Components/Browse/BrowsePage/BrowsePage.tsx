@@ -48,8 +48,32 @@ function sortBooks(list: Book[], sort: string) {
   }
 }
 
+function catalogFilters(books: Book[]): BrowseFilters {
+  const years = books
+    .map((book) => book.year)
+    .filter((year) => Number.isFinite(year));
+
+  return {
+    ...defaultBrowseFilters,
+    yearFrom: years.length > 0 ? Math.min(...years) : 0,
+    yearTo:
+      years.length > 0 ? Math.max(...years) : new Date().getFullYear(),
+  };
+}
+
 export default function BrowsePage({ browse }: BrowsePageProps) {
-  const [filters, setFilters] = useState(defaultBrowseFilters);
+  const defaults = useMemo(
+    () => catalogFilters(browse.books),
+    [browse.books],
+  );
+  const genres = useMemo(
+    () =>
+      [...new Set(browse.books.map((book) => book.genre).filter(Boolean))].sort(
+        (a, b) => a.localeCompare(b),
+      ),
+    [browse.books],
+  );
+  const [filters, setFilters] = useState(defaults);
   const [sort, setSort] = useState("Most Relevant");
 
   const visibleBooks = useMemo(
@@ -70,7 +94,12 @@ export default function BrowsePage({ browse }: BrowsePageProps) {
       <p className="mt-1 text-sm text-slate-500">{browse.subtitle}</p>
 
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
-        <FilterSidebar filters={filters} onChange={setFilters} />
+        <FilterSidebar
+          filters={filters}
+          genres={genres}
+          defaults={defaults}
+          onChange={setFilters}
+        />
 
         <section className="min-w-0">
           <BrowseToolbar

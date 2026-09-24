@@ -21,6 +21,10 @@ export default function DueDates({ dueDates }: DueDatesProps) {
         <h3 className="text-sm font-semibold text-slate-800">Due Dates</h3>
       </div>
 
+      {dueDates.length === 0 ? (
+        <p className="mt-4 text-sm text-slate-500">No books are due.</p>
+      ) : null}
+
       <ul className="mt-4 space-y-3">
         {dueDates.map((item) => (
           <li key={item.id} className="flex items-center gap-3">
