@@ -9,6 +9,10 @@ export default function FormField({
   required,
   as = "input",
   options,
+  min,
+  max,
+  step,
+  accept,
 }: {
   label: string;
   name: string;
@@ -18,6 +22,10 @@ export default function FormField({
   required?: boolean;
   as?: "input" | "textarea" | "select";
   options?: string[];
+  min?: number;
+  max?: number;
+  step?: number | "any";
+  accept?: string;
 }) {
   return (
     <fieldset className="fieldset p-0">
@@ -51,7 +59,11 @@ export default function FormField({
           placeholder={placeholder}
           defaultValue={defaultValue}
           required={required}
-          className="input w-full"
+          min={min}
+          max={max}
+          step={step}
+          accept={accept}
+          className={type === "file" ? "file-input w-full" : "input w-full"}
         />
       )}
     </fieldset>

@@ -4,9 +4,9 @@ import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import { NextResponse } from "next/server";
 
-connectDB();
 
 export async function POST(request: Request) {
+  connectDB();
   try {
     const body = await request.json();
     const { email } = body;

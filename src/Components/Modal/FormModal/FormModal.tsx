@@ -33,7 +33,7 @@ export default function FormModal({
           <ModalButton tone="secondary" onClick={() => closeModal(id)}>
             Cancel
           </ModalButton>
-          <ModalButton type="submit">{submitLabel}</ModalButton>
+          <ModalButton type="submit" >{submitLabel}</ModalButton>
         </div>
       </form>
     </AppModal>
