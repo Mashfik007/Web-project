@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
 import StatusBadge from "@/Components/AdminCatalog/StatusBadge/StatusBadge";
@@ -17,7 +18,8 @@ import {
   openModal,
   useFeedback,
 } from "@/Components/Modal";
-import type { AdminFine, AdminFineSummary } from "@/types/adminOps";
+import { addFine, payFine, waiveFine } from "@/Controller/admin.controller";
+import type { AdminFine, AdminFineSummary, AdminFineType } from "@/types/adminOps";
 
 interface FinesPageProps {
   summary: AdminFineSummary;
@@ -51,7 +53,10 @@ const cards = [
   },
 ] as const;
 
+const fineTypes: AdminFineType[] = ["Overdue", "Damage", "Lost"];
+
 export default function FinesPage({ summary, fines }: FinesPageProps) {
+  const router = useRouter();
   const [paying, setPaying] = useState<AdminFine | null>(null);
   const [waiving, setWaiving] = useState<AdminFine | null>(null);
   const feedback = useFeedback();
@@ -91,7 +96,7 @@ export default function FinesPage({ summary, fines }: FinesPageProps) {
             "Status",
             "Actions",
           ]}
-          from={1}
+          from={fines.length === 0 ? 0 : 1}
           to={fines.length}
           total={fines.length}
         >
@@ -173,7 +178,7 @@ export default function FinesPage({ summary, fines }: FinesPageProps) {
         id="add-fine"
         title="Add Fine"
         submitLabel="Add Fine"
-        onSubmit={(form) => {
+        onSubmit={async (form) => {
           if (
             !formHasValues(form, ["member", "book", "type", "amount", "date"])
           ) {
@@ -183,7 +188,26 @@ export default function FinesPage({ summary, fines }: FinesPageProps) {
             );
             return;
           }
-          feedback.success("Fine added", "The fine was recorded successfully.");
+
+          const data = new FormData(form);
+          const type = String(data.get("type") ?? "");
+          const result = await addFine({
+            member: String(data.get("member") ?? "").trim(),
+            book: String(data.get("book") ?? "").trim(),
+            type: fineTypes.includes(type as AdminFineType)
+              ? (type as AdminFineType)
+              : "Overdue",
+            amount: Number(data.get("amount")),
+            date: String(data.get("date") ?? "").trim(),
+          });
+
+          if (!result.ok) {
+            feedback.failed("Could not add fine", result.message);
+            return;
+          }
+
+          router.refresh();
+          feedback.success("Fine added", result.message);
         }}
       >
         <FormField label="Member" name="member" placeholder="Member name" />
@@ -205,8 +229,18 @@ export default function FinesPage({ summary, fines }: FinesPageProps) {
         confirmLabel="Mark paid"
         tone="success"
         onConfirm={() => {
+          const current = paying;
           setPaying(null);
-          feedback.success("Payment recorded", "The fine was marked as paid.");
+          if (!current) return;
+
+          void payFine(current.id).then((result) => {
+            if (!result.ok) {
+              feedback.failed("Could not record payment", result.message);
+              return;
+            }
+            feedback.success("Payment recorded", result.message);
+            router.refresh();
+          });
         }}
       />
 
@@ -217,8 +251,18 @@ export default function FinesPage({ summary, fines }: FinesPageProps) {
         confirmLabel="Waive"
         tone="danger"
         onConfirm={() => {
+          const current = waiving;
           setWaiving(null);
-          feedback.success("Fine waived", "The fine was waived.");
+          if (!current) return;
+
+          void waiveFine(current.id).then((result) => {
+            if (!result.ok) {
+              feedback.failed("Could not waive fine", result.message);
+              return;
+            }
+            feedback.success("Fine waived", result.message);
+            router.refresh();
+          });
         }}
       />
 

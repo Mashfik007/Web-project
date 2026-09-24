@@ -14,7 +14,7 @@ export type AdminBook = {
 };
 
 export type AdminCategory = {
-  id: number;
+  id: string;
   name: string;
   description: string;
   totalBooks: number;
@@ -22,7 +22,7 @@ export type AdminCategory = {
 };
 
 export type AdminAuthor = {
-  id: number;
+  id: string;
   name: string;
   initials: string;
   avatarClass: string;
@@ -32,18 +32,19 @@ export type AdminAuthor = {
 };
 
 export type AdminPublisher = {
-  id: number;
+  id: string;
   name: string;
   city: string;
   email: string;
   totalBooks: number;
+  status: "Active" | "Inactive";
 };
 
 export type AdminUserRole = "Member" | "Librarian" | "Admin";
 export type AdminUserStatus = "Active" | "Suspended";
 
 export type AdminUser = {
-  id: number;
+  id: string;
   name: string;
   initials: string;
   avatarClass: string;

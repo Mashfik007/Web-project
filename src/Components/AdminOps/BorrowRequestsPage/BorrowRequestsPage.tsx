@@ -2,6 +2,7 @@
 
 // incoming borrow requests — approve or reject
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
 import StatusBadge from "@/Components/AdminCatalog/StatusBadge/StatusBadge";
@@ -16,6 +17,7 @@ import {
   openModal,
   useFeedback,
 } from "@/Components/Modal";
+import { decideBorrowRequest } from "@/Controller/admin.controller";
 import type { AdminBorrowRequest, AdminBorrowStatus } from "@/types/adminOps";
 
 interface BorrowRequestsPageProps {
@@ -25,6 +27,7 @@ interface BorrowRequestsPageProps {
 export default function BorrowRequestsPage({
   requests,
 }: BorrowRequestsPageProps) {
+  const router = useRouter();
   const [filter, setFilter] = useState<"All" | AdminBorrowStatus>("All");
   const [confirm, setConfirm] = useState<{
     item: AdminBorrowRequest;
@@ -68,7 +71,7 @@ export default function BorrowRequestsPage({
           "Status",
           "Actions",
         ]}
-        from={1}
+        from={visible.length === 0 ? 0 : 1}
         to={visible.length}
         total={visible.length}
       >
@@ -146,12 +149,29 @@ export default function BorrowRequestsPage({
         confirmLabel={confirm?.action === "approve" ? "Approve" : "Reject"}
         tone={confirm?.action === "approve" ? "success" : "danger"}
         onConfirm={() => {
-          const action = confirm?.action;
-          const book = confirm?.item.book;
+          const current = confirm;
           setConfirm(null);
-          feedback.success(
-            action === "approve" ? "Request approved" : "Request rejected",
-            `"${book}" was ${action === "approve" ? "approved" : "rejected"}.`,
+          if (!current) return;
+
+          void decideBorrowRequest(current.item.id, current.action).then(
+            (result) => {
+              if (!result.ok) {
+                feedback.failed(
+                  current.action === "approve"
+                    ? "Could not approve request"
+                    : "Could not reject request",
+                  result.message,
+                );
+                return;
+              }
+              feedback.success(
+                current.action === "approve"
+                  ? "Request approved"
+                  : "Request rejected",
+                result.message,
+              );
+              router.refresh();
+            },
           );
         }}
       />

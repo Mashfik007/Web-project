@@ -1,5 +1,7 @@
 import BorrowRequestsPage from "@/Components/AdminOps/BorrowRequestsPage/BorrowRequestsPage";
-import { getAdminBorrowRequests } from "@/data/adminOpsData";
+import { getAdminBorrowRequests } from "@/data/getAdminBorrowRequests";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;

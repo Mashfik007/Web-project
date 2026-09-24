@@ -1,5 +1,7 @@
 import ReservationsPage from "@/Components/AdminOps/ReservationsPage/ReservationsPage";
-import { getAdminReservations } from "@/data/adminOpsData";
+import { getAdminReservations } from "@/data/getAdminReservations";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;

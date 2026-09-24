@@ -1,7 +1,7 @@
 export type AdminBorrowStatus = "Pending" | "Approved" | "Rejected";
 
 export type AdminBorrowRequest = {
-  id: number;
+  id: string;
   member: string;
   initials: string;
   avatarClass: string;
@@ -14,7 +14,7 @@ export type AdminBorrowRequest = {
 export type AdminReturnStatus = "Returned" | "Overdue" | "Due Today" | "Active";
 
 export type AdminReturnRecord = {
-  id: number;
+  id: string;
   member: string;
   initials: string;
   avatarClass: string;
@@ -30,7 +30,7 @@ export type AdminReturnRecord = {
 export type AdminReservationStatus = "Ready" | "Waiting" | "Expired";
 
 export type AdminReservation = {
-  id: number;
+  id: string;
   member: string;
   initials: string;
   avatarClass: string;
@@ -45,7 +45,7 @@ export type AdminFineType = "Overdue" | "Damage" | "Lost";
 export type AdminFineStatus = "Pending" | "Paid" | "Waived";
 
 export type AdminFine = {
-  id: number;
+  id: string;
   member: string;
   initials: string;
   avatarClass: string;
@@ -77,6 +77,26 @@ export type AdminDigitalResource = {
 export type AdminReportPoint = {
   month: string;
   borrows: number;
+};
+
+export type AdminReportPeriod = "week" | "month" | "year" | "custom";
+
+export type AdminReportTab = "borrows" | "users" | "fines" | "inventory";
+
+export type AdminReportRow = {
+  primary: string;
+  secondary: string;
+  value: string;
+  extra: string;
+};
+
+export type AdminReport = {
+  trends: AdminReportPoint[];
+  chartTitle: string;
+  seriesName: string;
+  tableTitle: string;
+  columns: [string, string, string, string];
+  rows: AdminReportRow[];
 };
 
 export type AdminTopBook = {

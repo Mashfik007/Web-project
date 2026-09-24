@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
 import StatusBadge from "@/Components/AdminCatalog/StatusBadge/StatusBadge";
@@ -13,6 +14,10 @@ import {
   openModal,
   useFeedback,
 } from "@/Components/Modal";
+import {
+  cancelReservation,
+  notifyReservation,
+} from "@/Controller/admin.controller";
 import type { AdminReservation } from "@/types/adminOps";
 
 interface ReservationsPageProps {
@@ -22,6 +27,7 @@ interface ReservationsPageProps {
 export default function ReservationsPage({
   reservations,
 }: ReservationsPageProps) {
+  const router = useRouter();
   const [notifying, setNotifying] = useState<AdminReservation | null>(null);
   const [cancelling, setCancelling] = useState<AdminReservation | null>(null);
   const feedback = useFeedback();
@@ -41,7 +47,7 @@ export default function ReservationsPage({
           "Status",
           "Actions",
         ]}
-        from={1}
+        from={reservations.length === 0 ? 0 : 1}
         to={reservations.length}
         total={reservations.length}
       >
@@ -106,12 +112,18 @@ export default function ReservationsPage({
         message={`Send a ready-for-pickup notice to ${notifying?.member} for "${notifying?.book}"?`}
         confirmLabel="Send notice"
         onConfirm={() => {
-          const name = notifying?.member;
+          const current = notifying;
           setNotifying(null);
-          feedback.success(
-            "Notice sent",
-            `${name} was notified that the book is ready.`,
-          );
+          if (!current) return;
+
+          void notifyReservation(current.id).then((result) => {
+            if (!result.ok) {
+              feedback.failed("Could not send notice", result.message);
+              return;
+            }
+            feedback.success("Notice sent", result.message);
+            router.refresh();
+          });
         }}
       />
 
@@ -122,11 +134,18 @@ export default function ReservationsPage({
         confirmLabel="Cancel hold"
         tone="danger"
         onConfirm={() => {
+          const current = cancelling;
           setCancelling(null);
-          feedback.success(
-            "Reservation cancelled",
-            "The hold was removed from the queue.",
-          );
+          if (!current) return;
+
+          void cancelReservation(current.id).then((result) => {
+            if (!result.ok) {
+              feedback.failed("Could not cancel reservation", result.message);
+              return;
+            }
+            feedback.success("Reservation cancelled", result.message);
+            router.refresh();
+          });
         }}
       />
 

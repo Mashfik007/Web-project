@@ -1,52 +1,38 @@
+import connectDB from "@/dbConfig/dbConfig";
+import { Book } from "@/Model/Books";
+import { Publisher } from "@/Model/Publishers";
 import type { AdminPublisher } from "@/types/adminCatalog";
 
-const publishers: AdminPublisher[] = [
-  {
-    id: 1,
-    name: "Penguin Random House",
-    city: "New York",
-    email: "contact@penguinrandomhouse.com",
-    totalBooks: 412,
-  },
-  {
-    id: 2,
-    name: "HarperCollins",
-    city: "London",
-    email: "info@harpercollins.co.uk",
-    totalBooks: 287,
-  },
-  {
-    id: 3,
-    name: "Simon & Schuster",
-    city: "New York",
-    email: "trade@simonandschuster.com",
-    totalBooks: 198,
-  },
-  {
-    id: 4,
-    name: "Ananya Prokashoni",
-    city: "Dhaka",
-    email: "info@ananya.com.bd",
-    totalBooks: 156,
-  },
-  {
-    id: 5,
-    name: "O'Reilly Media",
-    city: "Sebastopol",
-    email: "books@oreilly.com",
-    totalBooks: 234,
-  },
-  {
-    id: 6,
-    name: "Baatighar",
-    city: "Dhaka",
-    email: "contact@baatighar.com.bd",
-    totalBooks: 89,
-  },
-];
+type StoredPublisher = {
+  _id: { toString(): string };
+  name: string;
+  city: string;
+  email: string;
+  status: "Active" | "Inactive";
+};
 
 export async function getPublishersData(
   _adminId: string,
 ): Promise<AdminPublisher[]> {
-  return publishers;
+  await connectDB();
+
+  const [publishers, counts] = await Promise.all([
+    Publisher.find().sort({ createdAt: -1 }).lean<StoredPublisher[]>(),
+    Book.aggregate<{ _id: string; total: number }>([
+      { $group: { _id: "$metadata.publisher", total: { $sum: 1 } } },
+    ]),
+  ]);
+
+  const totals = new Map(
+    counts.map((count) => [count._id?.toLowerCase() ?? "", count.total]),
+  );
+
+  return publishers.map((publisher) => ({
+    id: publisher._id.toString(),
+    name: publisher.name,
+    city: publisher.city,
+    email: publisher.email,
+    totalBooks: totals.get(publisher.name.toLowerCase()) ?? 0,
+    status: publisher.status,
+  }));
 }

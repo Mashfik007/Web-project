@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
@@ -15,19 +16,34 @@ import {
   openModal,
   useFeedback,
 } from "@/Components/Modal";
+import {
+  addAuthor,
+  deleteAuthor,
+  restoreAuthor,
+  toggleAuthor,
+  updateAuthor,
+} from "@/Controller/admin.controller";
+import type { ArchivedAuthorItem } from "@/data/getArchivedAuthors";
 import type { AdminAuthor } from "@/types/adminCatalog";
 
 interface AuthorsPageProps {
   authors: AdminAuthor[];
+  archivedAuthors: ArchivedAuthorItem[];
 }
 
-export default function AuthorsPage({ authors }: AuthorsPageProps) {
+export default function AuthorsPage({
+  authors,
+  archivedAuthors,
+}: AuthorsPageProps) {
+  const router = useRouter();
   const [formMode, setFormMode] = useState<"add" | "edit" | null>(null);
+  const [formVersion, setFormVersion] = useState(0);
   const [editing, setEditing] = useState<AdminAuthor | null>(null);
   const [deleting, setDeleting] = useState<AdminAuthor | null>(null);
+  const [archiveId, setArchiveId] = useState("");
   const feedback = useFeedback();
 
-  function handleSave(form: HTMLFormElement) {
+  async function handleSave(form: HTMLFormElement) {
     if (!formHasValues(form, ["name", "nationality"])) {
       feedback.failed(
         "Could not save author",
@@ -35,10 +51,64 @@ export default function AuthorsPage({ authors }: AuthorsPageProps) {
       );
       return;
     }
+
+    const data = new FormData(form);
+    const author = {
+      name: String(data.get("name") ?? "").trim(),
+      nationality: String(data.get("nationality") ?? "").trim(),
+    };
+
+    const result =
+      formMode === "edit" && editing
+        ? await updateAuthor(editing.id, author)
+        : await addAuthor(author);
+
+    if (!result.ok) {
+      feedback.failed(
+        formMode === "edit" ? "Could not update author" : "Could not add author",
+        result.message,
+      );
+      return;
+    }
+
+    router.refresh();
     feedback.success(
       formMode === "edit" ? "Author updated" : "Author added",
-      "The author record was saved successfully.",
+      result.message,
     );
+  }
+
+  async function handleToggle(author: AdminAuthor) {
+    const result = await toggleAuthor(author.id);
+    if (!result.ok) {
+      feedback.failed("Could not update author", result.message);
+      return;
+    }
+    router.refresh();
+    feedback.success(
+      author.status === "Active" ? "Author deactivated" : "Author activated",
+      result.message,
+    );
+  }
+
+  async function handleRestore() {
+    if (!archiveId) {
+      feedback.failed(
+        "Could not restore author",
+        "Select an archived author first.",
+      );
+      return;
+    }
+
+    const result = await restoreAuthor(archiveId);
+    if (!result.ok) {
+      feedback.failed("Could not restore author", result.message);
+      return;
+    }
+
+    setArchiveId("");
+    router.refresh();
+    feedback.success("Author restored", result.message);
   }
 
   return (
@@ -49,12 +119,38 @@ export default function AuthorsPage({ authors }: AuthorsPageProps) {
       onAdd={() => {
         setEditing(null);
         setFormMode("add");
+        setFormVersion((version) => version + 1);
         openModal("author-form");
       }}
     >
+      <div className="border-base-200 flex flex-wrap items-center gap-2 border-b p-4">
+        <select
+          name="archive"
+          className="select"
+          value={archiveId}
+          onChange={(event) => setArchiveId(event.target.value)}
+        >
+          <option value="">Restore from archive</option>
+          {archivedAuthors.map((archive) => (
+            <option key={archive.id} value={archive.id}>
+              {archive.name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="btn btn-outline"
+          onClick={() => {
+            void handleRestore();
+          }}
+        >
+          Restore
+        </button>
+      </div>
+
       <AdminTable
         columns={["Author", "Nationality", "Total Books", "Status", "Actions"]}
-        from={1}
+        from={authors.length === 0 ? 0 : 1}
         to={authors.length}
         total={authors.length}
       >
@@ -81,14 +177,24 @@ export default function AuthorsPage({ authors }: AuthorsPageProps) {
               />
             </td>
             <td className="px-4 py-3">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <EditButton
                   onClick={() => {
                     setEditing(author);
                     setFormMode("edit");
+                    setFormVersion((version) => version + 1);
                     openModal("author-form");
                   }}
                 />
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleToggle(author);
+                  }}
+                  className="text-xs font-medium text-orange-500 hover:text-orange-600"
+                >
+                  {author.status === "Active" ? "Deactivate" : "Activate"}
+                </button>
                 <DeleteButton
                   onClick={() => {
                     setDeleting(author);
@@ -103,8 +209,9 @@ export default function AuthorsPage({ authors }: AuthorsPageProps) {
 
       <FormModal
         id="author-form"
-        key={editing?.id ?? "add"}
+        key={formVersion}
         title={formMode === "edit" ? "Edit Author" : "Add Author"}
+        submitLabel={formMode === "edit" ? "Update Author" : "Add Author"}
         onSubmit={handleSave}
       >
         <FormField
@@ -112,12 +219,14 @@ export default function AuthorsPage({ authors }: AuthorsPageProps) {
           name="name"
           placeholder="Author name"
           defaultValue={editing?.name}
+          required
         />
         <FormField
           label="Nationality"
           name="nationality"
           placeholder="Nationality"
           defaultValue={editing?.nationality}
+          required
         />
       </FormModal>
 
@@ -128,8 +237,18 @@ export default function AuthorsPage({ authors }: AuthorsPageProps) {
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {
+          const id = deleting?.id;
           setDeleting(null);
-          feedback.success("Author deleted", "The author was removed.");
+          if (!id) return;
+
+          void deleteAuthor(id).then((result) => {
+            if (!result.ok) {
+              feedback.failed("Could not delete author", result.message);
+              return;
+            }
+            feedback.success("Author deleted", result.message);
+            router.refresh();
+          });
         }}
       />
 

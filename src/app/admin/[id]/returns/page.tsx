@@ -1,5 +1,7 @@
 import ReturnsPage from "@/Components/AdminOps/ReturnsPage/ReturnsPage";
-import { getAdminReturns } from "@/data/adminOpsData";
+import { getAdminReturns } from "@/data/getAdminReturns";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;

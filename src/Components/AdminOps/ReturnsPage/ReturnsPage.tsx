@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
 import StatusBadge from "@/Components/AdminCatalog/StatusBadge/StatusBadge";
@@ -16,6 +17,7 @@ import {
   openModal,
   useFeedback,
 } from "@/Components/Modal";
+import { markReturned } from "@/Controller/admin.controller";
 import type { AdminReturnRecord, AdminReturnStatus } from "@/types/adminOps";
 
 interface ReturnsPageProps {
@@ -23,6 +25,7 @@ interface ReturnsPageProps {
 }
 
 export default function ReturnsPage({ records }: ReturnsPageProps) {
+  const router = useRouter();
   const [filter, setFilter] = useState<"All" | AdminReturnStatus>("All");
   const [returning, setReturning] = useState<AdminReturnRecord | null>(null);
   const feedback = useFeedback();
@@ -71,7 +74,7 @@ export default function ReturnsPage({ records }: ReturnsPageProps) {
           "Status",
           "Actions",
         ]}
-        from={1}
+        from={visible.length === 0 ? 0 : 1}
         to={visible.length}
         total={visible.length}
       >
@@ -131,13 +134,16 @@ export default function ReturnsPage({ records }: ReturnsPageProps) {
         key={returning?.id ?? "return"}
         title="Confirm return"
         submitLabel="Mark returned"
-        onSubmit={() => {
-          const book = returning?.book;
+        onSubmit={async (form) => {
+          if (!returning) return;
+          const returnDate = String(
+            new FormData(form).get("returnDate") ?? "",
+          ).trim();
+          const result = await markReturned(returning.id, returnDate);
           setReturning(null);
-          feedback.success(
-            "Book returned",
-            `"${book}" was marked as returned.`,
-          );
+          router.refresh();
+          if (result.ok) feedback.success(result.message, result.message);
+          else feedback.failed("Could not mark returned", result.message);
         }}
       >
         <p className="text-sm text-slate-500">

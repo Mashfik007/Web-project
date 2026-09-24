@@ -1,80 +1,59 @@
-import type { AdminUser } from "@/types/adminCatalog";
+import connectDB from "@/dbConfig/dbConfig";
+import { LibraryUser } from "@/Model/LibraryUsers";
+import type { AdminUser, AdminUserRole, AdminUserStatus } from "@/types/adminCatalog";
 
-const users: AdminUser[] = [
-  {
-    id: 1,
-    name: "Rafiqul Islam",
-    initials: "RI",
-    avatarClass: "bg-sky-500 text-white",
-    email: "rafiqul.i@gmail.com",
-    phone: "+880 1711-223344",
-    role: "Member",
-    status: "Active",
-    joined: "2024-01-12",
-    borrows: 8,
-  },
-  {
-    id: 2,
-    name: "Sarah Mitchell",
-    initials: "SM",
-    avatarClass: "bg-emerald-500 text-white",
-    email: "sarah.m@gmail.com",
-    phone: "+1 415-555-0198",
-    role: "Librarian",
-    status: "Active",
-    joined: "2023-08-04",
-    borrows: 2,
-  },
-  {
-    id: 3,
-    name: "Tanvir Ahmed",
-    initials: "TA",
-    avatarClass: "bg-violet-500 text-white",
-    email: "tanvir.a@gmail.com",
-    phone: "+880 1812-667788",
-    role: "Member",
-    status: "Active",
-    joined: "2024-03-21",
-    borrows: 5,
-  },
-  {
-    id: 4,
-    name: "Priya Sharma",
-    initials: "PS",
-    avatarClass: "bg-amber-500 text-white",
-    email: "priya.s@gmail.com",
-    phone: "+91 98765-43210",
-    role: "Member",
-    status: "Suspended",
-    joined: "2023-11-09",
-    borrows: 1,
-  },
-  {
-    id: 5,
-    name: "Michael Chen",
-    initials: "MC",
-    avatarClass: "bg-cyan-500 text-white",
-    email: "michael.c@gmail.com",
-    phone: "+1 646-555-0142",
-    role: "Admin",
-    status: "Active",
-    joined: "2022-06-18",
-    borrows: 0,
-  },
-  {
-    id: 6,
-    name: "Nadia Rahman",
-    initials: "NR",
-    avatarClass: "bg-rose-500 text-white",
-    email: "nadia.r@gmail.com",
-    phone: "+880 1913-445566",
-    role: "Librarian",
-    status: "Active",
-    joined: "2024-05-02",
-    borrows: 3,
-  },
+type StoredUser = {
+  _id: { toString(): string };
+  name: string;
+  email: string;
+  phone: string;
+  role: AdminUserRole;
+  status: AdminUserStatus;
+  borrows?: number;
+  createdAt?: string | Date;
+};
+
+const avatarClasses = [
+  "bg-sky-500 text-white",
+  "bg-emerald-500 text-white",
+  "bg-violet-500 text-white",
+  "bg-amber-500 text-white",
+  "bg-cyan-500 text-white",
+  "bg-rose-500 text-white",
 ];
 
+function initialsFrom(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const letters = parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "");
+  return letters.join("") || name.slice(0, 2).toUpperCase();
+}
+
+function avatarClassFrom(name: string) {
+  const code = name
+    .split("")
+    .reduce((total, char) => total + char.charCodeAt(0), 0);
+  return avatarClasses[code % avatarClasses.length];
+}
+
 export async function getUsersData(_adminId: string): Promise<AdminUser[]> {
-  return users;
+  await connectDB();
+
+  const users = await LibraryUser.find()
+    .sort({ createdAt: -1 })
+    .lean<StoredUser[]>();
+
+  return users.map((user) => ({
+    id: user._id.toString(),
+    name: user.name,
+    initials: initialsFrom(user.name),
+    avatarClass: avatarClassFrom(user.name),
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    status: user.status,
+    joined: user.createdAt
+      ? new Date(user.createdAt).toISOString().slice(0, 10)
+      : "",
+    borrows: user.borrows ?? 0,
+  }));
 }

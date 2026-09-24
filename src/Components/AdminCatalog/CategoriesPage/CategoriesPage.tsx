@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
@@ -16,19 +17,34 @@ import {
   openModal,
   useFeedback,
 } from "@/Components/Modal";
+import {
+  addCategory,
+  deleteCategory,
+  restoreCategory,
+  toggleCategory,
+  updateCategory,
+} from "@/Controller/admin.controller";
+import type { ArchivedCategoryItem } from "@/data/getArchivedCategories";
 import type { AdminCategory } from "@/types/adminCatalog";
 
 interface CategoriesPageProps {
   categories: AdminCategory[];
+  archivedCategories: ArchivedCategoryItem[];
 }
 
-export default function CategoriesPage({ categories }: CategoriesPageProps) {
+export default function CategoriesPage({
+  categories,
+  archivedCategories,
+}: CategoriesPageProps) {
+  const router = useRouter();
   const [formMode, setFormMode] = useState<"add" | "edit" | null>(null);
+  const [formVersion, setFormVersion] = useState(0);
   const [editing, setEditing] = useState<AdminCategory | null>(null);
   const [deleting, setDeleting] = useState<AdminCategory | null>(null);
+  const [archiveId, setArchiveId] = useState("");
   const feedback = useFeedback();
 
-  function handleSave(form: HTMLFormElement) {
+  async function handleSave(form: HTMLFormElement) {
     if (!formHasValues(form, ["name", "description"])) {
       feedback.failed(
         "Could not save category",
@@ -36,10 +52,66 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
       );
       return;
     }
+
+    const data = new FormData(form);
+    const category = {
+      name: String(data.get("name") ?? "").trim(),
+      description: String(data.get("description") ?? "").trim(),
+    };
+
+    const result =
+      formMode === "edit" && editing
+        ? await updateCategory(editing.id, category)
+        : await addCategory(category);
+
+    if (!result.ok) {
+      feedback.failed(
+        formMode === "edit"
+          ? "Could not update category"
+          : "Could not add category",
+        result.message,
+      );
+      return;
+    }
+
+    router.refresh();
     feedback.success(
       formMode === "edit" ? "Category updated" : "Category added",
-      "The category list was saved successfully.",
+      result.message,
     );
+  }
+
+  async function handleToggle(category: AdminCategory) {
+    const result = await toggleCategory(category.id);
+    if (!result.ok) {
+      feedback.failed("Could not update category", result.message);
+      return;
+    }
+    router.refresh();
+    feedback.success(
+      category.status === "Active" ? "Category deactivated" : "Category activated",
+      result.message,
+    );
+  }
+
+  async function handleRestore() {
+    if (!archiveId) {
+      feedback.failed(
+        "Could not restore category",
+        "Select an archived category first.",
+      );
+      return;
+    }
+
+    const result = await restoreCategory(archiveId);
+    if (!result.ok) {
+      feedback.failed("Could not restore category", result.message);
+      return;
+    }
+
+    setArchiveId("");
+    router.refresh();
+    feedback.success("Category restored", result.message);
   }
 
   return (
@@ -50,12 +122,38 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
       onAdd={() => {
         setEditing(null);
         setFormMode("add");
+        setFormVersion((version) => version + 1);
         openModal("category-form");
       }}
     >
+      <div className="border-base-200 flex flex-wrap items-center gap-2 border-b p-4">
+        <select
+          name="archive"
+          className="select"
+          value={archiveId}
+          onChange={(event) => setArchiveId(event.target.value)}
+        >
+          <option value="">Restore from archive</option>
+          {archivedCategories.map((archive) => (
+            <option key={archive.id} value={archive.id}>
+              {archive.name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="btn btn-outline"
+          onClick={() => {
+            void handleRestore();
+          }}
+        >
+          Restore
+        </button>
+      </div>
+
       <AdminTable
         columns={["Name", "Description", "Total Books", "Status", "Actions"]}
-        from={1}
+        from={categories.length === 0 ? 0 : 1}
         to={categories.length}
         total={categories.length}
       >
@@ -91,19 +189,15 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
                   onClick={() => {
                     setEditing(category);
                     setFormMode("edit");
+                    setFormVersion((version) => version + 1);
                     openModal("category-form");
                   }}
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    feedback.success(
-                      category.status === "Active"
-                        ? "Category deactivated"
-                        : "Category activated",
-                      `${category.name} is now ${category.status === "Active" ? "inactive" : "active"}.`,
-                    )
-                  }
+                  onClick={() => {
+                    void handleToggle(category);
+                  }}
                   className="text-xs font-medium text-orange-500 hover:text-orange-600"
                 >
                   {category.status === "Active" ? "Deactivate" : "Activate"}
@@ -122,8 +216,9 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
 
       <FormModal
         id="category-form"
-        key={editing?.id ?? "add"}
+        key={formVersion}
         title={formMode === "edit" ? "Edit Category" : "Add Category"}
+        submitLabel={formMode === "edit" ? "Update Category" : "Add Category"}
         onSubmit={handleSave}
       >
         <FormField
@@ -131,6 +226,7 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
           name="name"
           placeholder="Category name"
           defaultValue={editing?.name}
+          required
         />
         <FormField
           label="Description"
@@ -138,6 +234,7 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
           as="textarea"
           placeholder="Short description"
           defaultValue={editing?.description}
+          required
         />
       </FormModal>
 
@@ -148,8 +245,18 @@ export default function CategoriesPage({ categories }: CategoriesPageProps) {
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {
+          const id = deleting?.id;
           setDeleting(null);
-          feedback.success("Category deleted", "The category was removed.");
+          if (!id) return;
+
+          void deleteCategory(id).then((result) => {
+            if (!result.ok) {
+              feedback.failed("Could not delete category", result.message);
+              return;
+            }
+            feedback.success("Category deleted", result.message);
+            router.refresh();
+          });
         }}
       />
 

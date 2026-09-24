@@ -1,7 +1,17 @@
+import { AdminUser_shema } from "@/Shchema/adminUsers";
+import { Author_shema } from "@/Shchema/authors";
 import { Book_shema } from "@/Shchema/books";
+import { Category_shema } from "@/Shchema/categories";
+import { Fine_shema } from "@/Shchema/fines";
+import { Publisher_shema } from "@/Shchema/publishers";
 import { z } from "zod";
 
 type BookData = z.infer<typeof Book_shema>;
+type CategoryData = z.infer<typeof Category_shema>;
+type AuthorData = z.infer<typeof Author_shema>;
+type PublisherData = z.infer<typeof Publisher_shema>;
+type AdminUserData = z.infer<typeof AdminUser_shema>;
+type FineData = z.infer<typeof Fine_shema>;
 
 type ServerResult = {
     ok: boolean;
@@ -166,6 +176,131 @@ export async function login_user(form: loginForm) {
     } catch (error) {
         console.error(error);
     }
+}
+
+async function postCategory(url: string, body: unknown): Promise<ServerResult> {
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        return readResult(res);
+    } catch (error) {
+        console.error(error);
+        return { ok: false, message: "Could not reach the server." };
+    }
+}
+
+export async function addCategory(category: CategoryData) {
+    return postCategory("/api/admin/add-categories", category);
+}
+
+export async function updateCategory(id: string, category: CategoryData) {
+    return postCategory("/api/admin/update-categories", { id, ...category });
+}
+
+export async function toggleCategory(id: string) {
+    return postCategory("/api/admin/category-status", { id });
+}
+
+export async function deleteCategory(id: string) {
+    return postCategory("/api/admin/delete-categories", { id });
+}
+
+export async function restoreCategory(id: string) {
+    return postCategory("/api/admin/restore-categories", { id });
+}
+
+export async function addAuthor(author: AuthorData) {
+    return postCategory("/api/admin/add-authors", author);
+}
+
+export async function updateAuthor(id: string, author: AuthorData) {
+    return postCategory("/api/admin/update-authors", { id, ...author });
+}
+
+export async function toggleAuthor(id: string) {
+    return postCategory("/api/admin/author-status", { id });
+}
+
+export async function deleteAuthor(id: string) {
+    return postCategory("/api/admin/delete-authors", { id });
+}
+
+export async function restoreAuthor(id: string) {
+    return postCategory("/api/admin/restore-authors", { id });
+}
+
+export async function addPublisher(publisher: PublisherData) {
+    return postCategory("/api/admin/add-publishers", publisher);
+}
+
+export async function updatePublisher(id: string, publisher: PublisherData) {
+    return postCategory("/api/admin/update-publishers", { id, ...publisher });
+}
+
+export async function togglePublisher(id: string) {
+    return postCategory("/api/admin/publisher-status", { id });
+}
+
+export async function deletePublisher(id: string) {
+    return postCategory("/api/admin/delete-publishers", { id });
+}
+
+export async function restorePublisher(id: string) {
+    return postCategory("/api/admin/restore-publishers", { id });
+}
+
+export async function addUser(user: AdminUserData) {
+    return postCategory("/api/admin/add-users", user);
+}
+
+export async function updateUser(id: string, user: AdminUserData) {
+    return postCategory("/api/admin/update-users", { id, ...user });
+}
+
+export async function toggleUser(id: string) {
+    return postCategory("/api/admin/user-status", { id });
+}
+
+export async function deleteUser(id: string) {
+    return postCategory("/api/admin/delete-users", { id });
+}
+
+export async function restoreUser(id: string) {
+    return postCategory("/api/admin/restore-users", { id });
+}
+
+export async function decideBorrowRequest(id: string, action: "approve" | "reject") {
+    return postCategory("/api/admin/borrow-request-status", { id, action });
+}
+
+export async function markReturned(id: string, returnDate: string) {
+    return postCategory("/api/admin/mark-returned", { id, returnDate });
+}
+
+export async function notifyReservation(id: string) {
+    return postCategory("/api/admin/notify-reservation", { id });
+}
+
+export async function cancelReservation(id: string) {
+    return postCategory("/api/admin/cancel-reservation", { id });
+}
+
+export async function addFine(fine: FineData) {
+    return postCategory("/api/admin/add-fines", fine);
+}
+
+export async function payFine(id: string) {
+    return postCategory("/api/admin/pay-fine", { id });
+}
+
+export async function waiveFine(id: string) {
+    return postCategory("/api/admin/waive-fine", { id });
 }
 
 export async function logout() {
