@@ -7,8 +7,8 @@ const User_schema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "name is required"],
-      minLength: 8,
-      maxLength: 10,
+      minLength: 2,
+      maxLength: 40,
       trim: true,
     },
     email: {
@@ -28,7 +28,7 @@ const User_schema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      match: [/^\+?[1-9]\d{7,14}$/, "give a valid phone number"],
+      match: [/^\+?[0-9]\d{7,14}$/, "give a valid phone number"],
     },
     password: {
       type: String,
@@ -105,12 +105,21 @@ User_schema.methods.isPasswordCorrect = async function (password: string) {
   return bcrypt.compare(password, this.password);
 };
 
-const existingUser = mongoose.models.users;
-if (existingUser) {
-  existingUser.schema.methods.genAccessToken = genAccessToken;
-  existingUser.prototype.genAccessToken = genAccessToken;
+type UserMethods = {
+  genAccessToken(): string;
+  genRefreshToken(): string;
+  genforgotPassToken(): string;
+  isPasswordCorrect(password: string): Promise<boolean>;
+};
+
+if (mongoose.models.users) {
+  mongoose.deleteModel("users");
 }
 
-const User = existingUser || mongoose.model("users", User_schema);
+const User = mongoose.model("users", User_schema) as mongoose.Model<
+  mongoose.InferSchemaType<typeof User_schema>,
+  object,
+  UserMethods
+>;
 
 export { User, User_schema };

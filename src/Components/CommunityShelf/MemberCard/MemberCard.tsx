@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { StatusModal, useFeedback } from "@/Components/Modal";
@@ -115,6 +116,9 @@ export default function MemberCard({ viewerId, member }: MemberCardProps) {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+        <Link href={`/user/${viewerId}/chat?with=${member.id}`} className="btn btn-ghost btn-xs">
+          Message
+        </Link>
         {status === "friends" && (
           <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
             Friends

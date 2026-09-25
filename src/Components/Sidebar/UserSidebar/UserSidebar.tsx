@@ -113,6 +113,20 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    label: "Chat",
+    href: (userId) => `/user/${userId}/chat`,
+    match: (pathname, userId) => pathname.startsWith(`/user/${userId}/chat`),
+    icon: (
+      <Image
+        src="/svg/envelope.svg"
+        alt="Chat"
+        width={16}
+        height={16}
+        className={iconClassName}
+      />
+    ),
+  },
+  {
     label: "Borrow Requests",
     href: (userId) => `/user/${userId}/borrow-requests`,
     match: (pathname, userId) =>

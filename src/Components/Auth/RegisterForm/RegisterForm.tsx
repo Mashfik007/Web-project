@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Form_shema } from "@/Shchema/users";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
@@ -13,7 +14,9 @@ import z from "zod";
 type FormData = z.infer<typeof Form_shema>;
 
 export default function RegisterForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState("");
   const {
     register,
     handleSubmit,
@@ -22,8 +25,17 @@ export default function RegisterForm() {
     resolver: zodResolver(Form_shema),
   });
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    register_user(data);
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    setFormError("");
+    const res = await register_user(data);
+    const id = res?.data?._id;
+    if (!res?.success || !id) {
+      setFormError(res?.message || "Could not create the account.");
+      return;
+    }
+
+    router.push(`/user/${id}`);
+    router.refresh();
   };
 
   return (
@@ -101,6 +113,8 @@ export default function RegisterForm() {
           icon={<Image src="/svg/lock.svg" alt="Password" width={16} height={16} />}
           error={errors.confirmpassword?.message}
         />
+
+        {formError ? <p className="text-error text-sm">{formError}</p> : null}
 
         <button
           type="submit"

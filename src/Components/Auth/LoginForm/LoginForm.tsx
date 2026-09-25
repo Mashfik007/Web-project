@@ -12,10 +12,7 @@ import z from "zod";
 
 const Form_schema = z.object({
   email: z.email(),
-  password: z
-    .string()
-    .min(8, "Password length must be atleast 8")
-    .max(10, "Password length can not  be more than 10"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type FormField = z.infer<typeof Form_schema>;

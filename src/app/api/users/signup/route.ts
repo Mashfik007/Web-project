@@ -1,32 +1,48 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { syncLibraryMember } from "@/data/libraryLink";
 import { User } from "@/Model/Users";
+import { Form_shema } from "@/Shchema/users";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
-export  async function POST(request: Request) {
+import { NextResponse } from "next/server";
+
+export async function POST(request: Request) {
   try {
     await connectDB();
-    const body = await request.json();
-    const { name, email, phone, password } = body;
+    const parsed = Form_shema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        new ApiError(400, parsed.error.issues[0]?.message || "Invalid registration"),
+        { status: 400 },
+      );
+    }
 
-    // Check if user already exists
+    const { name, email, phone, password } = parsed.data;
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = phone.trim();
+
     const existsuser = await User.findOne({
-      $or: [{ email }, { phone }],
+      $or: [{ email: normalizedEmail }, { phone: normalizedPhone }],
     }).select("_id");
 
     if (existsuser) {
-      throw new Error("User already exists");
+      return NextResponse.json(
+        new ApiError(409, "An account with this email or phone already exists"),
+        { status: 409 },
+      );
     }
+
     const user = await User.create({
-      name,
-      email,
-      phone,
+      name: name.trim(),
+      email: normalizedEmail,
+      phone: normalizedPhone,
       password,
     });
 
+    const accessToken = user.genAccessToken();
+    user.accessToken = accessToken;
     user.refreshToken = user.genRefreshToken();
     user.forgotPassToken = user.genforgotPassToken();
-
     await user.save();
     await syncLibraryMember({
       name: user.name,
@@ -34,26 +50,40 @@ export  async function POST(request: Request) {
       phone: user.phone,
     });
 
-    return new Response(
-      JSON.stringify(new ApiResponce(201, null, "Saved user successfully")),
-      {
-        status: 201,
-        headers: {
-          "Content-Type": "application/json",
+    const response = NextResponse.json(
+      new ApiResponce(
+        201,
+        {
+          _id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          isAdmin: false,
         },
-      },
-    );
-  } catch (error: any) {
-    return new Response(
-      JSON.stringify(
-        new ApiError(500, error.message || "Internal Server Error"),
+        "Saved user successfully",
       ),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
+      { status: 201 },
     );
+
+    response.cookies.set("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 15,
+    });
+
+    return response;
+  } catch (error) {
+    const code =
+      error && typeof error === "object" && "code" in error ? error.code : undefined;
+    if (code === 11000) {
+      return NextResponse.json(
+        new ApiError(409, "An account with this email or phone already exists"),
+        { status: 409 },
+      );
+    }
+
+    const message = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json(new ApiError(500, message), { status: 500 });
   }
 }

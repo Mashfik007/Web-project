@@ -1,5 +1,6 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { LibraryUser } from "@/Model/LibraryUsers";
+import { User } from "@/Model/Users";
 import type { AdminUser, AdminUserRole, AdminUserStatus } from "@/types/adminCatalog";
 
 type StoredUser = {
@@ -38,22 +39,33 @@ function avatarClassFrom(name: string) {
 export async function getUsersData(_adminId: string): Promise<AdminUser[]> {
   await connectDB();
 
-  const users = await LibraryUser.find()
-    .sort({ createdAt: -1 })
-    .lean<StoredUser[]>();
+  const [users, adminAccounts] = await Promise.all([
+    LibraryUser.find({ role: { $ne: "Admin" } })
+      .sort({ createdAt: -1 })
+      .lean<StoredUser[]>(),
+    User.find({ isAdmin: true }).select("email").lean<{ email?: string }[]>(),
+  ]);
 
-  return users.map((user) => ({
-    id: user._id.toString(),
-    name: user.name,
-    initials: initialsFrom(user.name),
-    avatarClass: avatarClassFrom(user.name),
-    email: user.email,
-    phone: user.phone,
-    role: user.role,
-    status: user.status,
-    joined: user.createdAt
-      ? new Date(user.createdAt).toISOString().slice(0, 10)
-      : "",
-    borrows: user.borrows ?? 0,
-  }));
+  const adminEmails = new Set(
+    adminAccounts
+      .map((account) => account.email?.trim().toLowerCase())
+      .filter((email): email is string => Boolean(email)),
+  );
+
+  return users
+    .filter((user) => !adminEmails.has(user.email.trim().toLowerCase()))
+    .map((user) => ({
+      id: user._id.toString(),
+      name: user.name,
+      initials: initialsFrom(user.name),
+      avatarClass: avatarClassFrom(user.name),
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      status: user.status,
+      joined: user.createdAt
+        ? new Date(user.createdAt).toISOString().slice(0, 10)
+        : "",
+      borrows: user.borrows ?? 0,
+    }));
 }

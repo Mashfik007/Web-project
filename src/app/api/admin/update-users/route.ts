@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[1-9]\d{7,14}$/;
-const roles = ["Member", "Librarian", "Admin"];
+const roles = ["Member", "Librarian"];
 
 function normalizePhone(value: string) {
   const trimmed = value.trim();

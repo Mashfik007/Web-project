@@ -36,7 +36,7 @@ const roleClass = {
   Admin: "bg-rose-50 text-rose-600",
 };
 
-const roles: AdminUserRole[] = ["Member", "Librarian", "Admin"];
+const roles: AdminUserRole[] = ["Member", "Librarian"];
 
 interface UsersPageProps {
   users: AdminUser[];
@@ -139,7 +139,7 @@ export default function UsersPage({ users, archivedUsers }: UsersPageProps) {
   return (
     <AdminPageShell
       title="Users"
-      subtitle="Manage library members and staff"
+      subtitle="Manage library members"
       addLabel="Add User"
       onAdd={() => {
         setEditing(null);
