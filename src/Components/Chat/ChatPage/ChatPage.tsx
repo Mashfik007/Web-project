@@ -184,15 +184,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
 
   return (
     <main className="flex h-[calc(100dvh-7.5rem)] min-h-[32rem] flex-col">
-      <div className="mb-4">
-        <p className="text-[10px] font-semibold tracking-[0.2em] text-sky-500 uppercase">
-          Messages
-        </p>
-        <h1 className="mt-1 font-serif text-3xl font-bold text-slate-800">Chat</h1>
-        <p className="mt-1 text-sm text-sky-600">
-          Talk with the reading community, or message a member directly.
-        </p>
-      </div>
+
 
       <section className="grid min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[320px_minmax(0,1fr)]">
         <aside className="flex min-h-0 flex-col border-b border-slate-200 lg:border-r lg:border-b-0">
@@ -201,9 +193,8 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
               <button
                 type="button"
                 onClick={() => openConversation(community)}
-                className={`rounded-lg px-3 py-2 text-sm font-semibold ${
-                  channel === "group" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
-                }`}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold ${channel === "group" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
+                  }`}
               >
                 Community
               </button>
@@ -213,9 +204,8 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                   setChannel("direct");
                   if (selected.kind === "group" && directs[0]) openConversation(directs[0]);
                 }}
-                className={`rounded-lg px-3 py-2 text-sm font-semibold ${
-                  channel === "direct" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
-                }`}
+                className={`rounded-lg px-3 py-2 text-sm font-semibold ${channel === "direct" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
+                  }`}
               >
                 Direct
               </button>
@@ -239,9 +229,8 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                     <button
                       type="button"
                       onClick={() => openConversation(item)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left ${
-                        active ? "bg-sky-50" : "hover:bg-slate-50"
-                      }`}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left ${active ? "bg-sky-50" : "hover:bg-slate-50"
+                        }`}
                     >
                       <span
                         className={`flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${item.avatarColor}`}
@@ -332,11 +321,10 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                           </p>
                         )}
                         <div
-                          className={`rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
-                            mine
+                          className={`rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${mine
                               ? "rounded-br-md bg-sky-500 text-white"
                               : "rounded-bl-md bg-white text-slate-800 shadow-sm"
-                          }`}
+                            }`}
                         >
                           {message.body}
                         </div>

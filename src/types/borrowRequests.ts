@@ -11,6 +11,8 @@ export type IncomingBorrowRequest = {
   requestedAt: string;
   expectedReturn?: string;
   reason?: string;
+  direction?: "sent" | "received";
+  counterpart?: string;
 };
 
 export type BorrowRequestFilter = {

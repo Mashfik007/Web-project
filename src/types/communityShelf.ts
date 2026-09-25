@@ -6,6 +6,7 @@ export type NetworkStat = {
 };
 
 export type CommunityBook = {
+  id?: string;
   title: string;
   author: string;
   coverImage: string;

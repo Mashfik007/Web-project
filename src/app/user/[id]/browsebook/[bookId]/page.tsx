@@ -1,6 +1,8 @@
 import BookDetailsPage from "@/Components/BookDetails/BookDetailsPage/BookDetailsPage";
 import connectDB from "@/dbConfig/dbConfig";
 import { Book } from "@/Model/Books";
+import { ShelfLoan } from "@/Model/ShelfLoans";
+import { User } from "@/Model/Users";
 import type { BookDetails } from "@/types/bookDetails";
 import mongoose from "mongoose";
 import { notFound } from "next/navigation";
@@ -115,9 +117,44 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
+  const loans = await ShelfLoan.find({ bookId, status: "reading", userId: { $ne: id } })
+    .select("userId")
+    .lean<{ userId: string }[]>();
+  const holderIds = [...new Set(loans.map((loan) => loan.userId))].filter((holderId) =>
+    mongoose.Types.ObjectId.isValid(holderId),
+  );
+  const accounts = holderIds.length
+    ? await User.find({ _id: { $in: holderIds }, isAdmin: { $ne: true } })
+        .select("name")
+        .lean<{ _id: { toString(): string }; name?: string }[]>()
+    : [];
+  const colors = ["bg-sky-500", "bg-violet-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"];
+  const holders = accounts.map((account) => {
+    const name = account.name?.trim() || "Reader";
+    const letters = name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("");
+    const code = name.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
+    return {
+      id: account._id.toString(),
+      name,
+      initials: letters || "R",
+      color: colors[code % colors.length],
+    };
+  });
+
+  const book = toBookDetails(record);
+  book.community = {
+    totalOnShelf: holders.length,
+    members: holders,
+  };
+
   return (
     <BookDetailsPage
-      book={toBookDetails(record)}
+      book={book}
       userId={id}
       backHref={`/user/${id}/browsebook`}
       checkoutHref={`/user/${id}/checkout/${bookId}`}

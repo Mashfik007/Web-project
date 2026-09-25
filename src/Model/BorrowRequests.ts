@@ -35,6 +35,11 @@ const BorrowRequest_schema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    ownerId: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     reason: {
       type: String,
       trim: true,
@@ -55,6 +60,11 @@ if (existingBorrowRequest && !existingBorrowRequest.schema.path("reason")) {
   existingBorrowRequest.schema.add({
     reason: { type: String, trim: true, default: "" },
     decidedAt: { type: Date, default: null },
+  });
+}
+if (existingBorrowRequest && !existingBorrowRequest.schema.path("ownerId")) {
+  existingBorrowRequest.schema.add({
+    ownerId: { type: String, trim: true, default: "" },
   });
 }
 

@@ -34,7 +34,13 @@ export async function POST(request: Request) {
     await Book.deleteOne({ _id: book._id });
 
     return new Response(
-      JSON.stringify(new ApiResponce(200, null, "Book archived and deleted")),
+      JSON.stringify(
+        new ApiResponce(
+          200,
+          null,
+          "Book removed from the catalog. Readers who already borrowed it keep their copy.",
+        ),
+      ),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },

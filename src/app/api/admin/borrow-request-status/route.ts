@@ -37,6 +37,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (borrowRequest.ownerId) {
+      return new Response(
+        JSON.stringify(new ApiError(400, "Member-to-member requests are decided by the reader")),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     if (borrowRequest.status !== "Pending") {
       return new Response(
         JSON.stringify(new ApiError(400, "This request has already been decided")),

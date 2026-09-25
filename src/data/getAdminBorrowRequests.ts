@@ -41,7 +41,9 @@ export async function getAdminBorrowRequests(
   await connectDB();
   await syncShelfBorrows();
 
-  const requests = await BorrowRequest.find()
+  const requests = await BorrowRequest.find({
+    $or: [{ ownerId: { $exists: false } }, { ownerId: "" }, { ownerId: null }],
+  })
     .sort({ createdAt: -1 })
     .lean<StoredRequest[]>();
 

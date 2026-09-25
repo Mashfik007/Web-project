@@ -12,7 +12,15 @@ interface MemberCardProps {
   member: CommunityMember;
 }
 
-function BookLine({ book }: { book: CommunityBook }) {
+function BookLine({
+  book,
+  busy,
+  onRequest,
+}: {
+  book: CommunityBook;
+  busy: boolean;
+  onRequest?: (bookId: string) => void;
+}) {
   return (
     <li className="flex items-center gap-2">
       <div className="relative h-10 w-8 shrink-0 overflow-hidden rounded">
@@ -24,10 +32,20 @@ function BookLine({ book }: { book: CommunityBook }) {
           className="object-cover"
         />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-semibold text-slate-800">{book.title}</p>
         <p className="truncate text-[11px] text-slate-500">{book.author}</p>
       </div>
+      {book.id && onRequest ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onRequest(book.id!)}
+          className="btn btn-primary btn-xs shrink-0"
+        >
+          Request
+        </button>
+      ) : null}
     </li>
   );
 }
@@ -41,6 +59,27 @@ export default function MemberCard({ viewerId, member }: MemberCardProps) {
   useEffect(() => {
     setStatus(member.friendStatus);
   }, [member.friendStatus]);
+
+  async function requestBook(bookId: string) {
+    setBusy(true);
+    try {
+      const response = await fetch("/api/users/community/borrow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetId: member.id, bookId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        feedback.failed("Borrow request", payload.message || "Could not send the request");
+        return;
+      }
+      feedback.success("Borrow request", payload.message || "Request sent");
+    } catch {
+      feedback.failed("Borrow request", "Could not reach the server.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function send(action: "request" | "accept" | "decline" | "cancel") {
     setBusy(true);
@@ -94,7 +133,14 @@ export default function MemberCard({ viewerId, member }: MemberCardProps) {
           ) : (
             <ul className="mt-2 space-y-2">
               {member.readingNow.map((book) => (
-                <BookLine key={`${member.id}-now-${book.title}`} book={book} />
+                <BookLine
+                  key={`${member.id}-now-${book.title}`}
+                  book={book}
+                  busy={busy}
+                  onRequest={(bookId) => {
+                    void requestBook(bookId);
+                  }}
+                />
               ))}
             </ul>
           )}
@@ -108,7 +154,7 @@ export default function MemberCard({ viewerId, member }: MemberCardProps) {
           ) : (
             <ul className="mt-2 space-y-2">
               {member.finished.map((book) => (
-                <BookLine key={`${member.id}-done-${book.title}`} book={book} />
+                <BookLine key={`${member.id}-done-${book.title}`} book={book} busy={false} />
               ))}
             </ul>
           )}

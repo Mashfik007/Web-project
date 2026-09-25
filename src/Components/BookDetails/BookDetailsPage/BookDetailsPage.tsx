@@ -49,7 +49,7 @@ export default function BookDetailsPage({
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <CommunityShelf community={book.community} />
+          <CommunityShelf community={book.community} bookId={String(book.id)} />
           <MatchScore matchScore={book.matchScore} />
           <ReturnReview />
         </div>

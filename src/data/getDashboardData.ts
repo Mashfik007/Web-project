@@ -1,6 +1,6 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { booksForLoans } from "@/data/loanBooks";
 import { getMyShelf } from "@/data/getMyShelf";
-import { Book } from "@/Model/Books";
 import { FriendRequest } from "@/Model/FriendRequests";
 import { ReadingActivity } from "@/Model/ReadingActivities";
 import { ShelfLoan } from "@/Model/ShelfLoans";
@@ -45,12 +45,6 @@ type LogRow = {
   _id: { toString(): string };
   bookId: string;
   loggedAt?: Date;
-};
-
-type StoredBook = {
-  _id: { toString(): string };
-  title: string;
-  metadata?: { pages?: number };
 };
 
 function greeting() {
@@ -218,11 +212,8 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const bookIds = [...loans.map((loan) => loan.bookId), ...logs.map((log) => log.bookId)].filter(
     (id) => mongoose.Types.ObjectId.isValid(id),
   );
-  const storedBooks = await Book.find({ _id: { $in: bookIds } })
-    .select("title metadata.pages")
-    .lean<StoredBook[]>();
-  const booksById = new Map(storedBooks.map((book) => [book._id.toString(), book]));
-  const titleOf = (bookId: string) => booksById.get(bookId)?.title ?? "a book";
+  const booksById = await booksForLoans(bookIds);
+  const titleOf = (bookId: string) => booksById.get(bookId)?.title ?? "Borrowed book";
 
   const activeDays = new Set(
     logs.filter((log) => log.loggedAt).map((log) => dayKey(new Date(log.loggedAt as Date))),

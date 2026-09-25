@@ -59,7 +59,13 @@ export default function RequestCard({
             </span>
           </div>
 
-          <p className="mt-1 text-sm text-sky-600">Your request to the library</p>
+          <p className="mt-1 text-sm text-sky-600">
+            {request.direction === "received"
+              ? `${request.counterpart ?? request.userName} asked to borrow this from you`
+              : request.counterpart && request.counterpart !== "Library"
+                ? `Your request to ${request.counterpart}`
+                : "Your request to the library"}
+          </p>
 
           <p className="mt-1 text-xs text-slate-400">
             Requested {request.requestedAt}

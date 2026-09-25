@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { booksForLoans } from "@/data/loanBooks";
 import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
 import { FriendRequest } from "@/Model/FriendRequests";
@@ -58,8 +59,14 @@ function streakFor(logs: { loggedAt?: Date }[]) {
   return streak;
 }
 
-function coverOf(book?: { title: string; author: string; coverImage?: string }): CommunityBook {
+function coverOf(book?: {
+  _id?: { toString(): string };
+  title: string;
+  author: string;
+  coverImage?: string;
+}): CommunityBook {
   return {
+    id: book?._id?.toString(),
     title: book?.title ?? "Nothing checked out",
     author: book?.author ?? "Library catalog",
     coverImage: book?.coverImage ? `/api/uploads/${book.coverImage}` : "/svg/book.svg",
@@ -79,8 +86,7 @@ function timeAgo(date?: Date) {
 export async function getCommunityShelf(userId: string): Promise<CommunityShelfData> {
   await connectDB();
 
-  const [accounts, friendRows, loans, requests, activities, bookCount, approved] =
-    await Promise.all([
+  const [accounts, friendRows, loans, requests, activities, bookCount] = await Promise.all([
       User.find({ isAdmin: { $ne: true } }).select("name").sort({ name: 1 }).lean<
         { _id: { toString(): string }; name: string }[]
       >(),
@@ -103,19 +109,9 @@ export async function getCommunityShelf(userId: string): Promise<CommunityShelfD
         { userId: string; bookId: string; page?: number; loggedAt?: Date }[]
       >(),
       Book.countDocuments(),
-      BorrowRequest.find({ status: "Approved" }).select("userId bookId").lean<
-        { userId?: string; bookId?: string }[]
-      >(),
     ]);
 
-  const approvedLoans = new Set(
-    approved
-      .filter((item) => item.userId && item.bookId)
-      .map((item) => `${item.userId}:${item.bookId}`),
-  );
-  const readingLoans = loans.filter(
-    (loan) => loan.status === "reading" && approvedLoans.has(`${loan.userId}:${loan.bookId}`),
-  );
+  const readingLoans = loans.filter((loan) => loan.status === "reading");
   const readingByUser = new Map<string, { bookId: string; currentPage: number }>();
   for (const loan of readingLoans) {
     if (!readingByUser.has(loan.userId)) {
@@ -146,16 +142,7 @@ export async function getCommunityShelf(userId: string): Promise<CommunityShelfD
     ...loans.map((loan) => loan.bookId),
     ...activities.map((item) => item.bookId),
   ].filter((id) => mongoose.Types.ObjectId.isValid(id));
-  const books = await Book.find({ _id: { $in: bookIds } }).lean<
-    {
-      _id: { toString(): string };
-      title: string;
-      author: string;
-      coverImage?: string;
-      metadata?: { pages?: number };
-    }[]
-  >();
-  const booksById = new Map(books.map((book) => [book._id.toString(), book]));
+  const booksById = await booksForLoans(bookIds);
   const names = new Map(accounts.map((account) => [account._id.toString(), account.name]));
 
   const members = accounts
@@ -169,26 +156,30 @@ export async function getCommunityShelf(userId: string): Promise<CommunityShelfD
           const book = booksById.get(loan.bookId);
           const pages = book?.metadata?.pages ?? 0;
           const finished = pages > 0 && (loan.currentPage ?? 0) >= pages;
-          return (
-            loan.status === "reading" &&
-            !finished &&
-            approvedLoans.has(`${memberId}:${loan.bookId}`)
-          );
+          return loan.status === "reading" && !finished;
         })
-        .flatMap((loan) => {
-          const book = booksById.get(loan.bookId);
-          return book ? [coverOf(book)] : [];
-        });
+        .map((loan) =>
+          coverOf(
+            booksById.get(loan.bookId) ?? {
+              title: "Borrowed book",
+              author: "Still on their shelf",
+            },
+          ),
+        );
       const finished = mine
         .filter((loan) => {
           const book = booksById.get(loan.bookId);
           const pages = book?.metadata?.pages ?? 0;
           return pages > 0 && (loan.currentPage ?? 0) >= pages;
         })
-        .flatMap((loan) => {
-          const book = booksById.get(loan.bookId);
-          return book ? [coverOf(book)] : [];
-        });
+        .map((loan) =>
+          coverOf(
+            booksById.get(loan.bookId) ?? {
+              title: "Borrowed book",
+              author: "Still on their shelf",
+            },
+          ),
+        );
       return {
         id: memberId,
         name: account.name,

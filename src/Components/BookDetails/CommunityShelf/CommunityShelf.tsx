@@ -1,12 +1,40 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
+import { StatusModal, useFeedback } from "@/Components/Modal";
 import type { BookDetails } from "@/types/bookDetails";
 
 interface CommunityShelfProps {
   community: BookDetails["community"];
+  bookId: string;
 }
 
-export default function CommunityShelf({ community }: CommunityShelfProps) {
+export default function CommunityShelf({ community, bookId }: CommunityShelfProps) {
+  const feedback = useFeedback();
+  const [busyId, setBusyId] = useState("");
   const visibleMembers = community.members.slice(0, 4);
+
+  async function requestFrom(memberId: string) {
+    setBusyId(memberId);
+    try {
+      const response = await fetch("/api/users/community/borrow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetId: memberId, bookId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        feedback.failed("Borrow request", payload.message || "Could not send the request");
+        return;
+      }
+      feedback.success("Borrow request", payload.message || "Request sent");
+    } catch {
+      feedback.failed("Borrow request", "Could not reach the server.");
+    } finally {
+      setBusyId("");
+    }
+  }
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -20,9 +48,7 @@ export default function CommunityShelf({ community }: CommunityShelfProps) {
             className="size-4"
           />
         </div>
-        <h3 className="text-sm font-semibold text-slate-800">
-          Community Shelf
-        </h3>
+        <h3 className="text-sm font-semibold text-slate-800">Community Shelf</h3>
       </div>
 
       <p className="mt-3 text-xs text-slate-500">
@@ -42,25 +68,40 @@ export default function CommunityShelf({ community }: CommunityShelfProps) {
       </div>
 
       <ul className="mt-5 space-y-3">
-        {visibleMembers.map((member) => (
-          <li
-            key={member.id}
-            className="flex items-center justify-between text-sm"
-          >
-            <div className="flex items-center gap-2">
-              <span
-                className={`flex size-7 items-center justify-center rounded-full text-[10px] font-bold text-white ${member.color}`}
+        {visibleMembers.length === 0 ? (
+          <li className="text-xs text-slate-400">No other reader has this checked out.</li>
+        ) : (
+          visibleMembers.map((member) => (
+            <li key={member.id} className="flex items-center justify-between gap-2 text-sm">
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${member.color}`}
+                >
+                  {member.initials}
+                </span>
+                <span className="truncate font-medium text-slate-700">{member.name}</span>
+              </div>
+              <button
+                type="button"
+                disabled={busyId === member.id}
+                onClick={() => {
+                  void requestFrom(member.id);
+                }}
+                className="btn btn-primary btn-xs shrink-0"
               >
-                {member.initials}
-              </span>
-              <span className="font-medium text-slate-700">{member.name}</span>
-            </div>
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600">
-              On shelf
-            </span>
-          </li>
-        ))}
+                Request
+              </button>
+            </li>
+          ))
+        )}
       </ul>
+
+      <StatusModal
+        id={feedback.id}
+        variant={feedback.status.variant}
+        title={feedback.status.title}
+        message={feedback.status.message}
+      />
     </article>
   );
 }

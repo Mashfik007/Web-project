@@ -1,6 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
-import { Book } from "@/Model/Books";
-import { BorrowRequest } from "@/Model/BorrowRequests";
+import { bookOrKeptCopy, booksForLoans } from "@/data/loanBooks";
 import { Follow } from "@/Model/Follows";
 import { ReadingActivity } from "@/Model/ReadingActivities";
 import { ShelfLoan } from "@/Model/ShelfLoans";
@@ -165,36 +164,18 @@ export async function getMyShelf(userId: string): Promise<MyShelfData> {
       >(),
     ]);
 
-  const approvedRequests = await BorrowRequest.find({
-    userId,
-    status: "Approved",
-  })
-    .select("bookId")
-    .lean<{ bookId?: string }[]>();
-  const approvedBookIds = new Set(
-    approvedRequests
-      .map((request) => request.bookId)
-      .filter((id): id is string => Boolean(id)),
-  );
-
   const bookIds = loans
     .map((loan) => loan.bookId)
     .filter((id) => mongoose.Types.ObjectId.isValid(id));
-  const storedBooks = await Book.find({ _id: { $in: bookIds } }).lean<StoredBook[]>();
-  const booksById = new Map(storedBooks.map((book) => [book._id.toString(), book]));
+  const booksById = await booksForLoans(bookIds);
 
-  const shelfBooks = loans.flatMap((loan) => {
-    const book = booksById.get(loan.bookId);
-    return book ? [{ loan, book: toShelfBook(loan, book) }] : [];
+  const shelfBooks = loans.map((loan) => {
+    const book = bookOrKeptCopy(booksById, loan.bookId);
+    return { loan, book: toShelfBook(loan, book) };
   });
 
   const currentlyReading = shelfBooks
-    .filter(
-      (item) =>
-        item.loan.status === "reading" &&
-        approvedBookIds.has(item.loan.bookId) &&
-        !finishedBook(item.book),
-    )
+    .filter((item) => item.loan.status === "reading" && !finishedBook(item.book))
     .map((item) => item.book);
   const wantToRead = shelfBooks
     .filter((item) => item.loan.status === "wishlist")
