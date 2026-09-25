@@ -160,7 +160,7 @@ export async function getMyShelf(userId: string): Promise<MyShelfData> {
       Follow.countDocuments({ followingId: userId }),
       Follow.countDocuments({ followerId: userId }),
       Follow.find({ followerId: userId }).select("followingId").lean<{ followingId: string }[]>(),
-      User.find().select("name").sort({ name: 1 }).limit(30).lean<
+      User.find({ isAdmin: { $ne: true } }).select("name").sort({ name: 1 }).limit(30).lean<
         { _id: { toString(): string }; name: string }[]
       >(),
     ]);

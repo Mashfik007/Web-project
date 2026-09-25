@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import SuspendedAccount from "@/Components/Auth/SuspendedAccount/SuspendedAccount";
 import SideBar from "@/Components/Sidebar/UserSidebar/UserSidebar";
+import { isAccountSuspended } from "@/data/libraryLink";
 import { getSessionUser } from "@/Helper/userFromToken";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -20,6 +22,9 @@ export default async function UserLayout({
   const user = await getSessionUser();
   if (!user) redirect("/login");
   if (user.isAdmin) redirect(`/admin/${user._id}`);
+  if (await isAccountSuspended(user.email)) {
+    return <SuspendedAccount />;
+  }
 
   if (id !== user._id) {
     const path = (await headers()).get("x-pathname") || `/user/${id}`;

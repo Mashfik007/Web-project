@@ -37,12 +37,21 @@ export async function POST(request: Request) {
         headers: { "Content-Type": "application/json" },
       });
     }
-    const member = await User.findById(targetId).select("_id");
+    const [sender, member] = await Promise.all([
+      User.findById(userId).select("isAdmin").lean<{ isAdmin?: boolean } | null>(),
+      User.findById(targetId).select("isAdmin").lean<{ isAdmin?: boolean } | null>(),
+    ]);
     if (!member) {
       return new Response(JSON.stringify(new ApiError(404, "Member not found")), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       });
+    }
+    if (member.isAdmin || sender?.isAdmin) {
+      return new Response(
+        JSON.stringify(new ApiError(400, "Friend requests are only between members")),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
     }
 
     const outgoing = await FriendRequest.findOne({ fromId: userId, toId: targetId });

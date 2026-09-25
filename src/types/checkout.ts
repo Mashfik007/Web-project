@@ -32,8 +32,15 @@ export type PaymentMethod = {
   instructions: string[];
 };
 
+export type CheckoutPayer = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 export type CheckoutData = {
   userId: string;
+  payer: CheckoutPayer;
   title: string;
   subtitle: string;
   book: CheckoutBook;

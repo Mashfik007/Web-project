@@ -133,6 +133,14 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
             {step === "payment" && (
               <PaymentForm
                 paymentMethods={checkout.paymentMethods}
+                payer={checkout.payer}
+                bookTitle={checkout.book.title}
+                amount={calculateCheckoutTotal(
+                  checkout.book,
+                  checkout.pricing,
+                  deliveryForm.quantity,
+                )}
+                currency={checkout.pricing.currency}
                 defaultValues={paymentForm}
                 onBack={() => setStep("details")}
                 onSubmit={(data) => {

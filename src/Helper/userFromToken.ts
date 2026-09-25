@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { isAccountSuspended } from "@/data/libraryLink";
 import { User } from "@/Model/Users";
 import ApiError from "@/Utils/Api_error";
 import jwt from "jsonwebtoken";
@@ -62,6 +63,12 @@ export async function requireUserId(): Promise<string | Response> {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
+  }
+  if (await isAccountSuspended(user.email)) {
+    return new Response(
+      JSON.stringify(new ApiError(403, "Your account has been suspended. Contact the admin.")),
+      { status: 403, headers: { "Content-Type": "application/json" } },
+    );
   }
   return user._id;
 }

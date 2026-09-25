@@ -4,20 +4,49 @@ import { paymentFormSchema, type PaymentFormValues } from "@/Shchema/checkout";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import type { PaymentFormData, PaymentMethod } from "@/types/checkout";
+import type { CheckoutPayer, PaymentFormData, PaymentMethod } from "@/types/checkout";
 
 interface PaymentFormProps {
   paymentMethods: PaymentMethod[];
+  payer: CheckoutPayer;
+  bookTitle: string;
+  amount: number;
+  currency: string;
   defaultValues?: PaymentFormData;
   onBack: () => void;
   onSubmit: (data: PaymentFormData) => void;
+}
+
+export function paymentQrText(input: {
+  payer: CheckoutPayer;
+  bookTitle: string;
+  amount: number;
+  currency: string;
+  method: string;
+  receiver: string;
+}) {
+  return [
+    "FOLIO PAY",
+    `Name: ${input.payer.name}`,
+    `ID: ${input.payer.id}`,
+    `Email: ${input.payer.email}`,
+    `Book: ${input.bookTitle}`,
+    `Price: ${input.currency}${input.amount}`,
+    `Method: ${input.method}`,
+    `Receiver: ${input.receiver}`,
+  ].join("\n");
 }
 
 const inputClassName = "input w-full";
 
 export default function PaymentForm({
   paymentMethods,
+  payer,
+  bookTitle,
+  amount,
+  currency,
   defaultValues,
   onBack,
   onSubmit,
@@ -128,6 +157,48 @@ export default function PaymentForm({
                   {copied ? "Copied" : "Copy"}
                 </button>
               </div>
+
+              <dl className="mt-4 space-y-1 text-sm text-slate-700">
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Name</dt>
+                  <dd className="font-medium">{payer.name}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">ID</dt>
+                  <dd className="truncate font-mono text-xs">{payer.id}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Email</dt>
+                  <dd className="truncate">{payer.email || "—"}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Price</dt>
+                  <dd className="font-semibold">
+                    {currency}
+                    {amount}
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="mt-4 flex justify-center rounded-xl bg-white p-3">
+                <QRCodeSVG
+                  value={paymentQrText({
+                    payer,
+                    bookTitle,
+                    amount,
+                    currency,
+                    method: selectedMethod.name,
+                    receiver: selectedMethod.merchantNumber,
+                  })}
+                  size={180}
+                  level="M"
+                  includeMargin
+                />
+              </div>
+              <p className="mt-2 text-center text-xs text-slate-500">
+                Scan this code to pay {currency}
+                {amount} to {selectedMethod.merchantNumber}.
+              </p>
 
               <ol className="mt-4 list-decimal space-y-1 pl-4 text-xs text-slate-600">
                 {selectedMethod.instructions.map((step) => (

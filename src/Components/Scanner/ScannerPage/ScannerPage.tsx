@@ -32,6 +32,7 @@ export default function ScannerPage({ userId }: ScannerPageProps) {
   const [detected, setDetected] = useState<IDetectedBarcode | null>(null);
   const [manual, setManual] = useState("");
   const [book, setBook] = useState<ScannedBook | null>(null);
+  const [payment, setPayment] = useState("");
   const [message, setMessage] = useState("");
   const [looking, setLooking] = useState(false);
 
@@ -42,7 +43,17 @@ export default function ScannerPage({ userId }: ScannerPageProps) {
       return;
     }
 
+    if (next.startsWith("FOLIO PAY")) {
+      setPaused(true);
+      setPayment(next);
+      setBook(null);
+      setMessage("");
+      setLooking(false);
+      return;
+    }
+
     setPaused(true);
+    setPayment("");
     setBook(null);
     setLooking(true);
     setMessage("");
@@ -81,6 +92,7 @@ export default function ScannerPage({ userId }: ScannerPageProps) {
     setPaused(false);
     setDetected(null);
     setBook(null);
+    setPayment("");
     setMessage("");
   }
 
@@ -129,6 +141,23 @@ export default function ScannerPage({ userId }: ScannerPageProps) {
             Look up
           </button>
         </form>
+
+        {payment ? (
+          <article className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
+            <h2 className="font-semibold text-slate-800">Payment</h2>
+            <ul className="mt-3 space-y-1">
+              {payment
+                .split("\n")
+                .slice(1)
+                .map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+            </ul>
+            <button type="button" onClick={scanAgain} className="btn btn-ghost btn-sm mt-3">
+              Scan again
+            </button>
+          </article>
+        ) : null}
 
         {looking ? <p className="text-sm text-slate-500">Looking up the catalog…</p> : null}
 

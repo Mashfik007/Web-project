@@ -81,7 +81,7 @@ export async function getCommunityShelf(userId: string): Promise<CommunityShelfD
 
   const [accounts, friendRows, loans, requests, activities, bookCount, approved] =
     await Promise.all([
-      User.find().select("name").sort({ name: 1 }).lean<
+      User.find({ isAdmin: { $ne: true } }).select("name").sort({ name: 1 }).lean<
         { _id: { toString(): string }; name: string }[]
       >(),
       FriendRequest.find({
@@ -241,8 +241,8 @@ export async function getCommunityShelf(userId: string): Promise<CommunityShelfD
 
   const readingFeed = activities.slice(0, 8).flatMap((item) => {
     const book = booksById.get(item.bookId);
-    const name = names.get(item.userId) || "A reader";
-    if (!book) return [];
+    const name = names.get(item.userId);
+    if (!book || !name) return [];
     const pages = book.metadata?.pages ?? 0;
     const progress =
       pages > 0 ? Math.min(100, Math.round(((item.page ?? 0) / pages) * 100)) : 0;

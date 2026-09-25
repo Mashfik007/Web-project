@@ -45,6 +45,13 @@ export async function syncLibraryMember(input: {
   }
 }
 
+export async function isAccountSuspended(email: string) {
+  const member = await LibraryUser.findOne({ email: email.trim().toLowerCase() })
+    .select("status")
+    .lean<{ status?: string } | null>();
+  return member?.status === "Suspended";
+}
+
 export async function memberBorrowBlock(userId: string) {
   if (!mongoose.Types.ObjectId.isValid(userId)) return null;
 
