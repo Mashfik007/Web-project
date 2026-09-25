@@ -21,7 +21,7 @@ export default function Intro({ intro }: IntroProps) {
       <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
         <div>
           <p className="mb-2 text-xs font-medium tracking-[0.18em] text-sky-300">
-            GOOD MORNING
+            {intro.greeting}
           </p>
 
           <h1 className="font-serif text-3xl font-bold tracking-tight text-white md:text-4xl">

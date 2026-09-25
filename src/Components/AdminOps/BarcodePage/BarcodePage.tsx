@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminCard from "@/Components/AdminOps/AdminCard/AdminCard";
 import {
@@ -16,8 +17,25 @@ interface BarcodePageProps {
   scans: AdminScan[];
 }
 
+function downloadQRCode() {
+  const svg = document.getElementById("qr-code-element");
+  if (!svg) return;
+
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+  const svgUrl = URL.createObjectURL(svgBlob);
+  const downloadLink = document.createElement("a");
+  downloadLink.href = svgUrl;
+  downloadLink.download = "qrcode.svg";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+  URL.revokeObjectURL(svgUrl);
+}
+
 export default function BarcodePage({ scans }: BarcodePageProps) {
-  const [generated, setGenerated] = useState(false);
+  const [text, setText] = useState("");
+  const [size, setSize] = useState(220);
   const feedback = useFeedback();
 
   return (
@@ -98,39 +116,49 @@ export default function BarcodePage({ scans }: BarcodePageProps) {
         <AdminCard>
           <div className="p-5">
             <h2 className="font-semibold text-slate-800">Generate QR Code</h2>
-            <form
-              className="mt-4 flex gap-2"
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (!formHasValues(event.currentTarget, ["qrBookId"])) {
-                  feedback.failed(
-                    "Could not generate",
-                    "Enter a Book ID first.",
-                  );
-                  setGenerated(false);
-                  return;
-                }
-                setGenerated(true);
-                feedback.success(
-                  "QR generated",
-                  "Print or scan this code at the desk.",
-                );
-              }}
-            >
-              <FormField
-                label="Book ID"
+            <fieldset className="fieldset mt-4 p-0">
+              <legend className="fieldset-legend">Book ID or URL</legend>
+              <input
+                id="qr-input"
                 name="qrBookId"
+                type="text"
+                value={text}
+                onChange={(event) => setText(event.target.value)}
                 placeholder="e.g., LIB-2024-00342"
+                className="input w-full"
               />
-              <div className="flex items-end">
-                <ModalButton type="submit">Generate</ModalButton>
-              </div>
-            </form>
-            <div className="mt-5 flex h-40 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-center text-sm text-slate-400">
-              {generated
-                ? "QR preview ready"
-                : "Enter a Book ID and click Generate."}
+            </fieldset>
+            <label className="mt-3 flex items-center gap-3 text-xs text-slate-500">
+              Size
+              <input
+                type="range"
+                min={128}
+                max={320}
+                step={16}
+                value={size}
+                onChange={(event) => setSize(Number(event.target.value))}
+                className="range range-xs range-primary flex-1"
+              />
+              <span className="w-10 text-right">{size}</span>
+            </label>
+            <div className="mt-5 flex min-h-56 items-center justify-center rounded-xl border border-slate-100 bg-white p-4 text-center text-sm text-slate-400">
+              {text ? (
+                <QRCodeSVG
+                  id="qr-code-element"
+                  value={text}
+                  size={size}
+                  level="H"
+                  includeMargin
+                />
+              ) : (
+                <p>Enter a Book ID or URL to see the QR code.</p>
+              )}
             </div>
+            {text ? (
+              <div className="mt-4">
+                <ModalButton onClick={downloadQRCode}>Download SVG</ModalButton>
+              </div>
+            ) : null}
             <div className="mt-6 grid grid-cols-2 gap-3">
               <FormField
                 label="Member ID"

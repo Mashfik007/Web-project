@@ -19,14 +19,14 @@ export default function DashboardPage({ dashboard }: DashboardPageProps) {
       <div className="grid w-full grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-4">
           <ReadingTabs reading={dashboard.reading} />
-          <RecentActivity />
+          <RecentActivity items={dashboard.activity} />
         </div>
 
         <aside className="space-y-4">
-          <Streak />
-          <BooksPerMonth />
-          <Badges />
-          <ActivityHeatmap />
+          <Streak streak={dashboard.streak} />
+          <BooksPerMonth months={dashboard.booksPerMonth} />
+          <Badges badges={dashboard.badges} />
+          <ActivityHeatmap activity={dashboard.heatmap} />
         </aside>
       </div>
     </main>
