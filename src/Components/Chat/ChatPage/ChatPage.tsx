@@ -1,7 +1,8 @@
 "use client";
 
+import { getChatSocket } from "@/lib/chatSocket";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ChatInbox, ChatMessage, ChatPreview } from "@/types/chat";
+import type { ChatInbox, ChatMessage, ChatPreview, LiveChatMessage } from "@/types/chat";
 
 interface ChatPageProps {
   inbox: ChatInbox;
@@ -34,8 +35,11 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [live, setLive] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
 
   const conversations = useMemo(() => {
     const list = channel === "group" ? [community] : directs;
@@ -50,37 +54,90 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
       : (directs.find((item) => item.conversationId === selectedId) ?? community);
 
   useEffect(() => {
+    const socket = getChatSocket();
     let cancelled = false;
 
-    async function load(quiet: boolean) {
-      if (!quiet) setLoading(true);
-      try {
-        const response = await fetch(
-          `/api/users/chat?conversationId=${encodeURIComponent(selectedId)}`,
-        );
-        const payload = await response.json();
-        if (!response.ok) {
-          if (!cancelled) setError(payload.message || "Could not load messages");
+    function load() {
+      socket.timeout(10000).emit("conversation:history", selectedId, (err: Error | null, ack: unknown) => {
+        if (cancelled) return;
+        const payload = ack as { ok?: boolean; message?: string; messages?: ChatMessage[] } | undefined;
+        if (err || !payload?.ok) {
+          setError(payload?.message || "Live chat could not load this conversation.");
+          setLoading(false);
           return;
         }
-        if (!cancelled) {
-          setMessages(payload.data ?? []);
-          setError("");
-        }
-      } catch {
-        if (!cancelled) setError("Could not reach the server.");
-      } finally {
-        if (!cancelled && !quiet) setLoading(false);
-      }
+        setMessages((current) => {
+          const incoming = payload.messages ?? [];
+          const ids = new Set(incoming.map((item) => item.id));
+          return [...incoming, ...current.filter((item) => !ids.has(item.id))];
+        });
+        setError("");
+        setLoading(false);
+      });
     }
 
-    load(false);
-    const timer = window.setInterval(() => load(true), 4000);
+    setMessages([]);
+    setLoading(true);
+    socket.on("connect", load);
+    if (socket.connected) load();
+
     return () => {
       cancelled = true;
-      window.clearInterval(timer);
+      socket.off("connect", load);
     };
   }, [selectedId]);
+
+  useEffect(() => {
+    const socket = getChatSocket();
+
+    function syncLive() {
+      setLive(socket.connected);
+    }
+
+    function onMessage(message: LiveChatMessage) {
+      const patch = (item: ChatPreview) =>
+        item.conversationId === message.conversationId
+          ? { ...item, lastBody: message.body, lastAt: message.createdAt }
+          : item;
+      setCommunity(patch);
+      setDirects((list) => list.map(patch));
+      if (message.conversationId !== selectedIdRef.current) return;
+      stickToBottom.current = true;
+      setMessages((current) =>
+        current.some((item) => item.id === message.id) ? current : [...current, message],
+      );
+    }
+
+    socket.on("message:new", onMessage);
+    socket.on("connect", syncLive);
+    socket.on("disconnect", syncLive);
+    syncLive();
+
+    return () => {
+      socket.off("message:new", onMessage);
+      socket.off("connect", syncLive);
+      socket.off("disconnect", syncLive);
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = getChatSocket();
+    const rooms = [
+      inbox.community.conversationId,
+      ...inbox.directs.map((item) => item.conversationId),
+    ];
+
+    function joinRooms() {
+      for (const room of rooms) socket.emit("conversation:join", room);
+    }
+
+    socket.on("connect", joinRooms);
+    if (socket.connected) joinRooms();
+
+    return () => {
+      socket.off("connect", joinRooms);
+    };
+  }, [inbox]);
 
   useEffect(() => {
     if (!stickToBottom.current) return;
@@ -96,41 +153,33 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
     setError("");
   }
 
-  async function sendMessage() {
+  function sendMessage() {
     const body = draft.trim();
     if (!body || sending) return;
+    const socket = getChatSocket();
+    if (!socket.connected) {
+      setError("Live chat is reconnecting. Try again in a moment.");
+      return;
+    }
+
     setSending(true);
     setError("");
-    try {
-      const response = await fetch("/api/users/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: selectedId, body }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        setError(payload.message || "Could not send the message");
-        return;
-      }
-      if (payload.data) {
-        const sent = payload.data as ChatMessage;
-        setMessages((current) =>
-          current.some((item) => item.id === sent.id) ? current : [...current, sent],
-        );
-        const patch = (item: ChatPreview) =>
-          item.conversationId === selectedId
-            ? { ...item, lastBody: sent.body, lastAt: sent.createdAt }
-            : item;
-        setCommunity(patch);
-        setDirects((list) => list.map(patch));
-      }
-      setDraft("");
-      stickToBottom.current = true;
-    } catch {
-      setError("Could not reach the server.");
-    } finally {
-      setSending(false);
-    }
+    setDraft("");
+    stickToBottom.current = true;
+    socket.timeout(10000).emit(
+      "message:send",
+      { conversationId: selectedId, body },
+      (err: Error | null, ack: unknown) => {
+        const payload = ack as { ok?: boolean; message?: string } | undefined;
+        setSending(false);
+        if (err || !payload?.ok) {
+          setDraft(body);
+          setError(
+            typeof payload?.message === "string" ? payload.message : "Could not send the message",
+          );
+        }
+      },
+    );
   }
 
   return (
@@ -230,6 +279,8 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
             <div className="min-w-0">
               <h2 className="truncate text-base font-semibold text-slate-800">{selected.title}</h2>
               <p className="text-xs text-slate-500">
+                {live ? "Live" : "Reconnecting"}
+                {" · "}
                 {selected.kind === "group"
                   ? `${selected.subtitle} · group chat`
                   : selected.isFriend

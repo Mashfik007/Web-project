@@ -1,5 +1,6 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { COMMUNITY_CHAT_ID, peerFromDirectChat } from "@/Helper/chat";
+import { publishChatMessage } from "@/Helper/publishChat";
 import { requireUserId } from "@/Helper/userFromToken";
 import { Message } from "@/Model/Messages";
 import { User } from "@/Model/Users";
@@ -143,6 +144,11 @@ export async function POST(request: Request) {
         createdAt: saved.createdAt,
       },
     ]);
+
+    publishChatMessage({
+      ...message,
+      conversationId: parsed.data.conversationId,
+    });
 
     return new Response(JSON.stringify(new ApiResponce(201, message, "Message sent")), {
       status: 201,

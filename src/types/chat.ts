@@ -29,3 +29,7 @@ export type ChatMessage = {
   body: string;
   createdAt: string;
 };
+
+export type LiveChatMessage = ChatMessage & {
+  conversationId: string;
+};
