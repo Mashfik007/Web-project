@@ -116,17 +116,44 @@ export default function BarcodePage({ scans }: BarcodePageProps) {
         <AdminCard>
           <div className="p-5">
             <h2 className="font-semibold text-slate-800">Generate QR Code</h2>
+            <p className="mt-1 text-xs text-slate-400">
+              Copy a book ID from Books, then paste it here. A member scan opens that book.
+            </p>
             <fieldset className="fieldset mt-4 p-0">
-              <legend className="fieldset-legend">Book ID or URL</legend>
-              <input
-                id="qr-input"
-                name="qrBookId"
-                type="text"
-                value={text}
-                onChange={(event) => setText(event.target.value)}
-                placeholder="e.g., LIB-2024-00342"
-                className="input w-full"
-              />
+              <legend className="fieldset-legend">Book ID</legend>
+              <div className="flex gap-2">
+                <input
+                  id="qr-input"
+                  name="qrBookId"
+                  type="text"
+                  value={text}
+                  onChange={(event) => setText(event.target.value)}
+                  placeholder="Paste a copied book ID"
+                  className="input min-w-0 flex-1"
+                />
+                <ModalButton
+                  onClick={() => {
+                    void navigator.clipboard.readText().then(
+                      (value) => {
+                        const next = value.trim();
+                        if (!next) {
+                          feedback.failed("Nothing to paste", "Copy a book ID first.");
+                          return;
+                        }
+                        setText(next);
+                      },
+                      () => {
+                        feedback.failed(
+                          "Could not paste",
+                          "Allow clipboard access, or paste with the keyboard.",
+                        );
+                      },
+                    );
+                  }}
+                >
+                  Paste
+                </ModalButton>
+              </div>
             </fieldset>
             <label className="mt-3 flex items-center gap-3 text-xs text-slate-500">
               Size

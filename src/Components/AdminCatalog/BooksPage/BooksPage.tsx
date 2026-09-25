@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
+import CopyText from "@/Components/AdminCatalog/CopyText/CopyText";
 import AdminSearchRow from "@/Components/AdminCatalog/AdminSearchRow/AdminSearchRow";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
 import DeleteButton from "@/Components/AdminCatalog/DeleteButton/DeleteButton";
@@ -469,6 +470,7 @@ export default function BooksPage({
             </td>
             <td className="px-4 py-3">
               <div className="flex items-center gap-1">
+                <CopyText value={book.id} label="Copy ID" />
                 <EditButton
                   onClick={() => {
                     void openEditor(book);

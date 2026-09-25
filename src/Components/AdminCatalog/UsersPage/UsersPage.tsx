@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
+import CopyText from "@/Components/AdminCatalog/CopyText/CopyText";
 import AdminSearchRow from "@/Components/AdminCatalog/AdminSearchRow/AdminSearchRow";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
 import DeleteButton from "@/Components/AdminCatalog/DeleteButton/DeleteButton";
@@ -212,13 +213,24 @@ export default function UsersPage({ users, archivedUsers }: UsersPageProps) {
                 >
                   {user.initials}
                 </span>
-                <span className="font-semibold text-slate-800">
-                  {user.name}
-                </span>
+                <div>
+                  <p className="font-semibold text-slate-800">{user.name}</p>
+                  <CopyText value={user.id} label="Copy ID" />
+                </div>
               </div>
             </td>
-            <td className="px-4 py-3 text-slate-500">{user.email}</td>
-            <td className="px-4 py-3 text-slate-500">{user.phone}</td>
+            <td className="px-4 py-3 text-slate-500">
+              <div className="flex flex-wrap items-center gap-1">
+                <span>{user.email}</span>
+                <CopyText value={user.email} label="Copy email" />
+              </div>
+            </td>
+            <td className="px-4 py-3 text-slate-500">
+              <div className="flex flex-wrap items-center gap-1">
+                <span>{user.phone}</span>
+                <CopyText value={user.phone} label="Copy phone" />
+              </div>
+            </td>
             <td className="px-4 py-3">
               <span
                 className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${roleClass[user.role]}`}

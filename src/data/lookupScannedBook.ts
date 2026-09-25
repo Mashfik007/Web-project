@@ -43,6 +43,11 @@ function codesFromScan(raw: string) {
   };
 
   const value = raw.trim();
+  for (const part of value.split(/[\s,;]+/)) addCode(found, part);
+  for (const line of value.split(/\r?\n/)) {
+    const labeled = line.match(/^(?:book\s*id|isbn|code|id)\s*[:=]\s*(.+)$/i);
+    if (labeled?.[1]) addCode(found, labeled[1]);
+  }
   try {
     readUrl(new URL(value));
   } catch {

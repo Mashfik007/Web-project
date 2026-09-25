@@ -2,6 +2,7 @@
 
 import { Scanner, type IDetectedBarcode, type IScannerError } from "@yudiel/react-qr-scanner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ScannedBook } from "@/data/lookupScannedBook";
 
@@ -26,6 +27,7 @@ function cameraMessage(error: IScannerError) {
 }
 
 export default function ScannerPage({ userId }: ScannerPageProps) {
+  const router = useRouter();
   const [paused, setPaused] = useState(false);
   const [detected, setDetected] = useState<IDetectedBarcode | null>(null);
   const [manual, setManual] = useState("");
@@ -51,11 +53,16 @@ export default function ScannerPage({ userId }: ScannerPageProps) {
         message?: string;
         data?: ScannedBook | null;
       };
+      if (response.status === 404) {
+        setMessage("Invalid QR code");
+        return;
+      }
       if (!response.ok || !body.data) {
-        setMessage(body.message || "No book matches that code.");
+        setMessage(body.message || "Could not look up that code.");
         return;
       }
       setBook(body.data);
+      router.push(`/user/${userId}/browsebook/${body.data.id}`);
     } catch {
       setMessage("Could not look up that code.");
     } finally {

@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
     const book = await lookupScannedBook(code);
     if (!book) {
-      return new Response(JSON.stringify(new ApiError(404, "No book matches that code")), {
+      return new Response(JSON.stringify(new ApiError(404, "Invalid QR code")), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       });
