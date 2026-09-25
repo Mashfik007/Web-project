@@ -54,6 +54,20 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    label: "Scanner",
+    href: (userId) => `/user/${userId}/scan`,
+    match: (pathname, userId) => pathname.startsWith(`/user/${userId}/scan`),
+    icon: (
+      <Image
+        src="/svg/barcode.svg"
+        alt="Scanner"
+        width={16}
+        height={16}
+        className={iconClassName}
+      />
+    ),
+  },
+  {
     label: "My Shelf",
     href: (userId) => `/user/${userId}/shelf`,
     match: (pathname, userId) =>
