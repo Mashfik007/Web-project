@@ -11,12 +11,14 @@ export type ChatPreview = {
   isFriend: boolean;
   lastBody: string;
   lastAt: string | null;
+  unread: number;
+  description?: string;
 };
 
 export type ChatInbox = {
   viewerId: string;
   viewerName: string;
-  community: ChatPreview;
+  groups: ChatPreview[];
   directs: ChatPreview[];
 };
 

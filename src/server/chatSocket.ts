@@ -30,6 +30,9 @@ function readCookie(header: string | undefined, name: string) {
 
 function canJoin(userId: string, conversationId: string) {
   if (conversationId === "community") return true;
+  if (conversationId.startsWith("group:")) {
+    return /^[a-f\d]{24}$/i.test(conversationId.slice("group:".length));
+  }
   if (!conversationId.startsWith("dm:")) return false;
   const [left, right] = conversationId.slice(3).split(":");
   if (!left || !right || left === right) return false;
@@ -85,9 +88,53 @@ async function presentMessages(rows: MessageRow[]) {
   });
 }
 
+async function joinUserRooms(socket: { join: (room: string | string[]) => Promise<void> | void }, userId: string) {
+  const rooms = ["community"];
+  const memberships = await mongoose.connection
+    .collection("groupmembers")
+    .find({ userId })
+    .project({ groupId: 1 })
+    .toArray();
+  for (const membership of memberships) {
+    const groupId = String(membership.groupId || "");
+    if (/^[a-f\d]{24}$/i.test(groupId)) rooms.push(`group:${groupId}`);
+  }
+
+  if (mongoose.Types.ObjectId.isValid(userId)) {
+    const peers = await mongoose.connection
+      .collection("users")
+      .find({
+        isAdmin: { $ne: true },
+        _id: { $ne: new mongoose.Types.ObjectId(userId) },
+      })
+      .project({ _id: 1 })
+      .toArray();
+    for (const peer of peers) {
+      const id = String(peer._id);
+      const [left, right] = [userId, id].sort();
+      rooms.push(`dm:${left}:${right}`);
+    }
+  }
+
+  await socket.join(rooms);
+}
+
 async function assertConversation(userId: string, conversationId: string) {
   if (!canJoin(userId, conversationId)) {
     throw new Error("Conversation not found");
+  }
+  if (conversationId.startsWith("group:")) {
+    const id = conversationId.slice("group:".length);
+    const group = await mongoose.connection.collection("communitygroups").findOne({
+      _id: new mongoose.Types.ObjectId(id),
+    });
+    if (!group) throw new Error("Conversation not found");
+    const member = await mongoose.connection.collection("groupmembers").findOne({
+      groupId: id,
+      userId,
+    });
+    if (!member) throw new Error("Join this group from the community page");
+    return;
   }
   if (!conversationId.startsWith("dm:")) return;
 
@@ -134,11 +181,18 @@ export async function startChatSocket() {
 
   io.on("connection", (socket) => {
     const userId = String(socket.data.userId || "");
+    void joinUserRooms(socket, userId);
+
+    socket.on("rooms:sync", () => {
+      void joinUserRooms(socket, userId);
+    });
 
     socket.on("conversation:join", (conversationId: unknown) => {
       if (typeof conversationId !== "string" || conversationId.length > 160) return;
       if (!canJoin(userId, conversationId)) return;
-      socket.join(conversationId);
+      void assertConversation(userId, conversationId)
+        .then(() => socket.join(conversationId))
+        .catch(() => {});
     });
 
     socket.on("conversation:history", async (conversationId: unknown, ack: unknown) => {

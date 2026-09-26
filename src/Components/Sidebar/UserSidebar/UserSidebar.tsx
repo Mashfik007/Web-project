@@ -5,6 +5,7 @@ import AppDrawer, {
   closeDrawer,
   drawerItemClass,
 } from "@/Components/Sidebar/AppDrawer/AppDrawer";
+import ChatUnreadBadge from "@/Components/Sidebar/ChatUnreadBadge/ChatUnreadBadge";
 import SidebarProfile from "@/Components/Sidebar/SidebarProfile/SidebarProfile";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -162,11 +163,13 @@ export default function SideBar({
   userId,
   name,
   initials,
+  unreadCount,
 }: {
   children: React.ReactNode;
   userId: string;
   name: string;
   initials: string;
+  unreadCount: number;
 }) {
   const pathname = usePathname();
   const activeItem = navItems.find((item) => item.match(pathname, userId));
@@ -190,7 +193,12 @@ export default function SideBar({
                     className={drawerItemClass(isActive)}
                     data-tip={item.label}
                   >
-                    {item.icon}
+                    <span className="relative inline-flex">
+                      {item.icon}
+                      {item.label === "Chat" ? (
+                        <ChatUnreadBadge userId={userId} initialCount={unreadCount} />
+                      ) : null}
+                    </span>
                     <span className="is-drawer-close:hidden">{item.label}</span>
                   </Link>
                 </li>

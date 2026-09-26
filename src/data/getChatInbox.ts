@@ -1,6 +1,9 @@
 import connectDB from "@/dbConfig/dbConfig";
-import { COMMUNITY_CHAT_ID, directChatId } from "@/Helper/chat";
+import { unreadByConversation } from "@/data/getUnreadChatCount";
+import { COMMUNITY_CHAT_ID, directChatId, groupChatId } from "@/Helper/chat";
+import { CommunityGroup } from "@/Model/CommunityGroups";
 import { FriendRequest } from "@/Model/FriendRequests";
+import { GroupMember } from "@/Model/GroupMembers";
 import { Message } from "@/Model/Messages";
 import { User } from "@/Model/Users";
 import type { ChatInbox, ChatPreview } from "@/types/chat";
@@ -33,7 +36,7 @@ type Account = { _id: { toString(): string }; name: string };
 export async function getChatInbox(userId: string): Promise<ChatInbox> {
   await connectDB();
 
-  const [viewer, accounts, friendRows] = await Promise.all([
+  const [viewer, accounts, friendRows, createdGroups, memberships] = await Promise.all([
     User.findById(userId).select("name").lean<{ name?: string } | null>(),
     User.find({ isAdmin: { $ne: true }, _id: { $ne: userId } })
       .select("name")
@@ -43,6 +46,11 @@ export async function getChatInbox(userId: string): Promise<ChatInbox> {
       status: "accepted",
       $or: [{ fromId: userId }, { toId: userId }],
     }).lean<{ fromId: string; toId: string }[]>(),
+    CommunityGroup.find()
+      .select("name description")
+      .sort({ createdAt: 1 })
+      .lean<{ _id: { toString(): string }; name: string; description?: string }[]>(),
+    GroupMember.find({ userId }).select("groupId").lean<{ groupId: string }[]>(),
   ]);
 
   const friendIds = new Set(
@@ -63,23 +71,58 @@ export async function getChatInbox(userId: string): Promise<ChatInbox> {
       isFriend: friendIds.has(id),
       lastBody: "",
       lastAt: null,
+      unread: 0,
     };
   });
 
-  const community: ChatPreview = {
-    conversationId: COMMUNITY_CHAT_ID,
-    kind: "group",
-    title: "Readers Community",
-    subtitle: `${accounts.length + 1} members`,
-    initials: "RC",
-    avatarColor: "bg-sky-600",
-    isFriend: false,
-    lastBody: "",
-    lastAt: null,
-  };
+  const memberCount = accounts.length + 1;
+  const joinedIds = new Set(memberships.map((row) => row.groupId));
+  const joinedGroups = createdGroups.filter((group) => joinedIds.has(group._id.toString()));
+  const joinedGroupIds = joinedGroups.map((group) => group._id.toString());
+  const memberTotals = new Map<string, number>();
+  if (joinedGroupIds.length > 0) {
+    const rows = await GroupMember.aggregate<{ _id: string; count: number }>([
+      { $match: { groupId: { $in: joinedGroupIds } } },
+      { $group: { _id: "$groupId", count: { $sum: 1 } } },
+    ]);
+    for (const row of rows) memberTotals.set(row._id, row.count);
+  }
+
+  const groups: ChatPreview[] = [
+    {
+      conversationId: COMMUNITY_CHAT_ID,
+      kind: "group",
+      title: "Readers Community",
+      subtitle: `${memberCount} members`,
+      initials: "RC",
+      avatarColor: "bg-sky-600",
+      isFriend: false,
+      lastBody: "",
+      lastAt: null,
+      unread: 0,
+    },
+    ...joinedGroups.map((group) => {
+      const name = group.name?.trim() || "Community";
+      const id = group._id.toString();
+      const total = memberTotals.get(id) ?? 1;
+      return {
+        conversationId: groupChatId(id),
+        kind: "group" as const,
+        title: name,
+        subtitle: `${total} ${total === 1 ? "member" : "members"}`,
+        initials: initials(name),
+        avatarColor: colorFor(name),
+        isFriend: false,
+        lastBody: "",
+        lastAt: null,
+        unread: 0,
+        description: group.description?.trim() || "",
+      };
+    }),
+  ];
 
   const conversationIds = [
-    COMMUNITY_CHAT_ID,
+    ...groups.map((item) => item.conversationId),
     ...directs.map((item) => item.conversationId),
   ];
   const previews = await Message.aggregate<{
@@ -98,14 +141,15 @@ export async function getChatInbox(userId: string): Promise<ChatInbox> {
     },
   ]);
   const latest = new Map(previews.map((row) => [row._id, row]));
+  const unread = await unreadByConversation(userId, conversationIds);
 
   function applyPreview(item: ChatPreview): ChatPreview {
     const row = latest.get(item.conversationId);
-    if (!row) return item;
     return {
       ...item,
-      lastBody: row.body,
-      lastAt: row.createdAt ? new Date(row.createdAt).toISOString() : null,
+      lastBody: row?.body || item.lastBody,
+      lastAt: row?.createdAt ? new Date(row.createdAt).toISOString() : item.lastAt,
+      unread: unread.get(item.conversationId) ?? 0,
     };
   }
 
@@ -120,7 +164,7 @@ export async function getChatInbox(userId: string): Promise<ChatInbox> {
   return {
     viewerId: userId,
     viewerName: viewer?.name?.trim() || "Reader",
-    community: applyPreview(community),
+    groups: groups.map(applyPreview),
     directs: withPreview,
   };
 }

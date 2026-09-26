@@ -4,6 +4,7 @@ export const adminSections = [
   { slug: "authors", label: "Authors" },
   { slug: "publishers", label: "Publishers" },
   { slug: "users", label: "Users" },
+  { slug: "community", label: "Community" },
   { slug: "borrow-requests", label: "Borrow Requests" },
   { slug: "returns", label: "Returns" },
   { slug: "reservations", label: "Reservations" },

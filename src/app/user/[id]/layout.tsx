@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SuspendedAccount from "@/Components/Auth/SuspendedAccount/SuspendedAccount";
 import SideBar from "@/Components/Sidebar/UserSidebar/UserSidebar";
+import { getUnreadChatCount } from "@/data/getUnreadChatCount";
 import { isAccountSuspended } from "@/data/libraryLink";
 import { getSessionUser } from "@/Helper/userFromToken";
 import { headers } from "next/headers";
@@ -41,8 +42,15 @@ export default async function UserLayout({
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("") || "R";
 
+  const unreadCount = await getUnreadChatCount(user._id);
+
   return (
-    <SideBar userId={user._id} name={user.name} initials={initials}>
+    <SideBar
+      userId={user._id}
+      name={user.name}
+      initials={initials}
+      unreadCount={unreadCount}
+    >
       {children}
     </SideBar>
   );

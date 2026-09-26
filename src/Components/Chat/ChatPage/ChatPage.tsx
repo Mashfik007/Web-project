@@ -1,6 +1,7 @@
 "use client";
 
 import { getChatSocket } from "@/lib/chatSocket";
+import { markConversationRead, setViewingConversation } from "@/lib/chatUnread";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChatInbox, ChatMessage, ChatPreview, LiveChatMessage } from "@/types/chat";
 
@@ -22,13 +23,13 @@ function formatStamp(iso: string | null) {
 
 export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
   const starting =
-    inbox.directs.find((item) => item.peerId === initialPeerId) ?? inbox.community;
+    inbox.directs.find((item) => item.peerId === initialPeerId) ?? inbox.groups[0];
   const [channel, setChannel] = useState<"group" | "direct">(
-    starting.kind === "direct" ? "direct" : "group",
+    starting?.kind === "direct" ? "direct" : "group",
   );
-  const [community, setCommunity] = useState(inbox.community);
+  const [groups, setGroups] = useState(inbox.groups);
   const [directs, setDirects] = useState(inbox.directs);
-  const [selectedId, setSelectedId] = useState(starting.conversationId);
+  const [selectedId, setSelectedId] = useState(starting?.conversationId ?? "");
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
@@ -42,18 +43,34 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
   selectedIdRef.current = selectedId;
 
   const conversations = useMemo(() => {
-    const list = channel === "group" ? [community] : directs;
+    const list = channel === "group" ? groups : directs;
     const term = query.trim().toLowerCase();
     if (!term) return list;
     return list.filter((item) => item.title.toLowerCase().includes(term));
-  }, [channel, community, directs, query]);
+  }, [channel, groups, directs, query]);
 
   const selected =
-    selectedId === community.conversationId
-      ? community
-      : (directs.find((item) => item.conversationId === selectedId) ?? community);
+    groups.find((item) => item.conversationId === selectedId) ??
+    directs.find((item) => item.conversationId === selectedId) ??
+    groups[0];
+
+  setViewingConversation(selected?.conversationId ?? null);
 
   useEffect(() => {
+    return () => setViewingConversation(null);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const patch = (item: ChatPreview) =>
+      item.conversationId === selectedId ? { ...item, unread: 0 } : item;
+    setGroups((list) => list.map(patch));
+    setDirects((list) => list.map(patch));
+    void markConversationRead(selectedId);
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (!selectedId) return;
     const socket = getChatSocket();
     let cancelled = false;
 
@@ -95,13 +112,21 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
     }
 
     function onMessage(message: LiveChatMessage) {
+      const viewing = message.conversationId === selectedIdRef.current;
+      const fromOther = message.senderId !== inbox.viewerId;
       const patch = (item: ChatPreview) =>
         item.conversationId === message.conversationId
-          ? { ...item, lastBody: message.body, lastAt: message.createdAt }
+          ? {
+              ...item,
+              lastBody: message.body,
+              lastAt: message.createdAt,
+              unread: viewing || !fromOther ? 0 : item.unread + 1,
+            }
           : item;
-      setCommunity(patch);
+      setGroups((list) => list.map(patch));
       setDirects((list) => list.map(patch));
-      if (message.conversationId !== selectedIdRef.current) return;
+      if (viewing && fromOther) void markConversationRead(message.conversationId);
+      if (!viewing) return;
       stickToBottom.current = true;
       setMessages((current) =>
         current.some((item) => item.id === message.id) ? current : [...current, message],
@@ -123,7 +148,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
   useEffect(() => {
     const socket = getChatSocket();
     const rooms = [
-      inbox.community.conversationId,
+      ...inbox.groups.map((item) => item.conversationId),
       ...inbox.directs.map((item) => item.conversationId),
     ];
 
@@ -145,10 +170,18 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
     if (node) node.scrollTop = node.scrollHeight;
   }, [messages, selectedId]);
 
+  function clearUnread(conversationId: string) {
+    const patch = (item: ChatPreview) =>
+      item.conversationId === conversationId ? { ...item, unread: 0 } : item;
+    setGroups((list) => list.map(patch));
+    setDirects((list) => list.map(patch));
+  }
+
   function openConversation(item: ChatPreview) {
     stickToBottom.current = true;
     setSelectedId(item.conversationId);
     setChannel(item.kind === "group" ? "group" : "direct");
+    clearUnread(item.conversationId);
     setDraft("");
     setError("");
   }
@@ -182,6 +215,14 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
     );
   }
 
+  if (!selected) {
+    return (
+      <main className="flex h-[calc(100dvh-7.5rem)] min-h-[32rem] items-center justify-center">
+        <p className="text-sm text-slate-400">No conversations yet.</p>
+      </main>
+    );
+  }
+
   return (
     <main className="flex h-[calc(100dvh-7.5rem)] min-h-[32rem] flex-col">
 
@@ -192,7 +233,10 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
             <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1">
               <button
                 type="button"
-                onClick={() => openConversation(community)}
+                onClick={() => {
+                  setChannel("group");
+                  if (selected?.kind !== "group" && groups[0]) openConversation(groups[0]);
+                }}
                 className={`rounded-lg px-3 py-2 text-sm font-semibold ${channel === "group" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
                   }`}
               >
@@ -202,7 +246,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                 type="button"
                 onClick={() => {
                   setChannel("direct");
-                  if (selected.kind === "group" && directs[0]) openConversation(directs[0]);
+                  if (selected?.kind === "group" && directs[0]) openConversation(directs[0]);
                 }}
                 className={`rounded-lg px-3 py-2 text-sm font-semibold ${channel === "direct" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
                   }`}
@@ -213,7 +257,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder={channel === "group" ? "Search community" : "Search members"}
+              placeholder={channel === "group" ? "Search groups" : "Search members"}
               className="input input-bordered w-full"
             />
           </div>
@@ -223,7 +267,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
               <li className="px-3 py-6 text-sm text-slate-400">No conversations match.</li>
             ) : (
               conversations.map((item) => {
-                const active = item.conversationId === selected.conversationId;
+                const active = item.conversationId === selected?.conversationId;
                 return (
                   <li key={item.conversationId}>
                     <button
@@ -246,8 +290,15 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                             {formatStamp(item.lastAt)}
                           </span>
                         </span>
-                        <span className="mt-0.5 block truncate text-xs text-slate-500">
-                          {item.lastBody || item.subtitle}
+                        <span className="mt-0.5 flex items-center gap-2">
+                          <span className="block min-w-0 flex-1 truncate text-xs text-slate-500">
+                            {item.lastBody || item.subtitle}
+                          </span>
+                          {item.unread > 0 ? (
+                            <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                              {item.unread > 99 ? "99+" : item.unread}
+                            </span>
+                          ) : null}
                         </span>
                       </span>
                     </button>
@@ -271,7 +322,9 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                 {live ? "Live" : "Reconnecting"}
                 {" · "}
                 {selected.kind === "group"
-                  ? `${selected.subtitle} · group chat`
+                  ? selected.description
+                    ? `${selected.description} · ${selected.subtitle}`
+                    : `${selected.subtitle} · group chat`
                   : selected.isFriend
                     ? "Direct message · friend"
                     : "Direct message"}

@@ -1,5 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
-import { COMMUNITY_CHAT_ID, peerFromDirectChat } from "@/Helper/chat";
+import { userCanAccessConversation } from "@/Helper/chatAccess";
 import { publishChatMessage } from "@/Helper/publishChat";
 import { requireUserId } from "@/Helper/userFromToken";
 import { Message } from "@/Model/Messages";
@@ -31,14 +31,6 @@ function initials(name: string) {
 function colorFor(name: string) {
   const code = name.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
   return colors[code % colors.length];
-}
-
-async function allowedConversation(userId: string, conversationId: string) {
-  if (conversationId === COMMUNITY_CHAT_ID) return true;
-  const peerId = peerFromDirectChat(conversationId, userId);
-  if (!peerId || !mongoose.Types.ObjectId.isValid(peerId)) return false;
-  const peer = await User.findById(peerId).select("isAdmin").lean<{ isAdmin?: boolean } | null>();
-  return Boolean(peer && !peer.isAdmin);
 }
 
 async function toMessages(
@@ -82,7 +74,7 @@ export async function GET(request: Request) {
     }
 
     await connectDB();
-    if (!(await allowedConversation(session, conversationId))) {
+    if (!(await userCanAccessConversation(session, conversationId))) {
       return new Response(JSON.stringify(new ApiError(404, "Conversation not found")), {
         status: 404,
         headers: { "Content-Type": "application/json" },
@@ -123,7 +115,7 @@ export async function POST(request: Request) {
     if (session instanceof Response) return session;
 
     await connectDB();
-    if (!(await allowedConversation(session, parsed.data.conversationId))) {
+    if (!(await userCanAccessConversation(session, parsed.data.conversationId))) {
       return new Response(JSON.stringify(new ApiError(404, "Conversation not found")), {
         status: 404,
         headers: { "Content-Type": "application/json" },

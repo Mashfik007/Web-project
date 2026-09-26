@@ -307,6 +307,21 @@ export async function waiveFine(id: string) {
     return postCategory("/api/admin/waive-fine", { id });
 }
 
+export async function addCommunityGroup(group: { name: string; description: string }) {
+    return postCategory("/api/admin/add-community-groups", group);
+}
+
+export async function updateCommunityGroup(
+    id: string,
+    group: { name: string; description: string },
+) {
+    return postCategory("/api/admin/update-community-groups", { id, ...group });
+}
+
+export async function deleteCommunityGroup(id: string) {
+    return postCategory("/api/admin/delete-community-groups", { id });
+}
+
 export async function logout() {
     try {
         const res = await fetch("/api/users/logout", {

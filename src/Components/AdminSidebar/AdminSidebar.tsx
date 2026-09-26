@@ -61,6 +61,15 @@ const sectionIcons: Record<string, ReactNode> = {
       className={iconClass}
     />
   ),
+  community: (
+    <Image
+      src="/svg/users.svg"
+      alt="Community"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
   "borrow-requests": (
     <Image
       src="/svg/clipboard.svg"
