@@ -1,5 +1,6 @@
 import { createServer } from "http";
 import { COMMUNITY_CHAT_ID } from "@/Helper/chat";
+import { NOTICES_ROOM } from "@/Helper/publishNotice";
 import { CommunityGroup } from "@/Model/CommunityGroups";
 import { GroupMember } from "@/Model/GroupMembers";
 import jwt from "jsonwebtoken";
@@ -92,7 +93,7 @@ async function presentMessages(rows: MessageRow[]) {
 }
 
 async function joinUserRooms(socket: { join: (room: string | string[]) => Promise<void> | void }, userId: string) {
-  const rooms = [COMMUNITY_CHAT_ID];
+  const rooms = [COMMUNITY_CHAT_ID, NOTICES_ROOM];
   const memberships = await GroupMember.find({ userId }).select("groupId").lean<{ groupId: string }[]>();
   for (const membership of memberships) {
     const groupId = String(membership.groupId || "");
@@ -159,7 +160,47 @@ export async function startChatSocket() {
     await mongoose.connect(process.env.MONGODB_URL!);
   }
 
-  const httpServer = createServer();
+  const httpServer = createServer((req, res) => {
+    const url = req.url || "";
+    if (req.method === "POST" && url.startsWith("/internal/notice")) {
+      const chunks: Buffer[] = [];
+      req.on("data", (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+      req.on("end", () => {
+        const key = req.headers["x-notice-key"];
+        if (key !== process.env.SECRET_ACCESS_TOKEN) {
+          res.writeHead(401);
+          res.end();
+          return;
+        }
+        try {
+          const notice = JSON.parse(Buffer.concat(chunks).toString("utf8")) as {
+            id?: string;
+            title?: string;
+            message?: string;
+            createdAt?: string;
+          };
+          if (!notice.id || !notice.title || !notice.message) {
+            res.writeHead(400);
+            res.end();
+            return;
+          }
+          io.emit("notice:new", notice);
+          res.writeHead(204);
+          res.end();
+        } catch {
+          res.writeHead(400);
+          res.end();
+        }
+      });
+      return;
+    }
+    if (!url.startsWith("/socket.io")) {
+      res.writeHead(404);
+      res.end();
+    }
+  });
   const io = new Server(httpServer, {
     cors: { origin: true, credentials: true },
   });
@@ -186,6 +227,7 @@ export async function startChatSocket() {
 
   io.on("connection", (socket) => {
     const userId = String(socket.data.userId || "");
+    socket.join(NOTICES_ROOM);
     void joinUserRooms(socket, userId);
 
     socket.on("rooms:sync", () => {

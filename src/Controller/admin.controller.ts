@@ -322,6 +322,10 @@ export async function deleteCommunityGroup(id: string) {
     return postCategory("/api/admin/delete-community-groups", { id });
 }
 
+export async function sendNotification(notice: { title: string; message: string }) {
+    return postCategory("/api/admin/send-notification", notice);
+}
+
 export async function logout() {
     try {
         const res = await fetch("/api/users/logout", {

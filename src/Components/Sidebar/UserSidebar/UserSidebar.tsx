@@ -6,6 +6,7 @@ import AppDrawer, {
   drawerItemClass,
 } from "@/Components/Sidebar/AppDrawer/AppDrawer";
 import ChatUnreadBadge from "@/Components/Sidebar/ChatUnreadBadge/ChatUnreadBadge";
+import NoticeUnreadBadge from "@/Components/Sidebar/NoticeUnreadBadge/NoticeUnreadBadge";
 import SidebarProfile from "@/Components/Sidebar/SidebarProfile/SidebarProfile";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -156,6 +157,20 @@ const navItems: NavItem[] = [
       />
     ),
   },
+  {
+    label: "Notifications",
+    href: (userId) => `/user/${userId}/notifications`,
+    match: (pathname, userId) => pathname.startsWith(`/user/${userId}/notifications`),
+    icon: (
+      <Image
+        src="/svg/bell.svg"
+        alt="Notifications"
+        width={16}
+        height={16}
+        className={iconClassName}
+      />
+    ),
+  },
 ];
 
 export default function SideBar({
@@ -164,12 +179,14 @@ export default function SideBar({
   name,
   initials,
   unreadCount,
+  unreadNotices,
 }: {
   children: React.ReactNode;
   userId: string;
   name: string;
   initials: string;
   unreadCount: number;
+  unreadNotices: number;
 }) {
   const pathname = usePathname();
   const activeItem = navItems.find((item) => item.match(pathname, userId));
@@ -197,6 +214,9 @@ export default function SideBar({
                       {item.icon}
                       {item.label === "Chat" ? (
                         <ChatUnreadBadge userId={userId} initialCount={unreadCount} />
+                      ) : null}
+                      {item.label === "Notifications" ? (
+                        <NoticeUnreadBadge initialCount={unreadNotices} />
                       ) : null}
                     </span>
                     <span className="is-drawer-close:hidden">{item.label}</span>

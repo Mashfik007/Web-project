@@ -1,4 +1,4 @@
-import type { AdminDigitalResource, AdminNotice } from "@/types/adminOps";
+import type { AdminDigitalResource } from "@/types/adminOps";
 
 export async function getAdminDigitalResources(
   _adminId: string,
@@ -63,43 +63,6 @@ export async function getAdminDigitalResources(
       downloads: 88,
       size: "1.2 MB",
       coverClass: "bg-cyan-100 text-cyan-600",
-    },
-  ];
-}
-
-export async function getAdminNotices(
-  _adminId: string,
-): Promise<AdminNotice[]> {
-  return [
-    {
-      id: 1,
-      title: "Overdue Book Reminder",
-      message: "Please return borrowed titles that are past due.",
-      audience: "All Members",
-      priority: "High",
-      status: "Sent",
-      recipients: 23,
-      date: "2024-08-21",
-    },
-    {
-      id: 2,
-      title: "New Books Available",
-      message: "This week's arrivals are now on the shelf.",
-      audience: "All Members",
-      priority: "Normal",
-      status: "Scheduled",
-      recipients: 120,
-      date: "2024-08-24",
-    },
-    {
-      id: 3,
-      title: "Holiday Hours",
-      message: "The library will close early on Friday.",
-      audience: "Staff",
-      priority: "Normal",
-      status: "Draft",
-      recipients: 8,
-      date: "2024-08-18",
     },
   ];
 }

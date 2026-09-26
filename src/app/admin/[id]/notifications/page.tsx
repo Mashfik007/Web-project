@@ -1,13 +1,9 @@
 import NotificationsPage from "@/Components/AdminOps/NotificationsPage/NotificationsPage";
-import { getAdminNotices } from "@/data/adminOpsData";
+import { getAdminNotices } from "@/data/getNotices";
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
+export const dynamic = "force-dynamic";
 
-export default async function Page({ params }: PageProps) {
-  const { id } = await params;
-  const notices = await getAdminNotices(id);
-
+export default async function Page() {
+  const notices = await getAdminNotices();
   return <NotificationsPage notices={notices} />;
 }

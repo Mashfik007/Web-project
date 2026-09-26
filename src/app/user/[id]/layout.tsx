@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import SuspendedAccount from "@/Components/Auth/SuspendedAccount/SuspendedAccount";
 import SideBar from "@/Components/Sidebar/UserSidebar/UserSidebar";
 import { getUnreadChatCount } from "@/data/getUnreadChatCount";
+import { getUnreadNoticeCount } from "@/data/getUnreadNoticeCount";
 import { isAccountSuspended } from "@/data/libraryLink";
 import { getSessionUser } from "@/Helper/userFromToken";
 import { headers } from "next/headers";
@@ -42,7 +43,10 @@ export default async function UserLayout({
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("") || "R";
 
-  const unreadCount = await getUnreadChatCount(user._id);
+  const [unreadCount, unreadNotices] = await Promise.all([
+    getUnreadChatCount(user._id),
+    getUnreadNoticeCount(user._id),
+  ]);
 
   return (
     <SideBar
@@ -50,6 +54,7 @@ export default async function UserLayout({
       name={user.name}
       initials={initials}
       unreadCount={unreadCount}
+      unreadNotices={unreadNotices}
     >
       {children}
     </SideBar>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminCard from "@/Components/AdminOps/AdminCard/AdminCard";
 import {
@@ -9,19 +11,54 @@ import {
   formHasValues,
   useFeedback,
 } from "@/Components/Modal";
-import type { AdminNotice } from "@/types/adminOps";
+import { sendNotification } from "@/Controller/admin.controller";
+import type { AdminNotice } from "@/types/notice";
 
-interface NotificationsPageProps {
-  notices: AdminNotice[];
+function formatWhen(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
-export default function NotificationsPage({ notices }: NotificationsPageProps) {
+export default function NotificationsPage({ notices }: { notices: AdminNotice[] }) {
+  const router = useRouter();
   const feedback = useFeedback();
+  const [sending, setSending] = useState(false);
+
+  async function handleSubmit(form: HTMLFormElement) {
+    if (sending) return;
+    if (!formHasValues(form, ["title", "message"])) {
+      feedback.failed("Message not sent", "Title and message are required.");
+      return;
+    }
+
+    const data = new FormData(form);
+    setSending(true);
+    const result = await sendNotification({
+      title: String(data.get("title") ?? "").trim(),
+      message: String(data.get("message") ?? "").trim(),
+    });
+    setSending(false);
+
+    if (!result.ok) {
+      feedback.failed("Message not sent", result.message);
+      return;
+    }
+
+    form.reset();
+    router.refresh();
+    feedback.success("Notification sent", result.message);
+  }
 
   return (
     <AdminPageShell
       title="Notifications"
-      subtitle="Compose and manage library communications"
+      subtitle="Send a message to every reader"
       framed={false}
     >
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
@@ -30,109 +67,53 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
             className="space-y-4 p-5"
             onSubmit={(event) => {
               event.preventDefault();
-              if (!formHasValues(event.currentTarget, ["title", "message"])) {
-                feedback.failed(
-                  "Message not sent",
-                  "Title and message are required.",
-                );
-                return;
-              }
-              feedback.success(
-                "Notification sent",
-                "Members will see this message shortly.",
-              );
+              void handleSubmit(event.currentTarget);
             }}
           >
-            <h2 className="font-semibold text-slate-800">
-              Compose Notification
-            </h2>
+            <h2 className="font-semibold text-slate-800">Compose Notification</h2>
+            <p className="text-xs text-slate-400">
+              This goes to all readers and shows up on their notifications page.
+            </p>
             <FormField
               label="Title"
               name="title"
               placeholder="Notification title"
+              required
             />
             <FormField
               label="Message"
               name="message"
               as="textarea"
               placeholder="Write your message here..."
+              required
             />
-            <FormField
-              label="Target Audience"
-              name="audience"
-              as="select"
-              options={["All Members", "Staff", "Overdue borrowers"]}
-            />
-            <FormField
-              label="Priority"
-              name="priority"
-              as="select"
-              options={["Normal", "High"]}
-            />
-            <div className="flex items-center justify-between gap-3 pt-2">
-              <ModalButton
-                tone="secondary"
-                onClick={() =>
-                  feedback.success(
-                    "Notification scheduled",
-                    "The message was saved to send later.",
-                  )
-                }
-              >
-                Schedule
+            <div className="flex justify-end pt-2">
+              <ModalButton type="submit">
+                {sending ? "Sending..." : "Send to all users"}
               </ModalButton>
-              <ModalButton type="submit">Send Now</ModalButton>
             </div>
           </form>
         </AdminCard>
 
         <AdminCard>
           <div className="p-5">
-            <h2 className="font-semibold text-slate-800">
-              Notification History
-            </h2>
-            <ul className="mt-4 divide-y divide-slate-100">
-              {notices.map((notice) => (
-                <li key={notice.id} className="py-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-slate-800">
-                        {notice.title}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-400">
-                        {notice.message}
-                      </p>
-                    </div>
-                    <span
-                      className={`badge badge-sm ${
-                        notice.status === "Sent"
-                          ? "badge-soft badge-success"
-                          : notice.status === "Scheduled"
-                            ? "badge-soft badge-info"
-                            : "badge-ghost"
-                      }`}
-                    >
-                      {notice.status}
-                    </span>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
-                    <span>
-                      {notice.recipients} recipients ·{" "}
-                      <span
-                        className={`badge badge-xs ${
-                          notice.priority === "High"
-                            ? "badge-soft badge-error"
-                            : "badge-soft badge-info"
-                        }`}
-                      >
-                        {notice.priority}
-                      </span>
-                    </span>
-                    <span>{notice.date}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <h2 className="font-semibold text-slate-800">Notification History</h2>
+            {notices.length === 0 ? (
+              <p className="mt-4 text-sm text-slate-400">No notifications sent yet.</p>
+            ) : (
+              <ul className="mt-4 divide-y divide-slate-100">
+                {notices.map((notice) => (
+                  <li key={notice.id} className="py-4">
+                    <p className="font-semibold text-slate-800">{notice.title}</p>
+                    <p className="mt-1 text-sm text-slate-500">{notice.message}</p>
+                    <p className="mt-2 text-xs text-slate-400">
+                      {notice.recipients} {notice.recipients === 1 ? "reader" : "readers"} ·{" "}
+                      {formatWhen(notice.createdAt)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </AdminCard>
       </div>

@@ -106,16 +106,3 @@ export type AdminTopBook = {
   borrows: number;
   rating: number;
 };
-
-export type AdminNoticeStatus = "Sent" | "Scheduled" | "Draft";
-
-export type AdminNotice = {
-  id: number;
-  title: string;
-  message: string;
-  audience: string;
-  priority: "Normal" | "High";
-  status: AdminNoticeStatus;
-  recipients: number;
-  date: string;
-};
