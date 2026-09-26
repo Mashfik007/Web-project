@@ -16,10 +16,20 @@ interface MonthlyBorrowChartProps {
   yearLabel: string;
 }
 
+function axisTop(values: number[]) {
+  const peak = Math.max(1, ...values);
+  if (peak <= 5) return 5;
+  const step = Math.pow(10, Math.floor(Math.log10(peak)));
+  return Math.ceil(peak / step) * step;
+}
+
 export default function MonthlyBorrowChart({
   data,
   yearLabel,
 }: MonthlyBorrowChartProps) {
+  const top = axisTop(data.flatMap((point) => [point.borrows, point.returns]));
+  const ticks = [0, 1, 2, 3, 4].map((step) => Math.round((top / 4) * step));
+
   return (
     <article className="card bg-base-100 p-5 shadow-sm">
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -28,24 +38,10 @@ export default function MonthlyBorrowChart({
             Monthly Borrow Activity
           </h2>
           <p className="mt-0.5 text-xs text-slate-400">
-            Last 12 months — borrows vs returns
+            Borrows and returns in {yearLabel}
           </p>
         </div>
-        <button type="button" className="btn btn-ghost btn-xs">
-          {yearLabel}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-3.5 text-slate-400"
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </button>
+        <span className="text-xs font-semibold text-slate-500">{yearLabel}</span>
       </div>
 
       <div className="h-64 w-full">
@@ -56,8 +52,12 @@ export default function MonthlyBorrowChart({
           >
             <defs>
               <linearGradient id="borrowFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#2DD4BF" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#2DD4BF" stopOpacity={0.02} />
+                <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.35} />
+                <stop offset="95%" stopColor="#14B8A6" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="returnFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.28} />
+                <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.02} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -72,8 +72,9 @@ export default function MonthlyBorrowChart({
               tick={{ fontSize: 11, fill: "#94A3B8" }}
             />
             <YAxis
-              domain={[0, 600]}
-              ticks={[0, 150, 300, 450, 600]}
+              domain={[0, top]}
+              ticks={ticks}
+              allowDecimals={false}
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: "#94A3B8" }}
@@ -89,6 +90,7 @@ export default function MonthlyBorrowChart({
             <Area
               type="monotone"
               dataKey="borrows"
+              name="Borrows"
               stroke="#14B8A6"
               strokeWidth={2.4}
               fill="url(#borrowFill)"
@@ -98,6 +100,14 @@ export default function MonthlyBorrowChart({
                 fill: "#fff",
                 strokeWidth: 2,
               }}
+            />
+            <Area
+              type="monotone"
+              dataKey="returns"
+              name="Returns"
+              stroke="#38BDF8"
+              strokeWidth={2.4}
+              fill="url(#returnFill)"
             />
           </AreaChart>
         </ResponsiveContainer>

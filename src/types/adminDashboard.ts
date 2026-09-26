@@ -20,6 +20,7 @@ export type AdminStat = {
 export type MonthlyBorrowPoint = {
   month: string;
   borrows: number;
+  returns: number;
 };
 
 export type UserActivitySlice = {

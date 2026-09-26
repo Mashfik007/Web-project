@@ -12,7 +12,10 @@ export default function RecentActivity({ items }: RecentActivityProps) {
       </h2>
 
       <ul className="mt-4 space-y-4">
-        {items.map((item) => (
+        {items.length === 0 ? (
+          <li className="text-sm text-slate-400">No activity yet.</li>
+        ) : (
+          items.map((item) => (
           <li key={item.id} className="flex items-start gap-3">
             <span
               className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${item.avatarClass}`}
@@ -31,7 +34,8 @@ export default function RecentActivity({ items }: RecentActivityProps) {
               <p className="mt-0.5 text-sm text-slate-500">{item.action}</p>
             </div>
           </li>
-        ))}
+          ))
+        )}
       </ul>
     </article>
   );

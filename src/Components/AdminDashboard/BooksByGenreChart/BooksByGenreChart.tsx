@@ -15,7 +15,16 @@ interface BooksByGenreChartProps {
   data: GenreCount[];
 }
 
+function axisTop(peak: number) {
+  if (peak <= 5) return 5;
+  const step = Math.pow(10, Math.floor(Math.log10(peak)));
+  return Math.ceil(peak / step) * step;
+}
+
 export default function BooksByGenreChart({ data }: BooksByGenreChartProps) {
+  const top = axisTop(Math.max(1, ...data.map((item) => item.count), 1));
+  const ticks = [0, 1, 2, 3, 4].map((step) => Math.round((top / 4) * step));
+
   return (
     <article className="card bg-base-100 p-5 shadow-sm">
       <h2 className="text-base font-semibold text-slate-800">Books by Genre</h2>
@@ -23,6 +32,9 @@ export default function BooksByGenreChart({ data }: BooksByGenreChartProps) {
         Collection distribution across categories
       </p>
 
+      {data.length === 0 ? (
+        <p className="mt-8 text-sm text-slate-400">No books in the catalog yet.</p>
+      ) : (
       <div className="mt-4 h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -42,8 +54,9 @@ export default function BooksByGenreChart({ data }: BooksByGenreChartProps) {
               tick={{ fontSize: 11, fill: "#94A3B8" }}
             />
             <YAxis
-              domain={[0, 1000]}
-              ticks={[0, 250, 500, 750, 1000]}
+              domain={[0, top]}
+              ticks={ticks}
+              allowDecimals={false}
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: "#94A3B8" }}
@@ -58,6 +71,7 @@ export default function BooksByGenreChart({ data }: BooksByGenreChartProps) {
             />
             <Bar
               dataKey="count"
+              name="Books"
               fill="#60A5FA"
               radius={[6, 6, 0, 0]}
               maxBarSize={44}
@@ -65,6 +79,7 @@ export default function BooksByGenreChart({ data }: BooksByGenreChartProps) {
           </BarChart>
         </ResponsiveContainer>
       </div>
+      )}
     </article>
   );
 }

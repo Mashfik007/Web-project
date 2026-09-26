@@ -119,11 +119,3 @@ export type AdminNotice = {
   recipients: number;
   date: string;
 };
-
-export type AdminScan = {
-  id: number;
-  title: string;
-  author: string;
-  time: string;
-  status: "Issued" | "Returned";
-};

@@ -1,8 +1,4 @@
-import type {
-  AdminDigitalResource,
-  AdminNotice,
-  AdminScan,
-} from "@/types/adminOps";
+import type { AdminDigitalResource, AdminNotice } from "@/types/adminOps";
 
 export async function getAdminDigitalResources(
   _adminId: string,
@@ -104,39 +100,6 @@ export async function getAdminNotices(
       status: "Draft",
       recipients: 8,
       date: "2024-08-18",
-    },
-  ];
-}
-
-export async function getAdminScans(_adminId: string): Promise<AdminScan[]> {
-  return [
-    {
-      id: 1,
-      title: "Clean Code",
-      author: "Robert C. Martin",
-      time: "09:42 AM",
-      status: "Issued",
-    },
-    {
-      id: 2,
-      title: "Sapiens",
-      author: "Yuval Noah Harari",
-      time: "09:28 AM",
-      status: "Returned",
-    },
-    {
-      id: 3,
-      title: "1984",
-      author: "George Orwell",
-      time: "09:11 AM",
-      status: "Issued",
-    },
-    {
-      id: 4,
-      title: "Dune",
-      author: "Frank Herbert",
-      time: "08:54 AM",
-      status: "Returned",
     },
   ];
 }
