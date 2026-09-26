@@ -1,4 +1,7 @@
 import { createServer } from "http";
+import { COMMUNITY_CHAT_ID } from "@/Helper/chat";
+import { CommunityGroup } from "@/Model/CommunityGroups";
+import { GroupMember } from "@/Model/GroupMembers";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { Server } from "socket.io";
@@ -29,7 +32,7 @@ function readCookie(header: string | undefined, name: string) {
 }
 
 function canJoin(userId: string, conversationId: string) {
-  if (conversationId === "community") return true;
+  if (conversationId === COMMUNITY_CHAT_ID) return true;
   if (conversationId.startsWith("group:")) {
     return /^[a-f\d]{24}$/i.test(conversationId.slice("group:".length));
   }
@@ -89,12 +92,8 @@ async function presentMessages(rows: MessageRow[]) {
 }
 
 async function joinUserRooms(socket: { join: (room: string | string[]) => Promise<void> | void }, userId: string) {
-  const rooms = ["community"];
-  const memberships = await mongoose.connection
-    .collection("groupmembers")
-    .find({ userId })
-    .project({ groupId: 1 })
-    .toArray();
+  const rooms = [COMMUNITY_CHAT_ID];
+  const memberships = await GroupMember.find({ userId }).select("groupId").lean<{ groupId: string }[]>();
   for (const membership of memberships) {
     const groupId = String(membership.groupId || "");
     if (/^[a-f\d]{24}$/i.test(groupId)) rooms.push(`group:${groupId}`);
@@ -125,14 +124,9 @@ async function assertConversation(userId: string, conversationId: string) {
   }
   if (conversationId.startsWith("group:")) {
     const id = conversationId.slice("group:".length);
-    const group = await mongoose.connection.collection("communitygroups").findOne({
-      _id: new mongoose.Types.ObjectId(id),
-    });
+    const group = await CommunityGroup.findById(id).select("_id").lean();
     if (!group) throw new Error("Conversation not found");
-    const member = await mongoose.connection.collection("groupmembers").findOne({
-      groupId: id,
-      userId,
-    });
+    const member = await GroupMember.findOne({ groupId: id, userId }).select("_id").lean();
     if (!member) throw new Error("Join this group from the community page");
     return;
   }
@@ -150,6 +144,17 @@ async function assertConversation(userId: string, conversationId: string) {
 }
 
 export async function startChatSocket() {
+  const globalState = globalThis as typeof globalThis & {
+    __chatHttp?: ReturnType<typeof createServer>;
+    __chatIo?: Server;
+  };
+  if (globalState.__chatHttp) {
+    await new Promise<void>((resolve) => {
+      globalState.__chatIo?.close();
+      globalState.__chatHttp?.close(() => resolve());
+    });
+  }
+
   if (mongoose.connection.readyState !== 1) {
     await mongoose.connect(process.env.MONGODB_URL!);
   }
@@ -260,6 +265,8 @@ export async function startChatSocket() {
   });
 
   const port = Number(process.env.CHAT_SOCKET_PORT || 3001);
+  globalState.__chatHttp = httpServer;
+  globalState.__chatIo = io;
   await new Promise<void>((resolve, reject) => {
     httpServer.once("error", reject);
     httpServer.listen(port, "0.0.0.0", () => {
