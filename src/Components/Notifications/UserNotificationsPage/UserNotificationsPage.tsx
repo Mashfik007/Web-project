@@ -5,9 +5,14 @@ import { markNoticesRead, setViewingNotices } from "@/lib/noticeUnread";
 import type { LibraryNotice } from "@/types/notice";
 import { useEffect, useState } from "react";
 
+interface UserNotificationsPageProps {
+  notices: LibraryNotice[];
+}
+
 function formatWhen(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
+
   return date.toLocaleString([], {
     month: "short",
     day: "numeric",
@@ -16,9 +21,12 @@ function formatWhen(iso: string) {
   });
 }
 
-export default function UserNotificationsPage({ notices }: { notices: LibraryNotice[] }) {
+export default function UserNotificationsPage({
+  notices,
+}: UserNotificationsPageProps) {
   const [items, setItems] = useState(notices);
 
+  // badge stays off while they are looking at this page
   setViewingNotices(true);
 
   useEffect(() => {
@@ -42,9 +50,12 @@ export default function UserNotificationsPage({ notices }: { notices: LibraryNot
 
     function onNotice(notice: LibraryNotice) {
       if (!notice?.id) return;
-      setItems((current) =>
-        current.some((item) => item.id === notice.id) ? current : [notice, ...current],
-      );
+
+      setItems((current) => {
+        const already = current.some((item) => item.id === notice.id);
+        if (already) return current;
+        return [notice, ...current];
+      });
     }
 
     socket.on("connect", syncRooms);
@@ -60,7 +71,9 @@ export default function UserNotificationsPage({ notices }: { notices: LibraryNot
   return (
     <main className="mx-auto max-w-3xl">
       <header className="mb-6">
-        <h1 className="font-serif text-3xl font-bold text-slate-800">Notifications</h1>
+        <h1 className="font-serif text-3xl font-bold text-slate-800">
+          Notifications
+        </h1>
         <p className="mt-1 text-sm text-slate-500">Messages from the library</p>
       </header>
 
@@ -71,12 +84,19 @@ export default function UserNotificationsPage({ notices }: { notices: LibraryNot
       ) : (
         <ul className="space-y-3">
           {items.map((notice) => (
-            <li key={notice.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <li
+              key={notice.id}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            >
               <div className="flex items-start justify-between gap-3">
                 <h2 className="font-semibold text-slate-800">{notice.title}</h2>
-                <span className="shrink-0 text-xs text-slate-400">{formatWhen(notice.createdAt)}</span>
+                <span className="shrink-0 text-xs text-slate-400">
+                  {formatWhen(notice.createdAt)}
+                </span>
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{notice.message}</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                {notice.message}
+              </p>
             </li>
           ))}
         </ul>

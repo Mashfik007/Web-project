@@ -168,25 +168,26 @@ export async function startChatSocket() {
         chunks.push(chunk);
       });
       req.on("end", () => {
-        const key = req.headers["x-notice-key"];
-        if (key !== process.env.SECRET_ACCESS_TOKEN) {
+        if (req.headers["x-notice-key"] !== process.env.SECRET_ACCESS_TOKEN) {
           res.writeHead(401);
           res.end();
           return;
         }
+
         try {
-          const notice = JSON.parse(Buffer.concat(chunks).toString("utf8")) as {
-            id?: string;
-            title?: string;
-            message?: string;
-            createdAt?: string;
-          };
+          const notice = JSON.parse(Buffer.concat(chunks).toString("utf8"));
           if (!notice.id || !notice.title || !notice.message) {
             res.writeHead(400);
             res.end();
             return;
           }
-          io.emit("notice:new", notice);
+
+          io.emit("notice:new", {
+            id: notice.id,
+            title: notice.title,
+            message: notice.message,
+            createdAt: notice.createdAt,
+          });
           res.writeHead(204);
           res.end();
         } catch {

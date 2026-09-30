@@ -5,7 +5,13 @@ import { isViewingNotices, NOTICE_UNREAD_EVENT } from "@/lib/noticeUnread";
 import type { LibraryNotice } from "@/types/notice";
 import { useEffect, useState } from "react";
 
-export default function NoticeUnreadBadge({ initialCount }: { initialCount: number }) {
+interface NoticeUnreadBadgeProps {
+  initialCount: number;
+}
+
+export default function NoticeUnreadBadge({
+  initialCount,
+}: NoticeUnreadBadgeProps) {
   const [count, setCount] = useState(initialCount);
 
   useEffect(() => {

@@ -101,12 +101,9 @@ export default function LoginForm() {
         />
 
         <div className="flex justify-end">
-          <button
-            type="button"
-            className="btn btn-link btn-sm text-primary px-0"
-          >
+          <Link href="/forgot-password" className="btn btn-link btn-sm text-primary px-0">
             Forgot password?
-          </button>
+          </Link>
         </div>
 
         <button

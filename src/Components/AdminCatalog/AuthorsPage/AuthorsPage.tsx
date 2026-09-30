@@ -40,6 +40,7 @@ export default function AuthorsPage({
   const [formVersion, setFormVersion] = useState(0);
   const [editing, setEditing] = useState<AdminAuthor | null>(null);
   const [deleting, setDeleting] = useState<AdminAuthor | null>(null);
+  const [toggling, setToggling] = useState<AdminAuthor | null>(null);
   const [archiveId, setArchiveId] = useState("");
   const feedback = useFeedback();
 
@@ -189,7 +190,8 @@ export default function AuthorsPage({
                 <button
                   type="button"
                   onClick={() => {
-                    void handleToggle(author);
+                    setToggling(author);
+                    openModal("author-toggle");
                   }}
                   className="text-xs font-medium text-orange-500 hover:text-orange-600"
                 >
@@ -231,9 +233,27 @@ export default function AuthorsPage({
       </FormModal>
 
       <ConfirmModal
+        id="author-toggle"
+        title={toggling?.status === "Active" ? "Deactivate author" : "Activate author"}
+        message={
+          toggling?.status === "Active"
+            ? `Do you want to really deactivate "${toggling?.name ?? "this author"}"?`
+            : `Do you want to really activate "${toggling?.name ?? "this author"}"?`
+        }
+        confirmLabel={toggling?.status === "Active" ? "Deactivate" : "Activate"}
+        tone={toggling?.status === "Active" ? "danger" : "primary"}
+        onConfirm={() => {
+          const author = toggling;
+          setToggling(null);
+          if (!author) return;
+          void handleToggle(author);
+        }}
+      />
+
+      <ConfirmModal
         id="author-delete"
         title="Delete author"
-        message={`Remove "${deleting?.name ?? "this author"}" from the directory?`}
+        message={`Do you want to really delete "${deleting?.name ?? "this author"}"?`}
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {

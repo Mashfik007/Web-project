@@ -41,6 +41,7 @@ export default function CategoriesPage({
   const [formVersion, setFormVersion] = useState(0);
   const [editing, setEditing] = useState<AdminCategory | null>(null);
   const [deleting, setDeleting] = useState<AdminCategory | null>(null);
+  const [toggling, setToggling] = useState<AdminCategory | null>(null);
   const [archiveId, setArchiveId] = useState("");
   const feedback = useFeedback();
 
@@ -196,7 +197,8 @@ export default function CategoriesPage({
                 <button
                   type="button"
                   onClick={() => {
-                    void handleToggle(category);
+                    setToggling(category);
+                    openModal("category-toggle");
                   }}
                   className="text-xs font-medium text-orange-500 hover:text-orange-600"
                 >
@@ -239,9 +241,27 @@ export default function CategoriesPage({
       </FormModal>
 
       <ConfirmModal
+        id="category-toggle"
+        title={toggling?.status === "Active" ? "Deactivate category" : "Activate category"}
+        message={
+          toggling?.status === "Active"
+            ? `Do you want to really deactivate "${toggling?.name ?? "this category"}"?`
+            : `Do you want to really activate "${toggling?.name ?? "this category"}"?`
+        }
+        confirmLabel={toggling?.status === "Active" ? "Deactivate" : "Activate"}
+        tone={toggling?.status === "Active" ? "danger" : "primary"}
+        onConfirm={() => {
+          const category = toggling;
+          setToggling(null);
+          if (!category) return;
+          void handleToggle(category);
+        }}
+      />
+
+      <ConfirmModal
         id="category-delete"
         title="Delete category"
-        message={`Delete "${deleting?.name ?? "this category"}"? Books in this category will need a new one.`}
+        message={`Do you want to really delete "${deleting?.name ?? "this category"}"?`}
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {

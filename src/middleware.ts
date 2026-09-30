@@ -23,7 +23,12 @@ export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
 
-  const isPublic = pathname === "/" || pathname === "/login" || pathname === "/signup";
+  const isPublic =
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password";
 
   if (isPublic && session) {
     return NextResponse.redirect(
@@ -49,5 +54,13 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/signup", "/user/:path*", "/admin/:path*"],
+  matcher: [
+    "/",
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/user/:path*",
+    "/admin/:path*",
+  ],
 };

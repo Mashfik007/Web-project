@@ -49,6 +49,7 @@ export default function UsersPage({ users, archivedUsers }: UsersPageProps) {
   const [formVersion, setFormVersion] = useState(0);
   const [editing, setEditing] = useState<AdminUser | null>(null);
   const [deleting, setDeleting] = useState<AdminUser | null>(null);
+  const [toggling, setToggling] = useState<AdminUser | null>(null);
   const [archiveId, setArchiveId] = useState("");
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("All");
@@ -267,7 +268,8 @@ export default function UsersPage({ users, archivedUsers }: UsersPageProps) {
                 <button
                   type="button"
                   onClick={() => {
-                    void handleToggle(user);
+                    setToggling(user);
+                    openModal("user-toggle");
                   }}
                   className="text-xs font-medium text-orange-500 hover:text-orange-600"
                 >
@@ -325,9 +327,27 @@ export default function UsersPage({ users, archivedUsers }: UsersPageProps) {
       </FormModal>
 
       <ConfirmModal
+        id="user-toggle"
+        title={toggling?.status === "Active" ? "Deactivate account" : "Activate account"}
+        message={
+          toggling?.status === "Active"
+            ? `Do you want to really deactivate "${toggling?.name ?? "this account"}"?`
+            : `Do you want to really activate "${toggling?.name ?? "this account"}"?`
+        }
+        confirmLabel={toggling?.status === "Active" ? "Deactivate" : "Activate"}
+        tone={toggling?.status === "Active" ? "danger" : "primary"}
+        onConfirm={() => {
+          const user = toggling;
+          setToggling(null);
+          if (!user) return;
+          void handleToggle(user);
+        }}
+      />
+
+      <ConfirmModal
         id="user-delete"
         title="Delete user"
-        message={`Remove "${deleting?.name ?? "this user"}" from the library?`}
+        message={`Do you want to really delete "${deleting?.name ?? "this user"}"?`}
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {

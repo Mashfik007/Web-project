@@ -4,7 +4,7 @@ export const NOTICES_ROOM = "notices";
 
 export async function publishNotice(notice: LibraryNotice) {
   const port = process.env.CHAT_SOCKET_PORT || "3001";
-  const response = await fetch(`http://127.0.0.1:${port}/internal/notice`, {
+  const res = await fetch(`http://127.0.0.1:${port}/internal/notice`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -12,7 +12,8 @@ export async function publishNotice(notice: LibraryNotice) {
     },
     body: JSON.stringify(notice),
   });
-  if (!response.ok) {
+
+  if (!res.ok) {
     throw new Error("Live notification could not be delivered");
   }
 }

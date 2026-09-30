@@ -23,19 +23,23 @@ function toLibraryNotice(notice: StoredNotice): LibraryNotice {
 
 export async function getLibraryNotices(): Promise<LibraryNotice[]> {
   await connectDB();
+
   const notices = await Notice.find()
     .sort({ createdAt: -1 })
     .limit(100)
     .lean<StoredNotice[]>();
+
   return notices.map(toLibraryNotice);
 }
 
 export async function getAdminNotices(): Promise<AdminNotice[]> {
   await connectDB();
+
   const notices = await Notice.find()
     .sort({ createdAt: -1 })
     .limit(100)
     .lean<StoredNotice[]>();
+
   return notices.map((notice) => ({
     ...toLibraryNotice(notice),
     recipients: notice.recipients ?? 0,

@@ -11,38 +11,33 @@ export async function POST(request: Request) {
     const admin = await requireAdmin();
     if (admin instanceof Response) return admin;
 
-    const body = await request.json().catch(() => null);
-    const title =
-      body && typeof body === "object" && "title" in body
-        ? String(body.title ?? "").trim()
-        : "";
-    const message =
-      body && typeof body === "object" && "message" in body
-        ? String(body.message ?? "").trim()
-        : "";
+    await connectDB();
+    const { title, message } = await request.json();
+    const noticeTitle = String(title ?? "").trim();
+    const noticeMessage = String(message ?? "").trim();
 
-    if (!title || !message) {
+    if (!noticeTitle || !noticeMessage) {
       return new Response(
         JSON.stringify(new ApiError(400, "Title and message are required")),
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
-    if (title.length > 120 || message.length > 2000) {
+    if (noticeTitle.length > 120 || noticeMessage.length > 2000) {
       return new Response(
         JSON.stringify(new ApiError(400, "Title or message is too long")),
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    await connectDB();
     const recipients = await User.countDocuments({ isAdmin: { $ne: true } });
     const saved = await Notice.create({
-      title,
-      message,
+      title: noticeTitle,
+      message: noticeMessage,
       createdBy: admin._id,
       recipients,
     });
 
+    // push it out on the chat socket so open pages update
     await publishNotice({
       id: saved._id.toString(),
       title: saved.title,
@@ -50,23 +45,24 @@ export async function POST(request: Request) {
       createdAt: new Date(saved.createdAt).toISOString(),
     });
 
+    const sentMsg =
+      recipients === 1
+        ? "Notification sent to 1 reader"
+        : `Notification sent to ${recipients} readers`;
+
     return new Response(
-      JSON.stringify(
-        new ApiResponce(
-          201,
-          null,
-          recipients === 1
-            ? "Notification sent to 1 reader"
-            : `Notification sent to ${recipients} readers`,
-        ),
-      ),
+      JSON.stringify(new ApiResponce(201, null, sentMsg)),
       { status: 201, headers: { "Content-Type": "application/json" } },
     );
-  } catch (error) {
-    const text = error instanceof Error ? error.message : "Internal Server Error";
-    return new Response(JSON.stringify(new ApiError(500, text)), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  } catch (error: any) {
+    return new Response(
+      JSON.stringify(
+        new ApiError(500, error.message || "Internal Server Error"),
+      ),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 }

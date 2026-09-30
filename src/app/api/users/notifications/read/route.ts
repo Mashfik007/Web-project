@@ -18,15 +18,22 @@ export async function POST() {
     );
 
     const unread = await getUnreadNoticeCount(session);
-    return new Response(JSON.stringify(new ApiResponce(200, { unread }, "Marked read")), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal Server Error";
-    return new Response(JSON.stringify(new ApiError(500, message)), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify(new ApiResponce(200, { unread }, "Marked read")),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  } catch (error: any) {
+    return new Response(
+      JSON.stringify(
+        new ApiError(500, error.message || "Internal Server Error"),
+      ),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 }

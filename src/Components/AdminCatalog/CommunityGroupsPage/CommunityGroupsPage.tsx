@@ -170,11 +170,7 @@ export default function CommunityGroupsPage({
       <ConfirmModal
         id="community-group-delete"
         title="Delete group"
-        message={
-          deleting
-            ? `Delete ${deleting.name}? Members will no longer see this group in chat.`
-            : "Delete this group?"
-        }
+        message={`Do you want to really delete "${deleting?.name ?? "this group"}"?`}
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {

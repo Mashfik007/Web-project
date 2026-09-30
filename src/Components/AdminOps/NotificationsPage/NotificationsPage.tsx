@@ -14,9 +14,14 @@ import {
 import { sendNotification } from "@/Controller/admin.controller";
 import type { AdminNotice } from "@/types/notice";
 
+interface NotificationsPageProps {
+  notices: AdminNotice[];
+}
+
 function formatWhen(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
+
   return date.toLocaleString([], {
     month: "short",
     day: "numeric",
@@ -25,13 +30,14 @@ function formatWhen(iso: string) {
   });
 }
 
-export default function NotificationsPage({ notices }: { notices: AdminNotice[] }) {
+export default function NotificationsPage({ notices }: NotificationsPageProps) {
   const router = useRouter();
   const feedback = useFeedback();
   const [sending, setSending] = useState(false);
 
   async function handleSubmit(form: HTMLFormElement) {
     if (sending) return;
+
     if (!formHasValues(form, ["title", "message"])) {
       feedback.failed("Message not sent", "Title and message are required.");
       return;
@@ -39,10 +45,12 @@ export default function NotificationsPage({ notices }: { notices: AdminNotice[] 
 
     const data = new FormData(form);
     setSending(true);
+
     const result = await sendNotification({
       title: String(data.get("title") ?? "").trim(),
       message: String(data.get("message") ?? "").trim(),
     });
+
     setSending(false);
 
     if (!result.ok) {
@@ -99,7 +107,9 @@ export default function NotificationsPage({ notices }: { notices: AdminNotice[] 
           <div className="p-5">
             <h2 className="font-semibold text-slate-800">Notification History</h2>
             {notices.length === 0 ? (
-              <p className="mt-4 text-sm text-slate-400">No notifications sent yet.</p>
+              <p className="mt-4 text-sm text-slate-400">
+                No notifications sent yet.
+              </p>
             ) : (
               <ul className="mt-4 divide-y divide-slate-100">
                 {notices.map((notice) => (
@@ -107,7 +117,8 @@ export default function NotificationsPage({ notices }: { notices: AdminNotice[] 
                     <p className="font-semibold text-slate-800">{notice.title}</p>
                     <p className="mt-1 text-sm text-slate-500">{notice.message}</p>
                     <p className="mt-2 text-xs text-slate-400">
-                      {notice.recipients} {notice.recipients === 1 ? "reader" : "readers"} ·{" "}
+                      {notice.recipients}{" "}
+                      {notice.recipients === 1 ? "reader" : "readers"} ·{" "}
                       {formatWhen(notice.createdAt)}
                     </p>
                   </li>

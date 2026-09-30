@@ -147,7 +147,7 @@ export default function DigitalLibraryPage({
       <ConfirmModal
         id="delete-resource"
         title="Delete resource"
-        message={`Remove "${deleting?.title ?? "this file"}" from the digital library?`}
+        message={`Do you want to really delete "${deleting?.title ?? "this file"}"?`}
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {

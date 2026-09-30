@@ -41,6 +41,7 @@ export default function PublishersPage({
   const [formVersion, setFormVersion] = useState(0);
   const [editing, setEditing] = useState<AdminPublisher | null>(null);
   const [deleting, setDeleting] = useState<AdminPublisher | null>(null);
+  const [toggling, setToggling] = useState<AdminPublisher | null>(null);
   const [archiveId, setArchiveId] = useState("");
   const feedback = useFeedback();
 
@@ -214,7 +215,8 @@ export default function PublishersPage({
                 <button
                   type="button"
                   onClick={() => {
-                    void handleToggle(publisher);
+                    setToggling(publisher);
+                    openModal("publisher-toggle");
                   }}
                   className="text-xs font-medium text-orange-500 hover:text-orange-600"
                 >
@@ -264,9 +266,29 @@ export default function PublishersPage({
       </FormModal>
 
       <ConfirmModal
+        id="publisher-toggle"
+        title={
+          toggling?.status === "Active" ? "Deactivate publisher" : "Activate publisher"
+        }
+        message={
+          toggling?.status === "Active"
+            ? `Do you want to really deactivate "${toggling?.name ?? "this publisher"}"?`
+            : `Do you want to really activate "${toggling?.name ?? "this publisher"}"?`
+        }
+        confirmLabel={toggling?.status === "Active" ? "Deactivate" : "Activate"}
+        tone={toggling?.status === "Active" ? "danger" : "primary"}
+        onConfirm={() => {
+          const publisher = toggling;
+          setToggling(null);
+          if (!publisher) return;
+          void handleToggle(publisher);
+        }}
+      />
+
+      <ConfirmModal
         id="publisher-delete"
         title="Delete publisher"
-        message={`Remove "${deleting?.name ?? "this publisher"}" from the directory?`}
+        message={`Do you want to really delete "${deleting?.name ?? "this publisher"}"?`}
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {

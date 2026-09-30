@@ -756,7 +756,7 @@ export default function BooksPage({
       <ConfirmModal
         id="book-delete"
         title="Delete book"
-        message={`Remove "${deleting?.title ?? "this book"}" from the catalog? This cannot be undone.`}
+        message={`Do you want to really delete "${deleting?.title ?? "this book"}"?`}
         confirmLabel="Delete"
         tone="danger"
         onConfirm={() => {
