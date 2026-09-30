@@ -1,4 +1,6 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { sendFolioEmail } from "@/Helper/sendFolioEmail";
+import { LibraryUser } from "@/Model/LibraryUsers";
 import { Reservation } from "@/Model/Reservations";
 import { ReturnRecord } from "@/Model/Returns";
 import ApiError from "@/Utils/Api_error";
@@ -26,6 +28,7 @@ export async function POST(request: Request) {
     }
 
     const book = reservation.book;
+    const member = reservation.member;
     const wasReady = reservation.status === "Ready";
     await Reservation.deleteOne({ _id: reservation._id });
 
@@ -41,6 +44,23 @@ export async function POST(request: Request) {
           { sort: { reservedDate: 1, createdAt: 1 } },
         );
       }
+    }
+
+    try {
+      const libraryUser = await LibraryUser.findOne({ name: member }).select(
+        "email name",
+      );
+      if (libraryUser?.email) {
+        await sendFolioEmail({
+          email: libraryUser.email,
+          name: libraryUser.name || member,
+          type: "borrow_cancelled",
+          bookTitle: book,
+          reason: "Your reservation was cancelled by an administrator.",
+        });
+      }
+    } catch (error) {
+      console.error("[cancel-reservation] Cancel email failed:", error);
     }
 
     return new Response(

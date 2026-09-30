@@ -1,10 +1,56 @@
 import * as React from "react";
 
+export type FolioEmailType =
+  | "welcome"
+  | "account_suspended"
+  | "borrow_cancelled";
+
 interface EmailTemplateProps {
   firstName: string;
+  type?: FolioEmailType;
+  bookTitle?: string;
+  reason?: string;
 }
 
-export function EmailTemplate({ firstName }: EmailTemplateProps) {
+function contentFor(type: FolioEmailType, firstName: string, bookTitle?: string, reason?: string) {
+  if (type === "account_suspended") {
+    return {
+      headline: `Hi ${firstName}, your account was deactivated`,
+      intro:
+        "Your Folio account has been suspended by an administrator. You will not be able to borrow or reserve books until it is reactivated.",
+      detail:
+        "If you think this was a mistake, reply to this email or contact the library staff for help.",
+    };
+  }
+
+  if (type === "borrow_cancelled") {
+    const bookLine = bookTitle ? `"${bookTitle}"` : "your book request";
+    return {
+      headline: `Hi ${firstName}, your book was cancelled`,
+      intro: `Your request for ${bookLine} was cancelled by an administrator.`,
+      detail: reason
+        ? `Reason: ${reason}`
+        : "You can browse Folio anytime and request another copy when available.",
+    };
+  }
+
+  return {
+    headline: `Welcome, ${firstName}!`,
+    intro:
+      "Discover, borrow, and connect with a community of passionate readers.",
+    detail:
+      "Your Folio account is ready. Sign in anytime and start building your shelf.",
+  };
+}
+
+export function EmailTemplate({
+  firstName,
+  type = "welcome",
+  bookTitle,
+  reason,
+}: EmailTemplateProps) {
+  const copy = contentFor(type, firstName, bookTitle, reason);
+
   return (
     <table
       width="100%"
@@ -56,14 +102,14 @@ export function EmailTemplate({ firstName }: EmailTemplateProps) {
                     <h1
                       style={{
                         margin: 0,
-                        fontSize: "28px",
+                        fontSize: "26px",
                         lineHeight: "1.3",
                         fontWeight: 700,
                         fontFamily: "Georgia, Times New Roman, serif",
                         color: "#0f172a",
                       }}
                     >
-                      Welcome, {firstName}!
+                      {copy.headline}
                     </h1>
                     <p
                       style={{
@@ -73,8 +119,7 @@ export function EmailTemplate({ firstName }: EmailTemplateProps) {
                         color: "#ffffff",
                       }}
                     >
-                      Discover, borrow, and connect with a community of
-                      passionate readers.
+                      {copy.intro}
                     </p>
                   </td>
                 </tr>
@@ -88,8 +133,7 @@ export function EmailTemplate({ firstName }: EmailTemplateProps) {
                         color: "#64748b",
                       }}
                     >
-                      Your Folio account is ready. Sign in anytime and start
-                      building your shelf.
+                      {copy.detail}
                     </p>
                   </td>
                 </tr>

@@ -1,5 +1,6 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { syncLibraryMember } from "@/data/libraryLink";
+import { sendFolioEmail } from "@/Helper/sendFolioEmail";
 import { User } from "@/Model/Users";
 import { Form_shema } from "@/Shchema/users";
 import ApiError from "@/Utils/Api_error";
@@ -50,24 +51,14 @@ export async function POST(request: Request) {
       phone: user.phone,
     });
 
-    const emailBase = new URL(request.url).origin;
-
     try {
-      const emailRes = await fetch(`${emailBase}/api/email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user.email,
-          name: user.name,
-        }),
+      await sendFolioEmail({
+        email: user.email,
+        name: user.name,
+        type: "welcome",
       });
-
-      if (!emailRes.ok) {
-        const emailError = await emailRes.json().catch(() => null);
-        console.error("[signup] /api/email failed:", emailError);
-      }
     } catch (error) {
-      console.error("[signup] Could not reach /api/email:", error);
+      console.error("[signup] Welcome email failed:", error);
     }
 
     const response = NextResponse.json(

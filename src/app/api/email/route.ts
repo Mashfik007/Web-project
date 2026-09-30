@@ -1,53 +1,38 @@
-import { EmailTemplate } from "@/Components/Email/email-template";
-import { render } from "@react-email/render";
-import { Resend } from "resend";
+import { type FolioEmailType } from "@/Components/Email/email-template";
+import { sendFolioEmail } from "@/Helper/sendFolioEmail";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailTypes = new Set<FolioEmailType>([
+  "welcome",
+  "account_suspended",
+  "borrow_cancelled",
+]);
 
 export async function POST(request: Request) {
-    try {
-        const body = await request.json();
+  try {
+    const body = await request.json();
+    const typeValue = String(body.type ?? "welcome");
+    const type = emailTypes.has(typeValue as FolioEmailType)
+      ? (typeValue as FolioEmailType)
+      : "welcome";
 
-        const email = String(body.email ?? "").trim().toLowerCase();
-        const name = String(body.name ?? "there").trim() || "there";
-        const firstName = name.split(/\s+/)[0] || "there";
+    const result = await sendFolioEmail({
+      email: String(body.email ?? ""),
+      name: String(body.name ?? "there"),
+      type,
+      bookTitle: body.bookTitle ? String(body.bookTitle) : undefined,
+      reason: body.reason ? String(body.reason) : undefined,
+    });
 
-        if (!emailPattern.test(email)) {
-            return Response.json({ error: "Valid recipient email is required" }, { status: 400 });
-        }
-
-        if (!process.env.RESEND_API_KEY) {
-            return Response.json({ error: "RESEND_API_KEY is missing" }, { status: 500 });
-        }
-
-        const html = await render(EmailTemplate({ firstName }));
-        const text = [
-            `Welcome, ${firstName}!`,
-            "",
-            "Discover, borrow, and connect with a community of passionate readers.",
-            "Your Folio account is ready. Sign in anytime and start building your shelf.",
-        ].join("\n");
-
-        const { data, error } = await resend.emails.send({
-            from: "Folio <onboarding@resend.dev>",
-            to: [email],
-            subject: "Welcome to Folio",
-            html,
-            text,
-        });
-
-        if (error) {
-            console.error("[api/email] Resend failed:", error);
-            return Response.json({ error }, { status: 500 });
-        }
-
-        return Response.json(data);
-    } catch (error) {
-        console.error("[api/email] Unexpected error:", error);
-        return Response.json(
-            { error: error instanceof Error ? error.message : "Failed to send email" },
-            { status: 500 },
-        );
+    if (!result.ok) {
+      return Response.json({ error: result.error }, { status: 500 });
     }
+
+    return Response.json({ id: result.id });
+  } catch (error) {
+    console.error("[api/email] Unexpected error:", error);
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Failed to send email" },
+      { status: 500 },
+    );
+  }
 }

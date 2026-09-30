@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { sendFolioEmail } from "@/Helper/sendFolioEmail";
 import { LibraryUser } from "@/Model/LibraryUsers";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
@@ -26,6 +27,18 @@ export async function POST(request: Request) {
 
     user.status = user.status === "Active" ? "Suspended" : "Active";
     await user.save();
+
+    if (user.status === "Suspended") {
+      try {
+        await sendFolioEmail({
+          email: user.email,
+          name: user.name,
+          type: "account_suspended",
+        });
+      } catch (error) {
+        console.error("[user-status] Suspend email failed:", error);
+      }
+    }
 
     const message =
       user.status === "Active" ? "User activated" : "User suspended";

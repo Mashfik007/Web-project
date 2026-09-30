@@ -1,10 +1,13 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { recordMemberBorrow } from "@/data/libraryLink";
+import { sendFolioEmail } from "@/Helper/sendFolioEmail";
 import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
+import { LibraryUser } from "@/Model/LibraryUsers";
 import { Reservation } from "@/Model/Reservations";
 import { ReturnRecord } from "@/Model/Returns";
 import { ShelfLoan } from "@/Model/ShelfLoans";
+import { User } from "@/Model/Users";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
@@ -170,6 +173,43 @@ export async function POST(request: Request) {
             bookId: borrowRequest.bookId,
           });
         }
+      }
+    }
+
+    if (borrowRequest.status === "Rejected") {
+      try {
+        let email = "";
+        let name = borrowRequest.member;
+
+        if (borrowRequest.userId && mongoose.Types.ObjectId.isValid(borrowRequest.userId)) {
+          const authUser = await User.findById(borrowRequest.userId).select("email name");
+          if (authUser?.email) {
+            email = authUser.email;
+            name = authUser.name || name;
+          }
+        }
+
+        if (!email) {
+          const libraryUser = await LibraryUser.findOne({
+            name: borrowRequest.member,
+          }).select("email name");
+          if (libraryUser?.email) {
+            email = libraryUser.email;
+            name = libraryUser.name || name;
+          }
+        }
+
+        if (email) {
+          await sendFolioEmail({
+            email,
+            name,
+            type: "borrow_cancelled",
+            bookTitle: borrowRequest.book,
+            reason: borrowRequest.reason,
+          });
+        }
+      } catch (error) {
+        console.error("[borrow-request-status] Cancel email failed:", error);
       }
     }
 
