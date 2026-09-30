@@ -42,13 +42,33 @@ export async function POST(request: Request) {
     const accessToken = user.genAccessToken();
     user.accessToken = accessToken;
     user.refreshToken = user.genRefreshToken();
-    user.forgotPassToken = user.genforgotPassToken();
     await user.save();
+
     await syncLibraryMember({
       name: user.name,
       email: user.email,
       phone: user.phone,
     });
+
+    const emailBase = new URL(request.url).origin;
+
+    try {
+      const emailRes = await fetch(`${emailBase}/api/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          name: user.name,
+        }),
+      });
+
+      if (!emailRes.ok) {
+        const emailError = await emailRes.json().catch(() => null);
+        console.error("[signup] /api/email failed:", emailError);
+      }
+    } catch (error) {
+      console.error("[signup] Could not reach /api/email:", error);
+    }
 
     const response = NextResponse.json(
       new ApiResponce(

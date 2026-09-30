@@ -12,7 +12,6 @@ export async function register_user(user: FormData) {
       },
       body: JSON.stringify(user),
     });
-
     return await res.json();
   } catch (error) {
     console.error(error);
