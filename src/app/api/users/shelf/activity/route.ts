@@ -7,6 +7,7 @@ import { ReadingLog_schema } from "@/Shchema/shelf";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishShelfUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
       loggedAt: new Date(),
     });
 
+    await publishShelfUpdate({ action: "activity", userId: String(userId), bookId: String(loan.bookId || "") });
     return new Response(
       JSON.stringify(
         new ApiResponce(

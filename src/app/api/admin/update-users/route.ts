@@ -3,6 +3,7 @@ import { LibraryUser } from "@/Model/LibraryUsers";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishUserAdminUpdate } from "@/Helper/publishDomain";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[1-9]\d{7,14}$/;
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
     user.role = userRole;
     await user.save();
 
+    await publishUserAdminUpdate({ action: "update", id: String(user._id) });
     return new Response(JSON.stringify(new ApiResponce(200, user, "User updated")), {
       status: 200,
       headers: { "Content-Type": "application/json" },

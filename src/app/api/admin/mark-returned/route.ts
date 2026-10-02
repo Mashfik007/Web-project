@@ -7,6 +7,7 @@ import { ReturnRecord } from "@/Model/Returns";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishFineUpdate, publishShelfUpdate } from "@/Helper/publishDomain";
 
 const finePerDay = 10;
 
@@ -78,6 +79,19 @@ export async function POST(request: Request) {
       }
     }
 
+    await publishShelfUpdate({
+      action: "returned",
+      userId: String(record.userId || ""),
+      bookId: String(record.bookId || ""),
+    });
+    if (record.fine > 0) {
+      await publishFineUpdate({
+        action: "added",
+        id: String(record._id),
+        userId: String(record.userId || ""),
+        amount: record.fine,
+      });
+    }
     return new Response(
       JSON.stringify(new ApiResponce(200, record, "Book returned")),
       {

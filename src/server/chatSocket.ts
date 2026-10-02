@@ -1,7 +1,11 @@
 import { createServer } from "http";
 import { COMMUNITY_CHAT_ID } from "@/Helper/chat";
-import { NOTICES_ROOM } from "@/Helper/publishNotice";
-import { ADMIN_OPS_ROOM, userRoom } from "@/Helper/realtimeRooms";
+import {
+  ADMIN_OPS_ROOM,
+  CATALOG_ROOM,
+  NOTICES_ROOM,
+  userRoom,
+} from "@/Helper/realtimeRooms";
 import { CommunityGroup } from "@/Model/CommunityGroups";
 import { GroupMember } from "@/Model/GroupMembers";
 import jwt from "jsonwebtoken";
@@ -98,7 +102,12 @@ async function joinUserRooms(
   userId: string,
   isAdmin = false,
 ) {
-  const rooms = [COMMUNITY_CHAT_ID, NOTICES_ROOM, userRoom(userId)];
+  const rooms = [
+    COMMUNITY_CHAT_ID,
+    NOTICES_ROOM,
+    CATALOG_ROOM,
+    userRoom(userId),
+  ];
   if (isAdmin) rooms.push(ADMIN_OPS_ROOM);
 
   const memberships = await GroupMember.find({ userId })

@@ -2,6 +2,7 @@ import connectDB from "@/dbConfig/dbConfig";
 import { Fine } from "@/Model/Fines";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
+import { publishFineUpdate } from "@/Helper/publishDomain";
 
 const fineTypes = ["Overdue", "Damage", "Lost"];
 
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
       status: "Pending",
     });
 
+    await publishFineUpdate({ action: "added", id: String(fine._id), userId: "", amount: fine.amount, status: String(fine.status || "Pending") });
     return new Response(JSON.stringify(new ApiResponce(201, fine, "Fine added")), {
       status: 201,
       headers: { "Content-Type": "application/json" },

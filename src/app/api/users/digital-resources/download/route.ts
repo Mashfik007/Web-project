@@ -3,6 +3,7 @@ import { DigitalResource } from "@/Model/DigitalResources";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishDigitalUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
+    await publishDigitalUpdate({ action: "download", id: String(id) });
     return new Response(
       JSON.stringify(
         new ApiResponce(

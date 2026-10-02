@@ -3,6 +3,7 @@ import { requireAdmin } from "@/Helper/requireAdmin";
 import { CommunityGroup } from "@/Model/CommunityGroups";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
+import { publishGroupUpdate } from "@/Helper/publishDomain";
 
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
       createdBy: admin._id,
     });
 
+    await publishGroupUpdate({ action: "create", id: String(group._id) });
     return new Response(
       JSON.stringify(new ApiResponce(201, group, "Community group created")),
       { status: 201, headers: { "Content-Type": "application/json" } },

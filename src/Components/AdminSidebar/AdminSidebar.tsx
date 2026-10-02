@@ -1,17 +1,57 @@
 "use client";
 
-import AdminBorrowUnreadBadge from "@/Components/AdminSidebar/AdminBorrowUnreadBadge/AdminBorrowUnreadBadge";
 import { adminHref, adminSections } from "@/Components/AdminSidebar/adminNav";
 import AppDrawer, {
   closeDrawer,
   drawerItemClass,
 } from "@/Components/Sidebar/AppDrawer/AppDrawer";
+import RealtimeNavBadge from "@/Components/Sidebar/RealtimeNavBadge/RealtimeNavBadge";
+import {
+  ADMIN_BORROW_EVENTS,
+  ADMIN_FINE_EVENTS,
+  ADMIN_RESERVATION_EVENTS,
+  ADMIN_RETURNS_EVENTS,
+  adminBorrowShouldCount,
+  adminFinesShouldCount,
+  adminReservationsShouldCount,
+  adminReturnsShouldCount,
+} from "@/Components/Sidebar/RealtimeNavBadge/navBadgeRules";
 import { logout } from "@/Controller/users.controller";
-import { getChatSocket } from "@/lib/chatSocket";
+import { useRealtimeRefresh } from "@/lib/useRealtimeRefresh";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+
+const adminBadgeBySlug: Record<
+  string,
+  {
+    unreadKey: string;
+    events: readonly string[];
+    shouldCount?: (event: string, payload: unknown) => boolean;
+  }
+> = {
+  "borrow-requests": {
+    unreadKey: "admin-borrow",
+    events: ADMIN_BORROW_EVENTS,
+    shouldCount: adminBorrowShouldCount,
+  },
+  returns: {
+    unreadKey: "admin-returns",
+    events: ADMIN_RETURNS_EVENTS,
+    shouldCount: adminReturnsShouldCount,
+  },
+  reservations: {
+    unreadKey: "admin-reservations",
+    events: ADMIN_RESERVATION_EVENTS,
+    shouldCount: adminReservationsShouldCount,
+  },
+  fines: {
+    unreadKey: "admin-fines",
+    events: ADMIN_FINE_EVENTS,
+    shouldCount: adminFinesShouldCount,
+  },
+};
 
 const DRAWER_ID = "admin-drawer";
 const iconClass =
@@ -153,30 +193,7 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
   const adminId = params.id as string;
   const [isSigningOut, setIsSigningOut] = useState(false);
 
-  useEffect(() => {
-    const socket = getChatSocket();
-
-    function syncRooms() {
-      socket.emit("rooms:sync");
-    }
-
-    function onBorrowUpdate(update: { scope?: string; action?: string }) {
-      if (update?.scope !== "library") return;
-      // Keep admin lists in sync as soon as a member submits a request.
-      router.refresh();
-    }
-
-    socket.on("connect", syncRooms);
-    socket.on("borrow:update", onBorrowUpdate);
-    if (socket.connected) syncRooms();
-
-    return () => {
-      socket.off("connect", syncRooms);
-      socket.off("borrow:update", onBorrowUpdate);
-    };
-    // router.refresh identity is stable enough for this live subscription.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useRealtimeRefresh();
 
   const dashboardHref = adminHref(adminId);
   const isDashboard = pathname === dashboardHref;
@@ -254,8 +271,15 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
                   >
                     <span className="relative inline-flex">
                       {sectionIcons[section.slug]}
-                      {section.slug === "borrow-requests" ? (
-                        <AdminBorrowUnreadBadge />
+                      {adminBadgeBySlug[section.slug] ? (
+                        <RealtimeNavBadge
+                          unreadKey={adminBadgeBySlug[section.slug].unreadKey}
+                          events={adminBadgeBySlug[section.slug].events}
+                          active={isActive}
+                          shouldCount={
+                            adminBadgeBySlug[section.slug].shouldCount
+                          }
+                        />
                       ) : null}
                     </span>
                     <span className="is-drawer-close:hidden">

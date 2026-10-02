@@ -7,10 +7,20 @@ import AppDrawer, {
 } from "@/Components/Sidebar/AppDrawer/AppDrawer";
 import ChatUnreadBadge from "@/Components/Sidebar/ChatUnreadBadge/ChatUnreadBadge";
 import NoticeUnreadBadge from "@/Components/Sidebar/NoticeUnreadBadge/NoticeUnreadBadge";
+import RealtimeNavBadge from "@/Components/Sidebar/RealtimeNavBadge/RealtimeNavBadge";
+import {
+  USER_BORROW_EVENTS,
+  USER_COMMUNITY_EVENTS,
+  USER_SHELF_EVENTS,
+  userBorrowShouldCount,
+  userCommunityShouldCount,
+  userShelfShouldCount,
+} from "@/Components/Sidebar/RealtimeNavBadge/navBadgeRules";
 import SidebarProfile from "@/Components/Sidebar/SidebarProfile/SidebarProfile";
+import { useRealtimeRefresh } from "@/lib/useRealtimeRefresh";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 
 const DRAWER_ID = "user-drawer";
 
@@ -191,6 +201,24 @@ export default function SideBar({
   const pathname = usePathname();
   const activeItem = navItems.find((item) => item.match(pathname, userId));
 
+  useRealtimeRefresh();
+
+  const borrowShouldCount = useMemo(
+    () => (event: string, payload: unknown) =>
+      userBorrowShouldCount(userId, event, payload),
+    [userId],
+  );
+  const communityShouldCount = useMemo(
+    () => (event: string, payload: unknown) =>
+      userCommunityShouldCount(userId, event, payload),
+    [userId],
+  );
+  const shelfShouldCount = useMemo(
+    () => (event: string, payload: unknown) =>
+      userShelfShouldCount(userId, event, payload),
+    [userId],
+  );
+
   return (
     <AppDrawer
       id={DRAWER_ID}
@@ -217,6 +245,30 @@ export default function SideBar({
                       ) : null}
                       {item.label === "Notifications" ? (
                         <NoticeUnreadBadge initialCount={unreadNotices} />
+                      ) : null}
+                      {item.label === "Borrow Requests" ? (
+                        <RealtimeNavBadge
+                          unreadKey={`user-borrow:${userId}`}
+                          events={USER_BORROW_EVENTS}
+                          active={isActive}
+                          shouldCount={borrowShouldCount}
+                        />
+                      ) : null}
+                      {item.label === "Community Shelf" ? (
+                        <RealtimeNavBadge
+                          unreadKey={`user-community:${userId}`}
+                          events={USER_COMMUNITY_EVENTS}
+                          active={isActive}
+                          shouldCount={communityShouldCount}
+                        />
+                      ) : null}
+                      {item.label === "My Shelf" ? (
+                        <RealtimeNavBadge
+                          unreadKey={`user-shelf:${userId}`}
+                          events={USER_SHELF_EVENTS}
+                          active={isActive}
+                          shouldCount={shelfShouldCount}
+                        />
                       ) : null}
                     </span>
                     <span className="is-drawer-close:hidden">{item.label}</span>

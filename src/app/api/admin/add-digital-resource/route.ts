@@ -5,6 +5,7 @@ import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
 import { Readable } from "stream";
+import { publishDigitalUpdate } from "@/Helper/publishDomain";
 
 const ALLOWED_TYPES = new Set([
   "application/pdf",
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
       downloads: 0,
     });
 
+    await publishDigitalUpdate({ action: "add", id: String(saved._id) });
     return new Response(
       JSON.stringify(
         new ApiResponce(

@@ -4,6 +4,7 @@ import { LibraryUser } from "@/Model/LibraryUsers";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishUserAdminUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
     const message =
       user.status === "Active" ? "User activated" : "User suspended";
 
+    await publishUserAdminUpdate({ action: "status", id: String(user._id), status: String(user.status ?? "") });
     return new Response(JSON.stringify(new ApiResponce(200, user, message)), {
       status: 200,
       headers: { "Content-Type": "application/json" },

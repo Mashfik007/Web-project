@@ -21,7 +21,6 @@ import {
   useFeedback,
 } from "@/Components/Modal";
 import { decideBorrowRequest } from "@/Controller/admin.controller";
-import { setViewingAdminBorrowRequests } from "@/lib/adminBorrowUnread";
 import { getChatSocket } from "@/lib/chatSocket";
 import type { AdminBorrowRequest, AdminBorrowStatus } from "@/types/adminOps";
 import type { BorrowUpdatePayload } from "@/types/realtime";
@@ -40,11 +39,6 @@ export default function BorrowRequestsPage({
     action: "approve" | "reject";
   } | null>(null);
   const feedback = useFeedback();
-
-  useEffect(() => {
-    setViewingAdminBorrowRequests(true);
-    return () => setViewingAdminBorrowRequests(false);
-  }, []);
 
   useEffect(() => {
     const socket = getChatSocket();

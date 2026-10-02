@@ -4,6 +4,7 @@ import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
 import { Readable } from "stream";
+import { publishCatalogUpdate } from "@/Helper/publishDomain";
 
 async function uploadCover(
   db: mongoose.mongo.Db,
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
     });
     await existing.save();
 
+    await publishCatalogUpdate({ entity: "book", action: "update", id: String(existing._id) });
     return new Response(
       JSON.stringify(new ApiResponce(200, existing, "Book updated")),
       {

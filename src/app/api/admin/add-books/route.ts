@@ -4,6 +4,7 @@ import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
 import { Readable } from "stream";
+import { publishCatalogUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -60,6 +61,7 @@ export async function POST(request: Request) {
       coverImage: String(fileId),
     });
 
+    await publishCatalogUpdate({ entity: "book", action: "create", id: String(savedBook._id) });
     return new Response(
       JSON.stringify(
         new ApiResponce(

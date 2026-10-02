@@ -4,6 +4,7 @@ import { Book } from "@/Model/Books";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishCatalogUpdate } from "@/Helper/publishDomain";
 
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
       );
     }
 
+    await publishCatalogUpdate({ entity: "author", action: "update", id: String(author._id) });
     return new Response(
       JSON.stringify(new ApiResponce(200, author, "Author updated")),
       {

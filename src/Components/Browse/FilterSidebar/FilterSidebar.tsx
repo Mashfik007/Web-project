@@ -140,14 +140,6 @@ export default function FilterSidebar({
           }
           className="range range-xs range-info"
         />
-
-        <div className="flex justify-between px-1 text-[10px] text-slate-400">
-          <span>0</span>
-          <span>2</span>
-          <span>3</span>
-          <span>4</span>
-          <span>5</span>
-        </div>
       </FilterSection>
 
       {/* Year */}

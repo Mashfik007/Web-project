@@ -5,6 +5,7 @@ import { Order } from "@/Model/Orders";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishOrderUpdate } from "@/Helper/publishDomain";
 
 function orderNumber() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
       status: "processing",
     });
 
+    await publishOrderUpdate({ action: "placed", id: String(order._id), userId: String(userId), bookId: String(order.bookId || "") });
     return new Response(
       JSON.stringify(new ApiResponce(201, order, "Order placed")),
       { status: 201, headers: { "Content-Type": "application/json" } },

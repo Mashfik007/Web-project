@@ -2,6 +2,7 @@ import connectDB from "@/dbConfig/dbConfig";
 import { Category } from "@/Model/Categories";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
+import { publishCatalogUpdate } from "@/Helper/publishDomain";
 
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
       status: "Active",
     });
 
+    await publishCatalogUpdate({ entity: "category", action: "create", id: String(category._id) });
     return new Response(
       JSON.stringify(new ApiResponce(201, category, "Category added")),
       {

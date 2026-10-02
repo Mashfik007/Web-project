@@ -1,18 +1,22 @@
+import { emitRealtime } from "@/Helper/emitRealtime";
+import { NOTICES_ROOM } from "@/Helper/realtimeRooms";
 import type { LibraryNotice } from "@/types/notice";
-import type { Server } from "socket.io";
+import type { NoticeUpdatePayload } from "@/types/realtime";
 
-export const NOTICES_ROOM = "notices";
+export { NOTICES_ROOM } from "@/Helper/realtimeRooms";
 
 export async function publishNotice(notice: LibraryNotice) {
-  const io = (globalThis as typeof globalThis & { __chatIo?: Server }).__chatIo;
-  if (!io) {
-    throw new Error("Live notification could not be delivered");
-  }
-
-  io.emit("notice:new", {
+  const payload: NoticeUpdatePayload = {
     id: notice.id,
     title: notice.title,
     message: notice.message,
     createdAt: notice.createdAt,
-  });
+  };
+
+  try {
+    await emitRealtime("notice:new", [NOTICES_ROOM], payload);
+  } catch (error) {
+    console.error("[publishNotice] failed:", error);
+    throw new Error("Live notification could not be delivered");
+  }
 }

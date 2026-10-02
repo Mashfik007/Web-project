@@ -4,6 +4,7 @@ import { Book } from "@/Model/Books";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishCatalogUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
 
     await Book.deleteOne({ _id: book._id });
 
+    await publishCatalogUpdate({ entity: "book", action: "delete", id: String(book._id) });
     return new Response(
       JSON.stringify(
         new ApiResponce(

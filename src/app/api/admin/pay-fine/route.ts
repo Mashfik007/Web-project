@@ -3,6 +3,7 @@ import { Fine } from "@/Model/Fines";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishFineUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
     fine.paidAt = new Date().toISOString().slice(0, 10);
     await fine.save();
 
+    await publishFineUpdate({ action: "paid", id: String(fine._id), userId: "", amount: fine.amount, status: "Paid" });
     return new Response(
       JSON.stringify(new ApiResponce(200, fine, "Payment recorded")),
       {

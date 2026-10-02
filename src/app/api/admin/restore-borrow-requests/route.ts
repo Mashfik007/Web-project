@@ -4,6 +4,7 @@ import { BorrowRequest } from "@/Model/BorrowRequests";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishBorrowUpdate } from "@/Helper/publishBorrow";
 
 export async function POST(request: Request) {
   try {
@@ -31,6 +32,17 @@ export async function POST(request: Request) {
     await BorrowRequest.create(snapshot);
     await ArchivedBorrowRequest.deleteOne({ _id: archived._id });
 
+    await publishBorrowUpdate({
+      id: String(archived.originalId || archived._id),
+      action: "created",
+      scope: "library",
+      status: "Pending",
+      userId: String(snapshot.userId || ""),
+      member: String(snapshot.member || ""),
+      book: String(snapshot.book || ""),
+      requested: String(snapshot.requested || ""),
+      expectedReturn: String(snapshot.expectedReturn || ""),
+    });
     return new Response(
       JSON.stringify(new ApiResponce(200, null, "Borrow request restored")),
       {

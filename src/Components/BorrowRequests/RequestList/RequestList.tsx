@@ -41,25 +41,6 @@ export default function RequestList({ filters, requests, userId }: RequestListPr
         update.ownerId === userId;
       if (!involvesMe) return;
 
-      if (update.action === "created" && update.ownerId === userId) {
-        feedback.success(
-          "Borrow request",
-          `${update.member} asked to borrow "${update.book}".`,
-        );
-      } else if (update.action === "approved" && update.userId === userId) {
-        feedback.success(
-          "Borrow approved",
-          `"${update.book}" was approved.`,
-        );
-      } else if (update.action === "rejected" && update.userId === userId) {
-        feedback.failed(
-          "Borrow rejected",
-          update.reason
-            ? `"${update.book}" was rejected: ${update.reason}`
-            : `"${update.book}" was rejected.`,
-        );
-      }
-
       router.refresh();
     }
 

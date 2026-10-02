@@ -3,6 +3,7 @@ import { DigitalResource } from "@/Model/DigitalResources";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishDigitalUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
 
     await DigitalResource.deleteOne({ _id: resource._id });
 
+    await publishDigitalUpdate({ action: "delete", id: String(resource._id) });
     return new Response(
       JSON.stringify(new ApiResponce(200, null, "Digital resource deleted")),
       {

@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       },
     ]);
 
-    publishChatMessage({
+    await publishChatMessage({
       ...message,
       conversationId: parsed.data.conversationId,
     });

@@ -5,6 +5,7 @@ import { GroupMember } from "@/Model/GroupMembers";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishGroupUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
       }
     }
 
+    await publishGroupUpdate({ action: "joined", id: String(groupId), userId: String(session) });
     return new Response(
       JSON.stringify(new ApiResponce(200, { joined: true }, "You joined the group")),
       { status: 200, headers: { "Content-Type": "application/json" } },

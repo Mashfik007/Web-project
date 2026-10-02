@@ -3,6 +3,7 @@ import { Fine } from "@/Model/Fines";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishFineUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
     fine.status = "Waived";
     await fine.save();
 
+    await publishFineUpdate({ action: "waived", id: String(fine._id), userId: "", amount: fine.amount, status: "Waived" });
     return new Response(
       JSON.stringify(new ApiResponce(200, fine, "Fine waived")),
       {

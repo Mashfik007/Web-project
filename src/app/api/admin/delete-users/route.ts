@@ -4,6 +4,7 @@ import { LibraryUser } from "@/Model/LibraryUsers";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishUserAdminUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
     });
     await LibraryUser.deleteOne({ _id: user._id });
 
+    await publishUserAdminUpdate({ action: "delete", id: String(user._id) });
     return new Response(
       JSON.stringify(new ApiResponce(200, null, "User archived and deleted")),
       {

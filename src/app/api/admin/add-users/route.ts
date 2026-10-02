@@ -2,6 +2,7 @@ import connectDB from "@/dbConfig/dbConfig";
 import { LibraryUser } from "@/Model/LibraryUsers";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
+import { publishUserAdminUpdate } from "@/Helper/publishDomain";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[1-9]\d{7,14}$/;
@@ -70,6 +71,7 @@ export async function POST(request: Request) {
       status: "Active",
     });
 
+    await publishUserAdminUpdate({ action: "create", id: String(user._id) });
     return new Response(JSON.stringify(new ApiResponce(201, user, "User added")), {
       status: 201,
       headers: { "Content-Type": "application/json" },

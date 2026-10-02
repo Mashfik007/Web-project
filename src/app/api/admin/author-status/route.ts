@@ -3,6 +3,7 @@ import { Author } from "@/Model/Authors";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishCatalogUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
     const message =
       author.status === "Active" ? "Author activated" : "Author deactivated";
 
+    await publishCatalogUpdate({ entity: "author", action: "status", id: String(author._id) });
     return new Response(JSON.stringify(new ApiResponce(200, author, message)), {
       status: 200,
       headers: { "Content-Type": "application/json" },

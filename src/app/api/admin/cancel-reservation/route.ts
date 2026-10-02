@@ -6,6 +6,7 @@ import { ReturnRecord } from "@/Model/Returns";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishReservationUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -46,10 +47,12 @@ export async function POST(request: Request) {
       }
     }
 
+    let memberUserId = "";
     try {
       const libraryUser = await LibraryUser.findOne({ name: member }).select(
-        "email name",
+        "_id email name",
       );
+      memberUserId = libraryUser?._id?.toString() || "";
       if (libraryUser?.email) {
         await sendFolioEmail({
           email: libraryUser.email,
@@ -63,6 +66,12 @@ export async function POST(request: Request) {
       console.error("[cancel-reservation] Cancel email failed:", error);
     }
 
+    await publishReservationUpdate({
+      action: "cancelled",
+      id: String(reservation._id),
+      userId: memberUserId,
+      book: String(book || ""),
+    });
     return new Response(
       JSON.stringify(new ApiResponce(200, null, "Reservation cancelled")),
       {

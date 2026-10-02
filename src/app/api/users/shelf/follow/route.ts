@@ -4,6 +4,7 @@ import { Follow } from "@/Model/Follows";
 import { FollowAction_schema } from "@/Shchema/shelf";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
+import { publishShelfUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
 
     if (existing) {
       await existing.deleteOne();
+      await publishShelfUpdate({ action: "follow", userId: String(userId), targetUserId: String(targetId) });
       return new Response(
         JSON.stringify(new ApiResponce(200, { following: false }, "Unfollowed")),
         { status: 200, headers: { "Content-Type": "application/json" } },
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
     }
 
     await Follow.create({ followerId: userId, followingId: targetId });
+    await publishShelfUpdate({ action: "follow", userId: String(userId), targetUserId: String(targetId) });
     return new Response(
       JSON.stringify(new ApiResponce(201, { following: true }, "You are now following this member")),
       { status: 201, headers: { "Content-Type": "application/json" } },

@@ -6,6 +6,7 @@ import { ShelfBookAction_schema } from "@/Shchema/shelf";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+import { publishShelfUpdate } from "@/Helper/publishDomain";
 
 export async function POST(request: Request) {
   try {
@@ -60,6 +61,11 @@ export async function POST(request: Request) {
       });
     }
 
+    await publishShelfUpdate({
+      action: "wishlist",
+      userId: String(userId),
+      bookId: String(bookId),
+    });
     return new Response(
       JSON.stringify(
         new ApiResponce(
