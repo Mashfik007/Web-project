@@ -77,7 +77,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const stillOut = await ShelfLoan.findOne({ userId, bookId, status: "reading" });
+    // Only block when the copy is still checked out. After return (or if no
+    // active loan), the member may request the same book again.
+    const stillOut = await ShelfLoan.findOne({
+      userId,
+      bookId,
+      status: "reading",
+    });
     if (stillOut) {
       return new Response(
         JSON.stringify(
@@ -87,23 +93,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const approved = await BorrowRequest.findOne({
-      userId,
-      bookId,
-      status: "Approved",
-    });
-    if (approved) {
-      const returned = await ShelfLoan.findOne({ userId, bookId, status: "returned" });
-      if (!returned) {
-        return new Response(
-          JSON.stringify(
-            new ApiError(400, "You already requested this book and it has not been returned"),
-          ),
-          { status: 400, headers: { "Content-Type": "application/json" } },
-        );
-      }
-    }
-
     const saved = await recordBorrowRequest({
       userId,
       bookId,
@@ -111,20 +100,27 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     });
 
-    if (saved && saved.status === "Pending") {
-      await publishBorrowUpdate({
-        id: String(saved._id),
-        action: "created",
-        scope: "library",
-        status: "Pending",
-        userId: String(saved.userId || userId),
-        member: String(saved.member || "Reader"),
-        book: String(saved.book || book.title || "Book"),
-        bookId: String(saved.bookId || bookId),
-        requested: String(saved.requested || ""),
-        expectedReturn: String(saved.expectedReturn || ""),
-      });
+    if (!saved || saved.status !== "Pending") {
+      return new Response(
+        JSON.stringify(
+          new ApiError(400, "Could not create a new borrow request for this book"),
+        ),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
     }
+
+    await publishBorrowUpdate({
+      id: String(saved._id),
+      action: "created",
+      scope: "library",
+      status: "Pending",
+      userId: String(saved.userId || userId),
+      member: String(saved.member || "Reader"),
+      book: String(saved.book || book.title || "Book"),
+      bookId: String(saved.bookId || bookId),
+      requested: String(saved.requested || ""),
+      expectedReturn: String(saved.expectedReturn || ""),
+    });
 
     return new Response(
       JSON.stringify(

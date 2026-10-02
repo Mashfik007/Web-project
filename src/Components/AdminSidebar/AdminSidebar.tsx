@@ -1,5 +1,6 @@
 "use client";
 
+import AdminBorrowUnreadBadge from "@/Components/AdminSidebar/AdminBorrowUnreadBadge/AdminBorrowUnreadBadge";
 import { adminHref, adminSections } from "@/Components/AdminSidebar/adminNav";
 import AppDrawer, {
   closeDrawer,
@@ -251,7 +252,12 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
                     className={drawerItemClass(isActive)}
                     data-tip={section.label}
                   >
-                    {sectionIcons[section.slug]}
+                    <span className="relative inline-flex">
+                      {sectionIcons[section.slug]}
+                      {section.slug === "borrow-requests" ? (
+                        <AdminBorrowUnreadBadge />
+                      ) : null}
+                    </span>
                     <span className="is-drawer-close:hidden">
                       {section.label}
                     </span>

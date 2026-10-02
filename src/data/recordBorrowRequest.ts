@@ -38,12 +38,14 @@ export async function recordBorrowRequest(loan: {
     bookId: loan.bookId,
     status: "reading",
   });
+  // Sync helper: keep an approved row linked to an active loan, but never block
+  // a fresh request after the member has returned the book.
   if (stillOut) {
     const approved = await BorrowRequest.findOne({
       userId: loan.userId,
       bookId: loan.bookId,
       status: "Approved",
-    });
+    }).sort({ createdAt: -1 });
     if (approved) return approved;
   }
 

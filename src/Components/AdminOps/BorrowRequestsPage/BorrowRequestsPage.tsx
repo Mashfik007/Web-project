@@ -21,6 +21,7 @@ import {
   useFeedback,
 } from "@/Components/Modal";
 import { decideBorrowRequest } from "@/Controller/admin.controller";
+import { setViewingAdminBorrowRequests } from "@/lib/adminBorrowUnread";
 import { getChatSocket } from "@/lib/chatSocket";
 import type { AdminBorrowRequest, AdminBorrowStatus } from "@/types/adminOps";
 import type { BorrowUpdatePayload } from "@/types/realtime";
@@ -41,6 +42,11 @@ export default function BorrowRequestsPage({
   const feedback = useFeedback();
 
   useEffect(() => {
+    setViewingAdminBorrowRequests(true);
+    return () => setViewingAdminBorrowRequests(false);
+  }, []);
+
+  useEffect(() => {
     const socket = getChatSocket();
 
     function syncRooms() {
@@ -49,12 +55,6 @@ export default function BorrowRequestsPage({
 
     function onBorrowUpdate(update: BorrowUpdatePayload) {
       if (!update?.id || update.scope !== "library") return;
-      if (update.action === "created") {
-        feedback.success(
-          "New borrow request",
-          `${update.member} requested "${update.book}".`,
-        );
-      }
       router.refresh();
     }
 
