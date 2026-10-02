@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     });
     if (existing) {
       return new Response(
-        JSON.stringify(new ApiError(400, "An author with this name already exists")),
+        JSON.stringify(new ApiError(400, "this name already exists ")),
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
