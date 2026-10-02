@@ -11,7 +11,7 @@ export function getModal(id: string) {
 export function openModal(id: string) {
   // wait a frame so form fields can update first (edit book, etc.)
   requestAnimationFrame(() => {
-    document.querySelectorAll("dialog[open]").forEach((dialog) => {
+    document.querySelectorAll<HTMLDialogElement>("dialog[open]").forEach((dialog) => {
       if (dialog.id !== id) {
         dialog.close();
       }
