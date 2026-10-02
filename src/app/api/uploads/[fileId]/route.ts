@@ -5,7 +5,7 @@ type RouteContext = {
   params: Promise<{ fileId: string }>;
 };
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   try {
     await connectDB();
     const { fileId } = await context.params;
@@ -40,11 +40,24 @@ export async function GET(_request: Request, context: RouteContext) {
         ? file.metadata.contentType
         : "image/jpeg";
 
+    const headers: Record<string, string> = {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=86400",
+    };
+
+    const wantsDownload =
+      new URL(request.url).searchParams.get("download") === "1";
+    if (wantsDownload) {
+      const originalName =
+        typeof file.metadata?.originalName === "string"
+          ? file.metadata.originalName
+          : file.filename || "download";
+      headers["Content-Disposition"] =
+        `attachment; filename="${originalName.replace(/"/g, "")}"`;
+    }
+
     return new Response(new Uint8Array(Buffer.concat(chunks)), {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=86400",
-      },
+      headers,
     });
   } catch {
     return new Response("Image not found", { status: 404 });

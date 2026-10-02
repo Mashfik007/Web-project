@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   allowedDevOrigins: ["192.168.0.102"],
+  serverExternalPackages: ["mongoose", "bcryptjs", "jsonwebtoken"],
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: "inline",

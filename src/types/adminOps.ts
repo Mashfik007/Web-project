@@ -65,13 +65,14 @@ export type AdminFineSummary = {
 };
 
 export type AdminDigitalResource = {
-  id: number;
+  id: string;
   title: string;
   author: string;
   format: "PDF" | "EPUB";
   category: string;
   downloads: number;
   size: string;
+  fileId: string;
   coverClass: string;
 };
 

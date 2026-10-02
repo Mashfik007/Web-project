@@ -2,6 +2,7 @@ import { AdminUser_shema } from "@/Shchema/adminUsers";
 import { Author_shema } from "@/Shchema/authors";
 import { Book_shema } from "@/Shchema/books";
 import { Category_shema } from "@/Shchema/categories";
+import { DigitalResource_shema } from "@/Shchema/digitalResources";
 import { Fine_shema } from "@/Shchema/fines";
 import { Publisher_shema } from "@/Shchema/publishers";
 import { z } from "zod";
@@ -12,6 +13,7 @@ type AuthorData = z.infer<typeof Author_shema>;
 type PublisherData = z.infer<typeof Publisher_shema>;
 type AdminUserData = z.infer<typeof AdminUser_shema>;
 type FineData = z.infer<typeof Fine_shema>;
+type DigitalResourceData = z.infer<typeof DigitalResource_shema>;
 
 type ServerResult = {
     ok: boolean;
@@ -324,6 +326,31 @@ export async function deleteCommunityGroup(id: string) {
 
 export async function sendNotification(notice: { title: string; message: string }) {
     return postCategory("/api/admin/send-notification", notice);
+}
+
+export async function addDigitalResource(
+    resource: DigitalResourceData,
+    file: File,
+) {
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("resource", JSON.stringify(resource));
+
+        const res = await fetch("/api/admin/add-digital-resource", {
+            method: "POST",
+            body: formData,
+        });
+
+        return readResult(res);
+    } catch (error) {
+        console.error(error);
+        return { ok: false, message: "Could not reach the server." };
+    }
+}
+
+export async function deleteDigitalResource(id: string) {
+    return postCategory("/api/admin/delete-digital-resource", { id });
 }
 
 export async function logout() {
