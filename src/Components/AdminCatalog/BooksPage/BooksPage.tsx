@@ -45,7 +45,7 @@ const statusTone = {
   Reserved: "purple",
 } as const;
 
-const genres = [
+const categoryOptions = [
   "Fiction",
   "Science",
   "Technology",
@@ -73,7 +73,7 @@ const bookFormFields = [
   "metadata.published",
   "metadata.copiesHeld",
   "metadata.pages",
-  "metadata.genre",
+  "metadata.category",
   "metadata.deweyDecimal",
   "community.totalOnShelf",
   "matchScore.score",
@@ -126,7 +126,7 @@ function readBookForm(form: HTMLFormElement) {
       published: number("metadata.published"),
       copiesHeld: text("metadata.copiesHeld"),
       pages: number("metadata.pages"),
-      genre: text("metadata.genre"),
+      category: text("metadata.category"),
       deweyDecimal: text("metadata.deweyDecimal"),
     },
     community: {
@@ -169,7 +169,7 @@ type EditableBook = {
     published?: number;
     copiesHeld?: string;
     pages?: number;
-    genre?: string;
+    category?: string;
     deweyDecimal?: string;
   };
   community?: {
@@ -375,7 +375,7 @@ export default function BooksPage({
       >
         <FilterSelect
           name="category"
-          options={["all", ...genres]}
+          options={["all", ...categoryOptions]}
           value={category}
           onChange={(value) => updateFilters({ category: value })}
         />
@@ -680,17 +680,19 @@ export default function BooksPage({
             required
           />
           <FormField
-            label="Genre"
-            name="metadata.genre"
+            label="Category"
+            name="metadata.category"
             as="select"
             defaultValue={
-              editingBook?.metadata?.genre ?? editing?.category ?? "Fiction"
+              editingBook?.metadata?.category ??
+              editing?.category ??
+              "Fiction"
             }
             options={
-              editingBook?.metadata?.genre &&
-              !genres.includes(editingBook.metadata.genre)
-                ? [...genres, editingBook.metadata.genre]
-                : genres
+              editingBook?.metadata?.category &&
+              !categoryOptions.includes(editingBook.metadata.category)
+                ? [...categoryOptions, editingBook.metadata.category]
+                : categoryOptions
             }
             required
           />

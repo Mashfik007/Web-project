@@ -11,7 +11,7 @@ export type Book = {
   format: BookFormat;
   availability: BookAvailability;
   image: string;
-  genre: string;
+  category: string;
   fileId?: string;
   digitalFormat?: DigitalFileFormat;
   sizeLabel?: string;

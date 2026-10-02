@@ -28,7 +28,7 @@ export type ShelfBook = {
   id: string | number;
   title: string;
   author: string;
-  genre: string;
+  category: string;
   pages: number;
   currentPage: number;
   coverImage: string;
@@ -45,8 +45,8 @@ export type DueDateItem = {
   dueDate: string;
 };
 
-export type GenreStat = {
-  genre: string;
+export type CategoryStat = {
+  category: string;
   count: number;
   percentage: number;
 };
@@ -68,6 +68,6 @@ export type MyShelfData = {
   borrowedHistory: ShelfBook[];
   activity: number[];
   dueDates: DueDateItem[];
-  genres: GenreStat[];
+  categories: CategoryStat[];
   people: ShelfPerson[];
 };

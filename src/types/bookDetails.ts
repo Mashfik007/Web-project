@@ -33,7 +33,7 @@ export type BookDetails = {
     published: number;
     copiesHeld: string;
     pages: number;
-    genre: string;
+    category: string;
     deweyDecimal: string;
   };
   community: {

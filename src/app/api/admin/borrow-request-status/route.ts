@@ -1,5 +1,6 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { recordMemberBorrow } from "@/data/libraryLink";
+import { publishBorrowUpdate } from "@/Helper/publishBorrow";
 import { sendFolioEmail } from "@/Helper/sendFolioEmail";
 import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
@@ -217,6 +218,20 @@ export async function POST(request: Request) {
       borrowRequest.status === "Approved"
         ? "Request approved"
         : "Request rejected";
+
+    await publishBorrowUpdate({
+      id: String(borrowRequest._id),
+      action: borrowRequest.status === "Approved" ? "approved" : "rejected",
+      scope: "library",
+      status: borrowRequest.status,
+      userId: String(borrowRequest.userId || ""),
+      member: String(borrowRequest.member || "Reader"),
+      book: String(borrowRequest.book || "Book"),
+      bookId: String(borrowRequest.bookId || ""),
+      requested: String(borrowRequest.requested || ""),
+      expectedReturn: String(borrowRequest.expectedReturn || ""),
+      reason: borrowRequest.reason || undefined,
+    });
 
     return new Response(
       JSON.stringify(new ApiResponce(200, borrowRequest, message)),

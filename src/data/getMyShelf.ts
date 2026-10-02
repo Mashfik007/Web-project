@@ -5,8 +5,8 @@ import { ReadingActivity } from "@/Model/ReadingActivities";
 import { ShelfLoan } from "@/Model/ShelfLoans";
 import { User } from "@/Model/Users";
 import type {
+  CategoryStat,
   DueDateItem,
-  GenreStat,
   MyShelfData,
   ShelfBook,
   ShelfPerson,
@@ -32,7 +32,7 @@ type StoredBook = {
   coverImage?: string;
   metadata?: {
     pages?: number;
-    genre?: string;
+    category?: string;
   };
 };
 
@@ -80,7 +80,7 @@ function toShelfBook(loan: LoanRecord, book: StoredBook): ShelfBook {
     id: loan._id.toString(),
     title: book.title,
     author: book.author,
-    genre: book.metadata?.genre ?? "General",
+    category: book.metadata?.category ?? "General",
     pages: book.metadata?.pages ?? 0,
     currentPage: loan.currentPage ?? 0,
     coverImage: book.coverImage
@@ -136,14 +136,14 @@ function readingStreak(logs: ActivityRecord[]) {
   return streak;
 }
 
-function genreStats(books: ShelfBook[]): GenreStat[] {
+function categoryStats(books: ShelfBook[]): CategoryStat[] {
   const counts = new Map<string, number>();
   for (const book of books) {
-    counts.set(book.genre, (counts.get(book.genre) ?? 0) + 1);
+    counts.set(book.category, (counts.get(book.category) ?? 0) + 1);
   }
   const total = books.length || 1;
-  return [...counts.entries()].map(([genre, count]) => ({
-    genre,
+  return [...counts.entries()].map(([category, count]) => ({
+    category,
     count,
     percentage: Math.round((count / total) * 100),
   }));
@@ -277,7 +277,7 @@ export async function getMyShelf(userId: string): Promise<MyShelfData> {
     borrowedHistory,
     activity: activityLevels(logs),
     dueDates,
-    genres: genreStats([
+    categories: categoryStats([
       ...currentlyReading,
       ...wantToRead,
       ...borrowedHistory,

@@ -1,6 +1,6 @@
 import DueDates from "../DueDates/DueDates";
 import FollowList from "../FollowList/FollowList";
-import GenreBreakdown from "../GenreBreakdown/GenreBreakdown";
+import CategoryBreakdown from "../CategoryBreakdown/CategoryBreakdown";
 import ProfileHeader from "../ProfileHeader/ProfileHeader";
 import ReadingActivity from "../ReadingActivity/ReadingActivity";
 import ReadingLogForm from "../ReadingLogForm/ReadingLogForm";
@@ -40,7 +40,7 @@ export default function MyShelfPage({ shelf }: MyShelfPageProps) {
               streakDays={shelf.user.streakDays}
             />
             <DueDates dueDates={shelf.dueDates} />
-            <GenreBreakdown genres={shelf.genres} />
+            <CategoryBreakdown categories={shelf.categories} />
           </aside>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import BorrowingHabitsCard from "../BorrowingHabitsCard/BorrowingHabitsCard";
-import ExploreByGenre from "../ExploreByGenre/ExploreByGenre";
+import ExploreByCategory from "../ExploreByCategory/ExploreByCategory";
 import RecommendationSection from "../RecommendationSection/RecommendationSection";
 import RemixHeader from "../RemixHeader/RemixHeader";
 import type { ForYouData } from "@/types/forYou";
@@ -28,8 +28,8 @@ export default function ForYouPage({ forYou, userId }: ForYouPageProps) {
             />
           ))}
 
-        <ExploreByGenre
-          genres={forYou.exploreGenres}
+        <ExploreByCategory
+          categories={forYou.exploreCategories}
           catalogHref={forYou.catalogHref}
         />
       </div>

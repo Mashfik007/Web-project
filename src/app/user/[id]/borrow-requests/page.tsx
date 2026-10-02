@@ -11,5 +11,5 @@ export default async function Page({ params }: PageProps) {
   const { id } = await params;
   const borrowRequests = await getUserBorrowRequests(id);
 
-  return <BorrowRequestsPage borrowRequests={borrowRequests} />;
+  return <BorrowRequestsPage borrowRequests={borrowRequests} userId={id} />;
 }

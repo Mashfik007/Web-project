@@ -4,10 +4,12 @@ import type { BorrowRequestsData } from "@/types/borrowRequests";
 
 interface BorrowRequestsPageProps {
   borrowRequests: BorrowRequestsData;
+  userId: string;
 }
 
 export default function BorrowRequestsPage({
   borrowRequests,
+  userId,
 }: BorrowRequestsPageProps) {
   return (
     <main className="min-h-screen w-full bg-slate-50">
@@ -20,6 +22,7 @@ export default function BorrowRequestsPage({
         <RequestList
           filters={borrowRequests.filters}
           requests={borrowRequests.requests}
+          userId={userId}
         />
       </div>
     </main>

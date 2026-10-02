@@ -9,10 +9,10 @@ interface BorrowingHabitsCardProps {
 }
 
 function DonutChart({
-  genres,
+  categories,
   totalBooks,
 }: {
-  genres: BorrowingHabits["genres"];
+  categories: BorrowingHabits["categories"];
   totalBooks: number;
 }) {
   return (
@@ -20,16 +20,16 @@ function DonutChart({
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
-            data={genres}
+            data={categories}
             dataKey="percentage"
-            nameKey="genre"
+            nameKey="category"
             innerRadius={42}
             outerRadius={56}
             paddingAngle={2}
             stroke="none"
           >
-            {genres.map((genre) => (
-              <Cell key={genre.genre} fill={genre.color} />
+            {categories.map((item) => (
+              <Cell key={item.category} fill={item.color} />
             ))}
           </Pie>
           <Tooltip
@@ -61,30 +61,33 @@ export default function BorrowingHabitsCard({
         Your Borrowing Habits
       </h3>
       <p className="mt-0.5 text-xs text-slate-500">
-        {habits.totalBooks} books · {habits.months} months · {habits.genreCount}{" "}
-        genres
+        {habits.totalBooks} books · {habits.months} months ·{" "}
+        {habits.categoryCount} categories
       </p>
 
       <div className="mt-5 flex items-center gap-5">
-        <DonutChart genres={habits.genres} totalBooks={habits.totalBooks} />
+        <DonutChart
+          categories={habits.categories}
+          totalBooks={habits.totalBooks}
+        />
 
         <ul className="min-w-0 flex-1 space-y-2">
-          {habits.genres.map((genre) => (
+          {habits.categories.map((item) => (
             <li
-              key={genre.genre}
+              key={item.category}
               className="flex items-center justify-between gap-2 text-xs"
             >
               <div className="flex min-w-0 items-center gap-2">
                 <span
                   className="size-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: genre.color }}
+                  style={{ backgroundColor: item.color }}
                 />
                 <span className="truncate font-medium text-slate-700">
-                  {genre.genre}
+                  {item.category}
                 </span>
               </div>
               <span className="shrink-0 text-slate-400">
-                {genre.count} books · {genre.percentage}%
+                {item.count} books · {item.percentage}%
               </span>
             </li>
           ))}
@@ -94,7 +97,7 @@ export default function BorrowingHabitsCard({
       <div className="mt-6 border-t border-slate-100 pt-5">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-slate-700">
-            Genre Blend Slider
+            Category Blend Slider
           </p>
           <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
             {habits.blendSlider.balanceLabel}

@@ -56,8 +56,8 @@ export async function POST(request: Request) {
 
     if (previousName !== categoryName) {
       await Book.updateMany(
-        { "metadata.genre": previousName },
-        { $set: { "metadata.genre": categoryName } },
+        { "metadata.category": previousName },
+        { $set: { "metadata.category": categoryName } },
       );
     }
 

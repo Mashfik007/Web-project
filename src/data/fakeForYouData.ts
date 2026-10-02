@@ -7,28 +7,28 @@ export const fakeForYouData: ForYouData = {
     titleAccent: "Personalized Remix.",
     description:
       "Based on 23 books read this year. We've analysed your borrowing patterns and found what you'll love next.",
-    topGenres: [
-      { rank: 1, genre: "Fiction", percentage: 43, color: "#0ea5e9" },
-      { rank: 2, genre: "Sci-Fi", percentage: 22, color: "#8b5cf6" },
+    topCategories: [
+      { rank: 1, category: "Fiction", percentage: 43, color: "#0ea5e9" },
+      { rank: 2, category: "Sci-Fi", percentage: 22, color: "#8b5cf6" },
     ],
   },
   borrowingHabits: {
     totalBooks: 23,
     months: 12,
-    genreCount: 5,
-    genres: [
-      { genre: "Fiction", count: 10, percentage: 43, color: "#0ea5e9" },
-      { genre: "Sci-Fi", count: 5, percentage: 22, color: "#8b5cf6" },
-      { genre: "Literary", count: 4, percentage: 17, color: "#f43f5e" },
-      { genre: "Mystery", count: 3, percentage: 13, color: "#f59e0b" },
-      { genre: "Non-Fiction", count: 1, percentage: 5, color: "#14b8a6" },
+    categoryCount: 5,
+    categories: [
+      { category: "Fiction", count: 10, percentage: 43, color: "#0ea5e9" },
+      { category: "Sci-Fi", count: 5, percentage: 22, color: "#8b5cf6" },
+      { category: "Literary", count: 4, percentage: 17, color: "#f43f5e" },
+      { category: "Mystery", count: 3, percentage: 13, color: "#f59e0b" },
+      { category: "Non-Fiction", count: 1, percentage: 5, color: "#14b8a6" },
     ],
     blendSlider: {
       leftLabel: "Fiction",
       rightLabel: "Sci-Fi",
       value: 50,
       balanceLabel: "Balanced Mix",
-      hint: "Drag to tune recommendations between your top genres.",
+      hint: "Drag to tune recommendations between your top categories.",
     },
   },
   sections: [
@@ -36,8 +36,8 @@ export const fakeForYouData: ForYouData = {
       id: "perfect-mix",
       title: "Perfect Mix",
       description:
-        "Books that combine Fiction and Sci-Fi — your top two genres",
-      highlightGenres: ["Fiction", "Sci-Fi"],
+        "Books that combine Fiction and Sci-Fi — your top two categories",
+      highlightCategories: ["Fiction", "Sci-Fi"],
       badge: "Perfectly balanced",
       iconTheme: "blue",
       books: [
@@ -94,7 +94,7 @@ export const fakeForYouData: ForYouData = {
             "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=400&q=80",
           rating: 4.5,
           matchPercent: 85,
-          genre: "Non-Fiction",
+          category: "Non-Fiction",
           isNew: true,
         },
         {
@@ -105,7 +105,7 @@ export const fakeForYouData: ForYouData = {
             "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=400&q=80",
           rating: 4.6,
           matchPercent: 82,
-          genre: "Romance",
+          category: "Romance",
           isNew: true,
         },
         {
@@ -116,7 +116,7 @@ export const fakeForYouData: ForYouData = {
             "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=400&q=80",
           rating: 4.9,
           matchPercent: 79,
-          genre: "Fantasy",
+          category: "Fantasy",
           isNew: true,
         },
         {
@@ -127,13 +127,13 @@ export const fakeForYouData: ForYouData = {
             "https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fit=crop&w=400&q=80",
           rating: 4.6,
           matchPercent: 76,
-          genre: "Fiction",
+          category: "Fiction",
           isNew: true,
         },
       ],
     },
   ],
-  exploreGenres: [
+  exploreCategories: [
     {
       id: "fiction",
       label: "Fiction",

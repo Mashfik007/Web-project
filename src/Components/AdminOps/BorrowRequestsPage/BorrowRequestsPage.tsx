@@ -1,7 +1,7 @@
 "use client";
 
 // incoming borrow requests — approve or reject
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminPageShell from "@/Components/AdminCatalog/AdminPageShell/AdminPageShell";
 import AdminTable from "@/Components/AdminCatalog/AdminTable/AdminTable";
@@ -21,7 +21,9 @@ import {
   useFeedback,
 } from "@/Components/Modal";
 import { decideBorrowRequest } from "@/Controller/admin.controller";
+import { getChatSocket } from "@/lib/chatSocket";
 import type { AdminBorrowRequest, AdminBorrowStatus } from "@/types/adminOps";
+import type { BorrowUpdatePayload } from "@/types/realtime";
 
 interface BorrowRequestsPageProps {
   requests: AdminBorrowRequest[];
@@ -37,6 +39,34 @@ export default function BorrowRequestsPage({
     action: "approve" | "reject";
   } | null>(null);
   const feedback = useFeedback();
+
+  useEffect(() => {
+    const socket = getChatSocket();
+
+    function syncRooms() {
+      socket.emit("rooms:sync");
+    }
+
+    function onBorrowUpdate(update: BorrowUpdatePayload) {
+      if (!update?.id || update.scope !== "library") return;
+      if (update.action === "created") {
+        feedback.success(
+          "New borrow request",
+          `${update.member} requested "${update.book}".`,
+        );
+      }
+      router.refresh();
+    }
+
+    socket.on("connect", syncRooms);
+    socket.on("borrow:update", onBorrowUpdate);
+    if (socket.connected) syncRooms();
+
+    return () => {
+      socket.off("connect", syncRooms);
+      socket.off("borrow:update", onBorrowUpdate);
+    };
+  }, [router]);
 
   const visible = useMemo(
     () =>

@@ -21,7 +21,8 @@ function matchesFilters(book: Book, filters: BrowseFilters) {
     (filters.format === "Digital" && book.format === "DIGITAL");
 
   return (
-    (filters.genres.length === 0 || filters.genres.includes(book.genre)) &&
+    (filters.categories.length === 0 ||
+      filters.categories.includes(book.category)) &&
     (filters.availability === "All" ||
       book.availability === filters.availability) &&
     formatMatches &&
@@ -66,11 +67,11 @@ export default function BrowsePage({ browse }: BrowsePageProps) {
     () => catalogFilters(browse.books),
     [browse.books],
   );
-  const genres = useMemo(
+  const categories = useMemo(
     () =>
-      [...new Set(browse.books.map((book) => book.genre).filter(Boolean))].sort(
-        (a, b) => a.localeCompare(b),
-      ),
+      [
+        ...new Set(browse.books.map((book) => book.category).filter(Boolean)),
+      ].sort((a, b) => a.localeCompare(b)),
     [browse.books],
   );
   const [filters, setFilters] = useState(defaults);
@@ -96,7 +97,7 @@ export default function BrowsePage({ browse }: BrowsePageProps) {
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
         <FilterSidebar
           filters={filters}
-          genres={genres}
+          categories={categories}
           defaults={defaults}
           onChange={setFilters}
         />

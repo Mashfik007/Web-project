@@ -107,7 +107,7 @@ const Book_schema = new mongoose.Schema(
         required: true,
         min: 1,
       },
-      genre: {
+      category: {
         type: String,
         required: true,
         trim: true,

@@ -46,17 +46,20 @@ function SectionIcon({
   );
 }
 
-function renderDescription(description: string, highlightGenres?: string[]) {
-  if (!highlightGenres?.length) {
+function renderDescription(
+  description: string,
+  highlightCategories?: string[],
+) {
+  if (!highlightCategories?.length) {
     return description;
   }
 
   const parts = description.split(
-    new RegExp(`(${highlightGenres.join("|")})`, "g"),
+    new RegExp(`(${highlightCategories.join("|")})`, "g"),
   );
 
   return parts.map((part, index) =>
-    highlightGenres.includes(part) ? (
+    highlightCategories.includes(part) ? (
       <strong key={index} className="font-semibold text-slate-700">
         {part}
       </strong>
@@ -86,7 +89,10 @@ export default function RecommendationSection({
               {section.title}
             </h2>
             <p className="mt-0.5 text-xs text-slate-500">
-              {renderDescription(section.description, section.highlightGenres)}
+              {renderDescription(
+                section.description,
+                section.highlightCategories,
+              )}
             </p>
           </div>
         </div>

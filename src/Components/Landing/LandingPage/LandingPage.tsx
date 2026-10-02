@@ -46,7 +46,7 @@ const offers = [
   {
     title: "Personalized Recommendations",
     icon: "/svg/sparkles.svg",
-    body: "For You mixes your history, ratings, and genre taste into a short list worth opening.",
+    body: "For You mixes your history, ratings, and category taste into a short list worth opening.",
   },
   {
     title: "Reading Streak & Habit Tracker",
@@ -64,9 +64,9 @@ const offers = [
     body: "Rate what you finish, leave a short note, and keep a history you can actually search later.",
   },
   {
-    title: "Reading Stats & Genre Insights",
+    title: "Reading Stats & Category Insights",
     icon: "/svg/chart.svg",
-    body: "Monthly charts, genre breakdowns, and pace stats so you can see how your reading year is going.",
+    body: "Monthly charts, category breakdowns, and pace stats so you can see how your reading year is going.",
   },
 ];
 

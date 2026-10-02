@@ -57,7 +57,7 @@ export const fakeShelfData: MyShelfData = {
       id: 1,
       title: "The Midnight Library",
       author: "Matt Haig",
-      genre: "Fiction",
+      category: "Fiction",
       pages: 288,
       currentPage: 179,
       coverImage: midnightLibraryCover,
@@ -70,7 +70,7 @@ export const fakeShelfData: MyShelfData = {
       id: 2,
       title: "Klara and the Sun",
       author: "Kazuo Ishiguro",
-      genre: "Sci-Fi",
+      category: "Sci-Fi",
       pages: 303,
       currentPage: 303,
       coverImage:
@@ -82,7 +82,7 @@ export const fakeShelfData: MyShelfData = {
       id: 3,
       title: "The Vanishing Half",
       author: "Brit Bennett",
-      genre: "Literary",
+      category: "Literary",
       pages: 343,
       currentPage: 343,
       coverImage:
@@ -94,7 +94,7 @@ export const fakeShelfData: MyShelfData = {
       id: 4,
       title: "Piranesi",
       author: "Susanna Clarke",
-      genre: "Fantasy",
+      category: "Fantasy",
       pages: 272,
       currentPage: 272,
       coverImage:
@@ -106,7 +106,7 @@ export const fakeShelfData: MyShelfData = {
       id: 5,
       title: "Project Hail Mary",
       author: "Andy Weir",
-      genre: "Sci-Fi",
+      category: "Sci-Fi",
       pages: 496,
       currentPage: 496,
       coverImage:
@@ -120,7 +120,7 @@ export const fakeShelfData: MyShelfData = {
       id: 6,
       title: "Demon Copperhead",
       author: "Barbara Kingsolver",
-      genre: "Literary",
+      category: "Literary",
       pages: 560,
       currentPage: 0,
       coverImage:
@@ -132,7 +132,7 @@ export const fakeShelfData: MyShelfData = {
       id: 7,
       title: "The Paris Apartment",
       author: "Lucy Foley",
-      genre: "Mystery",
+      category: "Mystery",
       pages: 381,
       currentPage: 0,
       coverImage:
@@ -144,7 +144,7 @@ export const fakeShelfData: MyShelfData = {
       id: 8,
       title: "Lessons in Chemistry",
       author: "Bonnie Garmus",
-      genre: "Fiction",
+      category: "Fiction",
       pages: 400,
       currentPage: 0,
       coverImage:
@@ -158,7 +158,7 @@ export const fakeShelfData: MyShelfData = {
       id: 9,
       title: "In the Woods",
       author: "Tana French",
-      genre: "Mystery",
+      category: "Mystery",
       pages: 429,
       currentPage: 429,
       coverImage:
@@ -170,7 +170,7 @@ export const fakeShelfData: MyShelfData = {
       id: 10,
       title: "Crying in H Mart",
       author: "Michelle Zauner",
-      genre: "Non-Fiction",
+      category: "Non-Fiction",
       pages: 256,
       currentPage: 256,
       coverImage:
@@ -182,7 +182,7 @@ export const fakeShelfData: MyShelfData = {
       id: 11,
       title: "The Atlas Six",
       author: "Olivie Blake",
-      genre: "Fantasy",
+      category: "Fantasy",
       pages: 384,
       currentPage: 384,
       coverImage:
@@ -194,7 +194,7 @@ export const fakeShelfData: MyShelfData = {
       id: 12,
       title: "Orbital",
       author: "Samantha Harvey",
-      genre: "Literary",
+      category: "Literary",
       pages: 224,
       currentPage: 224,
       coverImage:
@@ -217,12 +217,12 @@ export const fakeShelfData: MyShelfData = {
       dueDate: "Aug 12",
     },
   ],
-  genres: [
-    { genre: "Fiction", count: 10, percentage: 43 },
-    { genre: "Sci-Fi", count: 5, percentage: 22 },
-    { genre: "Literary", count: 4, percentage: 17 },
-    { genre: "Mystery", count: 3, percentage: 13 },
-    { genre: "Non-Fiction", count: 1, percentage: 5 },
+  categories: [
+    { category: "Fiction", count: 10, percentage: 43 },
+    { category: "Sci-Fi", count: 5, percentage: 22 },
+    { category: "Literary", count: 4, percentage: 17 },
+    { category: "Mystery", count: 3, percentage: 13 },
+    { category: "Non-Fiction", count: 1, percentage: 5 },
   ],
   people: [],
 };

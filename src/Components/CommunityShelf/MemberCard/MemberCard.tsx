@@ -5,11 +5,31 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { StatusModal, useFeedback } from "@/Components/Modal";
+import { getChatSocket } from "@/lib/chatSocket";
 import type { CommunityBook, CommunityMember, FriendStatus } from "@/types/communityShelf";
+import type { FriendUpdatePayload } from "@/types/realtime";
 
 interface MemberCardProps {
   viewerId: string;
   member: CommunityMember;
+}
+
+function statusFromUpdate(
+  viewerId: string,
+  memberId: string,
+  update: FriendUpdatePayload,
+): FriendStatus | null {
+  const involvesMember =
+    (update.fromId === viewerId && update.toId === memberId) ||
+    (update.fromId === memberId && update.toId === viewerId);
+  if (!involvesMember) return null;
+
+  if (update.action === "accept") return "friends";
+  if (update.action === "decline" || update.action === "cancel") return "none";
+  if (update.action === "request") {
+    return update.fromId === viewerId ? "outgoing" : "incoming";
+  }
+  return null;
 }
 
 function BookLine({
@@ -59,6 +79,44 @@ export default function MemberCard({ viewerId, member }: MemberCardProps) {
   useEffect(() => {
     setStatus(member.friendStatus);
   }, [member.friendStatus]);
+
+  useEffect(() => {
+    const socket = getChatSocket();
+
+    function syncRooms() {
+      socket.emit("rooms:sync");
+    }
+
+    function onFriendUpdate(update: FriendUpdatePayload) {
+      if (!update?.action || !update.fromId || !update.toId) return;
+
+      const next = statusFromUpdate(viewerId, member.id, update);
+      if (next) setStatus(next);
+
+      if (update.actorId === viewerId) return;
+      if (update.fromId !== viewerId && update.toId !== viewerId) return;
+      if (update.fromId !== member.id && update.toId !== member.id) return;
+
+      if (update.action === "request" && update.toId === viewerId) {
+        feedback.success("Friend request", `${update.actorName} sent you a friend request.`);
+      } else if (update.action === "accept" && update.fromId === viewerId) {
+        feedback.success("Friends", `${update.actorName} accepted your friend request.`);
+      } else if (update.action === "decline" && update.fromId === viewerId) {
+        feedback.failed("Friend request", `${update.actorName} declined your friend request.`);
+      } else if (update.action === "cancel" && update.toId === viewerId) {
+        feedback.failed("Friend request", `${update.actorName} cancelled their friend request.`);
+      }
+    }
+
+    socket.on("connect", syncRooms);
+    socket.on("friend:update", onFriendUpdate);
+    if (socket.connected) syncRooms();
+
+    return () => {
+      socket.off("connect", syncRooms);
+      socket.off("friend:update", onFriendUpdate);
+    };
+  }, [viewerId, member.id]);
 
   async function requestBook(bookId: string) {
     setBusy(true);

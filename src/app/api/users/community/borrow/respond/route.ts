@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { publishBorrowUpdate } from "@/Helper/publishBorrow";
 import { requireUserId } from "@/Helper/userFromToken";
 import { BorrowRequest } from "@/Model/BorrowRequests";
 import { ShelfLoan } from "@/Model/ShelfLoans";
@@ -6,6 +7,34 @@ import { PeerBorrowReply_schema } from "@/Shchema/shelf";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
+
+async function emitPeerBorrow(borrowRequest: {
+  _id: { toString(): string };
+  status: "Pending" | "Approved" | "Rejected";
+  userId?: string;
+  ownerId?: string;
+  member?: string;
+  book?: string;
+  bookId?: string;
+  requested?: string;
+  expectedReturn?: string;
+  reason?: string;
+}) {
+  await publishBorrowUpdate({
+    id: borrowRequest._id.toString(),
+    action: borrowRequest.status === "Approved" ? "approved" : "rejected",
+    scope: "peer",
+    status: borrowRequest.status,
+    userId: String(borrowRequest.userId || ""),
+    ownerId: String(borrowRequest.ownerId || ""),
+    member: String(borrowRequest.member || "Reader"),
+    book: String(borrowRequest.book || "Book"),
+    bookId: String(borrowRequest.bookId || ""),
+    requested: String(borrowRequest.requested || ""),
+    expectedReturn: String(borrowRequest.expectedReturn || ""),
+    reason: borrowRequest.reason || undefined,
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -48,6 +77,7 @@ export async function POST(request: Request) {
       borrowRequest.reason = "Declined by the member";
       borrowRequest.decidedAt = new Date();
       await borrowRequest.save();
+      await emitPeerBorrow(borrowRequest);
       return new Response(JSON.stringify(new ApiResponce(200, null, "Request declined")), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -85,6 +115,7 @@ export async function POST(request: Request) {
     borrowRequest.status = "Approved";
     borrowRequest.decidedAt = new Date();
     await borrowRequest.save();
+    await emitPeerBorrow(borrowRequest);
 
     return new Response(
       JSON.stringify(new ApiResponce(200, null, "Request approved. The book is on their shelf.")),

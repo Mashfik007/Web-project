@@ -32,7 +32,7 @@ type BookRecord = {
     published?: number;
     copiesHeld?: string;
     pages?: number;
-    genre?: string;
+    category?: string;
     deweyDecimal?: string;
   };
   community?: {
@@ -78,7 +78,7 @@ function toBookDetails(book: BookRecord): BookDetails {
       published: book.metadata?.published ?? 0,
       copiesHeld: book.metadata?.copiesHeld ?? "",
       pages: book.metadata?.pages ?? 0,
-      genre: book.metadata?.genre ?? "",
+      category: book.metadata?.category ?? "",
       deweyDecimal: book.metadata?.deweyDecimal ?? "",
     },
     community: {

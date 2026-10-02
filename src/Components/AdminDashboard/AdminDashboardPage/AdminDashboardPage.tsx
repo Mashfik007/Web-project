@@ -1,4 +1,4 @@
-import BooksByGenreChart from "@/Components/AdminDashboard/BooksByGenreChart/BooksByGenreChart";
+import BooksByCategoryChart from "@/Components/AdminDashboard/BooksByCategoryChart/BooksByCategoryChart";
 import MonthlyBorrowChart from "@/Components/AdminDashboard/MonthlyBorrowChart/MonthlyBorrowChart";
 import RecentActivity from "@/Components/AdminDashboard/RecentActivity/RecentActivity";
 import StatCards from "@/Components/AdminDashboard/StatCards/StatCards";
@@ -41,7 +41,7 @@ export default function AdminDashboardPage({
 
       <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <BooksByGenreChart data={dashboard.booksByGenre} />
+          <BooksByCategoryChart data={dashboard.booksByCategory} />
         </div>
         <RecentActivity items={dashboard.recentActivity} />
       </div>

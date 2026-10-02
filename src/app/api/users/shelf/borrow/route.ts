@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { publishBorrowUpdate } from "@/Helper/publishBorrow";
 import { requireUserId } from "@/Helper/userFromToken";
 import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
@@ -103,12 +104,27 @@ export async function POST(request: Request) {
       }
     }
 
-    await recordBorrowRequest({
+    const saved = await recordBorrowRequest({
       userId,
       bookId,
       dueDate,
       createdAt: new Date(),
     });
+
+    if (saved && saved.status === "Pending") {
+      await publishBorrowUpdate({
+        id: String(saved._id),
+        action: "created",
+        scope: "library",
+        status: "Pending",
+        userId: String(saved.userId || userId),
+        member: String(saved.member || "Reader"),
+        book: String(saved.book || book.title || "Book"),
+        bookId: String(saved.bookId || bookId),
+        requested: String(saved.requested || ""),
+        expectedReturn: String(saved.expectedReturn || ""),
+      });
+    }
 
     return new Response(
       JSON.stringify(

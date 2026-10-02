@@ -21,7 +21,7 @@ export default function BookCard({ book, userId }: BookCardProps) {
       : `/user/${userId}/browsebook/${book.id}`;
 
   const coverClass =
-    digitalCoverClass[book.genre] ?? "bg-slate-100 text-slate-600";
+    digitalCoverClass[book.category] ?? "bg-slate-100 text-slate-600";
 
   return (
     <Link
@@ -72,7 +72,7 @@ export default function BookCard({ book, userId }: BookCardProps) {
 
         {book.format === "DIGITAL" ? (
           <div className="mt-3 flex items-center gap-1 text-[10px] text-slate-500">
-            <span>{book.genre}</span>
+            <span>{book.category}</span>
             {book.sizeLabel ? (
               <>
                 <span>·</span>

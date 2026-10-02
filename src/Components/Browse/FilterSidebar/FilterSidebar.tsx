@@ -7,7 +7,7 @@ export type AvailabilityFilter = "All" | "Available" | "On Loan";
 export type FormatFilter = "All" | "Physical" | "Digital";
 
 export type BrowseFilters = {
-  genres: string[];
+  categories: string[];
   availability: AvailabilityFilter;
   format: FormatFilter;
   minRating: number;
@@ -16,7 +16,7 @@ export type BrowseFilters = {
 };
 
 export const defaultBrowseFilters: BrowseFilters = {
-  genres: [],
+  categories: [],
   availability: "All",
   format: "All",
   minRating: 0,
@@ -26,23 +26,23 @@ export const defaultBrowseFilters: BrowseFilters = {
 
 interface FilterSidebarProps {
   filters: BrowseFilters;
-  genres: string[];
+  categories: string[];
   defaults: BrowseFilters;
   onChange: (filters: BrowseFilters) => void;
 }
 
 export default function FilterSidebar({
   filters,
-  genres,
+  categories,
   defaults,
   onChange,
 }: FilterSidebarProps) {
-  const toggleGenre = (genre: string) => {
-    const selected = filters.genres.includes(genre)
-      ? filters.genres.filter((item) => item !== genre)
-      : [...filters.genres, genre];
+  const toggleCategory = (category: string) => {
+    const selected = filters.categories.includes(category)
+      ? filters.categories.filter((item) => item !== category)
+      : [...filters.categories, category];
 
-    onChange({ ...filters, genres: selected });
+    onChange({ ...filters, categories: selected });
   };
 
   return (
@@ -60,21 +60,21 @@ export default function FilterSidebar({
         <span className="text-sm font-semibold text-slate-600">Filters</span>
       </div>
 
-      {/* Genre */}
-      <FilterSection title="GENRE">
-        {genres.map((genre) => (
+      {/* Category */}
+      <FilterSection title="CATEGORY">
+        {categories.map((category) => (
           <label
-            key={genre}
+            key={category}
             className="flex cursor-pointer items-center gap-2 text-sm text-slate-600"
           >
             <input
               type="checkbox"
-              checked={filters.genres.includes(genre)}
-              onChange={() => toggleGenre(genre)}
+              checked={filters.categories.includes(category)}
+              onChange={() => toggleCategory(category)}
               className="checkbox checkbox-sm checkbox-info"
             />
 
-            {genre}
+            {category}
           </label>
         ))}
       </FilterSection>

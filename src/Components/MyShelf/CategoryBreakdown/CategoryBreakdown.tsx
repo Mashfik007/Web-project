@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { GenreStat } from "@/types/myShelf";
+import type { CategoryStat } from "@/types/myShelf";
 import {
   Bar,
   BarChart,
@@ -12,14 +12,16 @@ import {
   YAxis,
 } from "recharts";
 
-interface GenreBreakdownProps {
-  genres: GenreStat[];
+interface CategoryBreakdownProps {
+  categories: CategoryStat[];
 }
 
-export default function GenreBreakdown({ genres }: GenreBreakdownProps) {
-  const data = genres.map((genre) => ({
-    ...genre,
-    detail: `${genre.count} books · ${genre.percentage}%`,
+export default function CategoryBreakdown({
+  categories,
+}: CategoryBreakdownProps) {
+  const data = categories.map((item) => ({
+    ...item,
+    detail: `${item.count} books · ${item.percentage}%`,
   }));
 
   return (
@@ -35,7 +37,7 @@ export default function GenreBreakdown({ genres }: GenreBreakdownProps) {
           />
         </div>
         <h3 className="text-sm font-semibold text-slate-800">
-          Genre Breakdown
+          Category Breakdown
         </h3>
       </div>
 
@@ -49,7 +51,7 @@ export default function GenreBreakdown({ genres }: GenreBreakdownProps) {
             <XAxis type="number" domain={[0, 100]} hide />
             <YAxis
               type="category"
-              dataKey="genre"
+              dataKey="category"
               width={78}
               axisLine={false}
               tickLine={false}

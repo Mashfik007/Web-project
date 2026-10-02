@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { publishFriendUpdate } from "@/Helper/publishFriend";
 import { requireUserId } from "@/Helper/userFromToken";
 import { FriendRequest } from "@/Model/FriendRequests";
 import { User } from "@/Model/Users";
@@ -38,8 +39,12 @@ export async function POST(request: Request) {
       });
     }
     const [sender, member] = await Promise.all([
-      User.findById(userId).select("isAdmin").lean<{ isAdmin?: boolean } | null>(),
-      User.findById(targetId).select("isAdmin").lean<{ isAdmin?: boolean } | null>(),
+      User.findById(userId)
+        .select("name isAdmin")
+        .lean<{ name?: string; isAdmin?: boolean } | null>(),
+      User.findById(targetId)
+        .select("isAdmin")
+        .lean<{ isAdmin?: boolean } | null>(),
     ]);
     if (!member) {
       return new Response(JSON.stringify(new ApiError(404, "Member not found")), {
@@ -54,6 +59,7 @@ export async function POST(request: Request) {
       );
     }
 
+    const actorName = sender?.name?.trim() || "Reader";
     const outgoing = await FriendRequest.findOne({ fromId: userId, toId: targetId });
     const incoming = await FriendRequest.findOne({ fromId: targetId, toId: userId });
 
@@ -67,6 +73,13 @@ export async function POST(request: Request) {
       if (incoming?.status === "pending") {
         incoming.status = "accepted";
         await incoming.save();
+        await publishFriendUpdate({
+          action: "accept",
+          fromId: targetId,
+          toId: userId,
+          actorId: userId,
+          actorName,
+        });
         return new Response(
           JSON.stringify(
             new ApiResponce(200, { friendStatus: "friends" }, "Friend request accepted"),
@@ -80,6 +93,13 @@ export async function POST(request: Request) {
       } else {
         await FriendRequest.create({ fromId: userId, toId: targetId, status: "pending" });
       }
+      await publishFriendUpdate({
+        action: "request",
+        fromId: userId,
+        toId: targetId,
+        actorId: userId,
+        actorName,
+      });
       return new Response(
         JSON.stringify(new ApiResponce(201, { friendStatus: "outgoing" }, "Friend request sent")),
         { status: 201, headers: { "Content-Type": "application/json" } },
@@ -99,6 +119,13 @@ export async function POST(request: Request) {
         outgoing.status = "accepted";
         await outgoing.save();
       }
+      await publishFriendUpdate({
+        action: "accept",
+        fromId: targetId,
+        toId: userId,
+        actorId: userId,
+        actorName,
+      });
       return new Response(
         JSON.stringify(new ApiResponce(200, { friendStatus: "friends" }, "You are now friends")),
         { status: 200, headers: { "Content-Type": "application/json" } },
@@ -114,6 +141,13 @@ export async function POST(request: Request) {
       }
       incoming.status = "declined";
       await incoming.save();
+      await publishFriendUpdate({
+        action: "decline",
+        fromId: targetId,
+        toId: userId,
+        actorId: userId,
+        actorName,
+      });
       return new Response(
         JSON.stringify(new ApiResponce(200, { friendStatus: "none" }, "Friend request declined")),
         { status: 200, headers: { "Content-Type": "application/json" } },
@@ -127,6 +161,13 @@ export async function POST(request: Request) {
       );
     }
     await outgoing.deleteOne();
+    await publishFriendUpdate({
+      action: "cancel",
+      fromId: userId,
+      toId: targetId,
+      actorId: userId,
+      actorName,
+    });
     return new Response(
       JSON.stringify(new ApiResponce(200, { friendStatus: "none" }, "Friend request cancelled")),
       { status: 200, headers: { "Content-Type": "application/json" } },

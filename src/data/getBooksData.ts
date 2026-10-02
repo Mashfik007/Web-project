@@ -13,7 +13,7 @@ type StoredBook = {
   };
   metadata?: {
     isbn?: string;
-    genre?: string;
+    category?: string;
   };
 };
 
@@ -23,7 +23,7 @@ export type BookFilters = {
   available?: string;
 };
 
-const coverByGenre: Record<string, string> = {
+const coverByCategory: Record<string, string> = {
   Fiction: "bg-sky-100 text-sky-600",
   History: "bg-emerald-100 text-emerald-600",
   "Non-Fiction": "bg-teal-100 text-teal-600",
@@ -52,7 +52,10 @@ export async function getBooksData(
   }
 
   if (category && category.toLowerCase() !== "all") {
-    query["metadata.genre"] = new RegExp(`^${escapeRegex(category)}$`, "i");
+    query["metadata.category"] = new RegExp(
+      `^${escapeRegex(category)}$`,
+      "i",
+    );
   }
 
   if (available === "available") {
@@ -70,7 +73,8 @@ export async function getBooksData(
   return books.map((book) => {
     const available = book.availability?.current ?? 0;
     const copies = book.availability?.total ?? 0;
-    const category = book.metadata?.genre ?? "";
+    const category =
+      book.metadata?.category ?? "";
     const status: AdminBookStatus = available === 0 ? "On Loan" : "Available";
 
     return {
@@ -83,7 +87,7 @@ export async function getBooksData(
       copies,
       available,
       status,
-      coverClass: coverByGenre[category] ?? "bg-slate-100 text-slate-600",
+      coverClass: coverByCategory[category] ?? "bg-slate-100 text-slate-600",
     };
   });
 }

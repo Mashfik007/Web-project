@@ -34,7 +34,7 @@ export default function DetailsTab({ metadata }: DetailsTabProps) {
     ],
     [
       { label: "Pages", value: `${metadata.pages} pages` },
-      { label: "Genre", value: metadata.genre },
+      { label: "Category", value: metadata.category },
       { label: "Dewey Dec.", value: metadata.deweyDecimal },
     ],
   ];

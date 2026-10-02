@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StatusModal, useFeedback } from "@/Components/Modal";
+import { getChatSocket } from "@/lib/chatSocket";
 import FilterTabs from "../FilterTabs/FilterTabs";
 import RequestCard from "../RequestCard/RequestCard";
 import type {
@@ -10,17 +11,67 @@ import type {
   BorrowRequestStatus,
   IncomingBorrowRequest,
 } from "@/types/borrowRequests";
+import type { BorrowUpdatePayload } from "@/types/realtime";
 
 interface RequestListProps {
   filters: BorrowRequestFilter[];
   requests: IncomingBorrowRequest[];
+  userId?: string;
 }
 
-export default function RequestList({ filters, requests }: RequestListProps) {
+export default function RequestList({ filters, requests, userId }: RequestListProps) {
   const router = useRouter();
   const feedback = useFeedback();
   const [activeStatus, setActiveStatus] = useState<BorrowRequestStatus | "all">("all");
   const [busyId, setBusyId] = useState("");
+
+  useEffect(() => {
+    const socket = getChatSocket();
+
+    function syncRooms() {
+      socket.emit("rooms:sync");
+    }
+
+    function onBorrowUpdate(update: BorrowUpdatePayload) {
+      if (!update?.id) return;
+
+      const involvesMe =
+        !userId ||
+        update.userId === userId ||
+        update.ownerId === userId;
+      if (!involvesMe) return;
+
+      if (update.action === "created" && update.ownerId === userId) {
+        feedback.success(
+          "Borrow request",
+          `${update.member} asked to borrow "${update.book}".`,
+        );
+      } else if (update.action === "approved" && update.userId === userId) {
+        feedback.success(
+          "Borrow approved",
+          `"${update.book}" was approved.`,
+        );
+      } else if (update.action === "rejected" && update.userId === userId) {
+        feedback.failed(
+          "Borrow rejected",
+          update.reason
+            ? `"${update.book}" was rejected: ${update.reason}`
+            : `"${update.book}" was rejected.`,
+        );
+      }
+
+      router.refresh();
+    }
+
+    socket.on("connect", syncRooms);
+    socket.on("borrow:update", onBorrowUpdate);
+    if (socket.connected) syncRooms();
+
+    return () => {
+      socket.off("connect", syncRooms);
+      socket.off("borrow:update", onBorrowUpdate);
+    };
+  }, [userId, router]);
 
   const visibleRequests = useMemo(
     () =>

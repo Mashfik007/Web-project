@@ -30,8 +30,8 @@ export type UserActivitySlice = {
   color: string;
 };
 
-export type GenreCount = {
-  genre: string;
+export type CategoryCount = {
+  category: string;
   count: number;
 };
 
@@ -52,6 +52,6 @@ export type AdminDashboardData = {
   borrowYearLabel: string;
   userActivity: UserActivitySlice[];
   userActivityTotal: number;
-  booksByGenre: GenreCount[];
+  booksByCategory: CategoryCount[];
   recentActivity: AdminActivityItem[];
 };

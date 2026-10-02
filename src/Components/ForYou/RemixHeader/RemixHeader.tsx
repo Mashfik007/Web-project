@@ -36,16 +36,16 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        {header.topGenres.map((genre, index) => (
-          <div key={genre.genre} className="flex items-center gap-2">
+        {header.topCategories.map((item, index) => (
+          <div key={item.category} className="flex items-center gap-2">
             {index > 0 && (
               <span className="text-sm font-medium text-slate-400">+</span>
             )}
             <span
               className="rounded-full px-3 py-1 text-xs font-semibold text-white"
-              style={{ backgroundColor: genre.color }}
+              style={{ backgroundColor: item.color }}
             >
-              #{genre.rank} {genre.genre} {genre.percentage}%
+              #{item.rank} {item.category} {item.percentage}%
             </span>
           </div>
         ))}

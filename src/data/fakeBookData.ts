@@ -32,7 +32,7 @@ export const fakeBookData: BookDetails = {
     published: 2020,
     copiesHeld: "4 copies across 3 branches",
     pages: 288,
-    genre: "Fiction",
+    category: "Fiction",
     deweyDecimal: "823.14",
   },
   community: {
@@ -65,13 +65,13 @@ function buildBookDetailsFromCatalog(catalogBook: Book): BookDetails {
     title: catalogBook.title,
     author: catalogBook.author,
     coverImage: catalogBook.image,
-    tags: [catalogBook.genre, String(catalogBook.year), `${pages} pages`],
+    tags: [catalogBook.category, String(catalogBook.year), `${pages} pages`],
     rating: {
       score: catalogBook.rating,
       totalRatings: 500 + id * 137,
       totalReviews: 120 + id * 41,
     },
-    description: `Discover ${catalogBook.title} by ${catalogBook.author}, a ${catalogBook.genre.toLowerCase()} title from ${catalogBook.year}. Borrow it today from your local branch or add it to your shelf.`,
+    description: `Discover ${catalogBook.title} by ${catalogBook.author}, a ${catalogBook.category.toLowerCase()} title from ${catalogBook.year}. Borrow it today from your local branch or add it to your shelf.`,
     price: {
       amount: 300 + (id % 5) * 50,
       currency: "৳",
@@ -88,7 +88,7 @@ function buildBookDetailsFromCatalog(catalogBook: Book): BookDetails {
       published: catalogBook.year,
       copiesHeld: "4 copies across 3 branches",
       pages,
-      genre: catalogBook.genre,
+      category: catalogBook.category,
       deweyDecimal: "823.14",
     },
     community: fakeBookData.community,
@@ -96,7 +96,7 @@ function buildBookDetailsFromCatalog(catalogBook: Book): BookDetails {
       score: 70 + (id % 25),
       maxScore: 100,
       label: "Good Match",
-      description: `Based on your interest in ${catalogBook.genre.toLowerCase()} books.`,
+      description: `Based on your interest in ${catalogBook.category.toLowerCase()} books.`,
     },
   };
 }

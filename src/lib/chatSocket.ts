@@ -31,12 +31,12 @@ export function getChatSocket() {
 async function openChatSocket(current: Socket) {
   try {
     const response = await fetch("/api/users/chat/token");
-    if (!response.ok) return;
-    const payload = (await response.json()) as { token?: string };
-    if (!payload.token) return;
-    current.auth = { token: payload.token };
-    current.connect();
+    if (response.ok) {
+      const payload = (await response.json()) as { token?: string };
+      if (payload.token) current.auth = { token: payload.token };
+    }
   } catch {
-    current.connect();
+    // Cookie auth on the socket server still works without a bearer token.
   }
+  if (!current.connected) current.connect();
 }

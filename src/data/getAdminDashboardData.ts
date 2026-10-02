@@ -110,7 +110,9 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
     Reservation.find({ status: { $in: ["Waiting", "Ready"] } })
       .select("member")
       .lean<{ member?: string }[]>(),
-    Book.find().select("metadata.genre").lean<{ metadata?: { genre?: string } }[]>(),
+    Book.find()
+      .select("metadata.category")
+      .lean<{ metadata?: { category?: string } }[]>(),
     BorrowRequest.find().sort({ createdAt: -1 }).limit(6).lean<
       { _id: { toString(): string }; member: string; book: string; status: string; createdAt?: Date }[]
     >(),
@@ -177,10 +179,10 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
   }).length;
 
   const fineTotal = pendingFines.reduce((sum, fine) => sum + (fine.amount ?? 0), 0);
-  const genreCounts = new Map<string, number>();
+  const categoryCounts = new Map<string, number>();
   for (const book of books) {
-    const genre = book.metadata?.genre?.trim() || "General";
-    genreCounts.set(genre, (genreCounts.get(genre) ?? 0) + 1);
+    const category = book.metadata?.category?.trim() || "General";
+    categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
   }
 
   const monthly = monthNames.map((month) => ({ month, borrows: 0, returns: 0 }));
@@ -293,10 +295,10 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
       { id: "inactive", label: "Inactive", value: inactive, color: "#CBD5E1" },
     ],
     userActivityTotal: activeReaders.length,
-    booksByGenre: [...genreCounts.entries()]
+    booksByCategory: [...categoryCounts.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8)
-      .map(([genre, count]) => ({ genre, count })),
+      .map(([category, count]) => ({ category, count })),
     recentActivity: recent,
   };
 }

@@ -27,7 +27,7 @@ export const Book_shema = z.object({
     published: z.number(),
     copiesHeld: z.string().min(1),
     pages: z.number().min(1),
-    genre: z.string().min(1),
+    category: z.string().min(1),
     deweyDecimal: z.string().min(1),
   }),
   community: z.object({

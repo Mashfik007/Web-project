@@ -18,7 +18,12 @@ export async function getCategoriesData(
   const [categories, counts] = await Promise.all([
     Category.find().sort({ createdAt: -1 }).lean<StoredCategory[]>(),
     Book.aggregate<{ _id: string; total: number }>([
-      { $group: { _id: "$metadata.genre", total: { $sum: 1 } } },
+      {
+        $group: {
+          _id: "$metadata.category",
+          total: { $sum: 1 },
+        },
+      },
     ]),
   ]);
 

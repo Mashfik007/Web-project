@@ -16,7 +16,7 @@ export default async function Page({ params }: PageProps) {
       browse={{
         userId: id,
         title: "Browse Collection",
-        subtitle: `${books.length.toLocaleString()} books across all genres and branches`,
+        subtitle: `${books.length.toLocaleString()} books across all categories and branches`,
         totalCatalogCount: books.length,
         books,
       }}

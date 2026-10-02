@@ -1,6 +1,7 @@
 import { createServer } from "http";
 import { COMMUNITY_CHAT_ID } from "@/Helper/chat";
 import { NOTICES_ROOM } from "@/Helper/publishNotice";
+import { ADMIN_OPS_ROOM, userRoom } from "@/Helper/realtimeRooms";
 import { CommunityGroup } from "@/Model/CommunityGroups";
 import { GroupMember } from "@/Model/GroupMembers";
 import jwt from "jsonwebtoken";
@@ -92,15 +93,23 @@ async function presentMessages(rows: MessageRow[]) {
   });
 }
 
-async function joinUserRooms(socket: { join: (room: string | string[]) => Promise<void> | void }, userId: string) {
-  const rooms = [COMMUNITY_CHAT_ID, NOTICES_ROOM];
-  const memberships = await GroupMember.find({ userId }).select("groupId").lean<{ groupId: string }[]>();
+async function joinUserRooms(
+  socket: { join: (room: string | string[]) => Promise<void> | void },
+  userId: string,
+  isAdmin = false,
+) {
+  const rooms = [COMMUNITY_CHAT_ID, NOTICES_ROOM, userRoom(userId)];
+  if (isAdmin) rooms.push(ADMIN_OPS_ROOM);
+
+  const memberships = await GroupMember.find({ userId })
+    .select("groupId")
+    .lean<{ groupId: string }[]>();
   for (const membership of memberships) {
     const groupId = String(membership.groupId || "");
     if (/^[a-f\d]{24}$/i.test(groupId)) rooms.push(`group:${groupId}`);
   }
 
-  if (mongoose.Types.ObjectId.isValid(userId)) {
+  if (!isAdmin && mongoose.Types.ObjectId.isValid(userId)) {
     const peers = await mongoose.connection
       .collection("users")
       .find({
@@ -158,32 +167,57 @@ async function ensureMongo() {
 
 function bindChatHandlers(io: Server) {
   io.use((socket, nextSocket) => {
-    try {
-      const headerToken = socket.handshake.auth?.token;
-      const token =
-        typeof headerToken === "string" && headerToken
-          ? headerToken
-          : readCookie(socket.handshake.headers.cookie, "accessToken");
-      const payload = jwt.verify(token, process.env.SECRET_ACCESS_TOKEN!);
-      const userId = payload && typeof payload === "object" ? payload._id : null;
-      if (!userId) {
+    void (async () => {
+      try {
+        const headerToken = socket.handshake.auth?.token;
+        const token =
+          typeof headerToken === "string" && headerToken
+            ? headerToken
+            : readCookie(socket.handshake.headers.cookie, "accessToken");
+        const payload = jwt.verify(token, process.env.SECRET_ACCESS_TOKEN!);
+        const userId = payload && typeof payload === "object" ? payload._id : null;
+        if (!userId) {
+          nextSocket(new Error("unauthorized"));
+          return;
+        }
+
+        const id = String(userId);
+        let isAdmin = Boolean(
+          payload && typeof payload === "object" && payload.isAdmin,
+        );
+
+        // Prefer live DB role so admins always join ops rooms after role changes.
+        if (mongoose.Types.ObjectId.isValid(id)) {
+          await ensureMongo();
+          const account = await mongoose.connection.collection("users").findOne(
+            { _id: new mongoose.Types.ObjectId(id) },
+            { projection: { isAdmin: 1 } },
+          );
+          if (account) isAdmin = Boolean(account.isAdmin);
+        }
+
+        socket.data.userId = id;
+        socket.data.isAdmin = isAdmin;
+        nextSocket();
+      } catch {
         nextSocket(new Error("unauthorized"));
-        return;
       }
-      socket.data.userId = String(userId);
-      nextSocket();
-    } catch {
-      nextSocket(new Error("unauthorized"));
-    }
+    })();
   });
 
   io.on("connection", (socket) => {
     const userId = String(socket.data.userId || "");
+    const isAdmin = Boolean(socket.data.isAdmin);
     socket.join(NOTICES_ROOM);
-    void joinUserRooms(socket, userId);
+    socket.join(userRoom(userId));
+    if (isAdmin) socket.join(ADMIN_OPS_ROOM);
+    void joinUserRooms(socket, userId, isAdmin);
 
     socket.on("rooms:sync", () => {
-      void joinUserRooms(socket, userId);
+      const admin = Boolean(socket.data.isAdmin);
+      if (admin) socket.join(ADMIN_OPS_ROOM);
+      else socket.leave(ADMIN_OPS_ROOM);
+      void joinUserRooms(socket, userId, admin);
     });
 
     socket.on("conversation:join", (conversationId: unknown) => {
@@ -293,7 +327,54 @@ export async function startChatSocket() {
   await ensureMongo();
 
   const httpServer = createServer((req, res) => {
-    const url = req.url || "";
+    const url = (req.url || "").split("?")[0] || "";
+
+    if (req.method === "POST" && url === "/internal/emit") {
+      const secret =
+        process.env.INTERNAL_SOCKET_SECRET ||
+        process.env.SECRET_ACCESS_TOKEN ||
+        "";
+      const provided = String(req.headers["x-internal-secret"] || "");
+      if (!secret || provided !== secret) {
+        res.writeHead(401, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: false }));
+        return;
+      }
+
+      const chunks: Buffer[] = [];
+      req.on("data", (chunk) => {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      });
+      req.on("end", () => {
+        try {
+          const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as {
+            event?: unknown;
+            rooms?: unknown;
+            payload?: unknown;
+          };
+          const event = typeof body.event === "string" ? body.event : "";
+          const rooms = Array.isArray(body.rooms)
+            ? body.rooms.filter((room): room is string => typeof room === "string")
+            : [];
+          const io = globalState.__chatIo;
+          if (!event || !io) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ ok: false }));
+            return;
+          }
+          for (const room of rooms) {
+            io.to(room).emit(event, body.payload);
+          }
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true }));
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: false }));
+        }
+      });
+      return;
+    }
+
     if (!url.startsWith("/socket.io")) {
       res.writeHead(404);
       res.end();

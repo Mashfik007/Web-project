@@ -1,12 +1,12 @@
-export type GenrePreference = {
+export type CategoryPreference = {
   rank: number;
-  genre: string;
+  category: string;
   percentage: number;
   color: string;
 };
 
-export type BorrowingHabitGenre = {
-  genre: string;
+export type BorrowingHabitCategory = {
+  category: string;
   count: number;
   percentage: number;
   color: string;
@@ -15,8 +15,8 @@ export type BorrowingHabitGenre = {
 export type BorrowingHabits = {
   totalBooks: number;
   months: number;
-  genreCount: number;
-  genres: BorrowingHabitGenre[];
+  categoryCount: number;
+  categories: BorrowingHabitCategory[];
   blendSlider: {
     leftLabel: string;
     rightLabel: string;
@@ -33,7 +33,7 @@ export type RecommendedBook = {
   coverImage: string;
   rating: number;
   matchPercent: number;
-  genre?: string;
+  category?: string;
   isNew?: boolean;
 };
 
@@ -41,13 +41,13 @@ export type RecommendationSection = {
   id: string;
   title: string;
   description: string;
-  highlightGenres?: string[];
+  highlightCategories?: string[];
   badge?: string;
   iconTheme: "blue" | "orange";
   books: RecommendedBook[];
 };
 
-export type ExploreGenre = {
+export type ExploreCategory = {
   id: string;
   label: string;
   color: string;
@@ -59,13 +59,13 @@ export type ForYouHeader = {
   title: string;
   titleAccent: string;
   description: string;
-  topGenres: GenrePreference[];
+  topCategories: CategoryPreference[];
 };
 
 export type ForYouData = {
   header: ForYouHeader;
   borrowingHabits: BorrowingHabits;
   sections: RecommendationSection[];
-  exploreGenres: ExploreGenre[];
+  exploreCategories: ExploreCategory[];
   catalogHref: string;
 };

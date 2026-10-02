@@ -9,7 +9,7 @@ export type LoanBook = {
   coverImage?: string;
   metadata?: {
     pages?: number;
-    genre?: string;
+    category?: string;
   };
 };
 

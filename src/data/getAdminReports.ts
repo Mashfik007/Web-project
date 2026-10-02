@@ -291,13 +291,15 @@ export async function getAdminReports(
         .select("createdAt")
         .lean<{ createdAt?: Date }[]>(),
       Book.find()
-        .select("title metadata.genre availability.current availability.total")
+        .select(
+          "title metadata.category availability.current availability.total",
+        )
         .sort({ "availability.current": 1, title: 1 })
         .limit(8)
         .lean<
           {
             title: string;
-            metadata?: { genre?: string };
+            metadata?: { category?: string };
             availability?: { current?: number; total?: number };
           }[]
         >(),
@@ -316,7 +318,8 @@ export async function getAdminReports(
       columns: ["Book", "Category", "On Shelf", "Total"],
       rows: stock.map((book) => ({
         primary: book.title,
-        secondary: book.metadata?.genre || "—",
+        secondary:
+          book.metadata?.category || "—",
         value: String(book.availability?.current ?? 0),
         extra: String(book.availability?.total ?? 0),
       })),
@@ -330,9 +333,13 @@ export async function getAdminReports(
     .lean<{ book: string; issueDate: string }[]>();
   const ranked = topCounts(returns.map((item) => ({ key: item.book })));
   const books = await Book.find({ title: { $in: ranked.map(([title]) => title) } })
-    .select("title rating.score metadata.genre")
+    .select("title rating.score metadata.category")
     .lean<
-      { title: string; rating?: { score?: number }; metadata?: { genre?: string } }[]
+      {
+        title: string;
+        rating?: { score?: number };
+        metadata?: { category?: string };
+      }[]
     >();
   const bookByTitle = new Map(books.map((book) => [book.title, book]));
 
@@ -352,7 +359,8 @@ export async function getAdminReports(
       const rating = book?.rating?.score;
       return {
         primary: title,
-        secondary: book?.metadata?.genre || "—",
+        secondary:
+          book?.metadata?.category || "—",
         value: String(borrows),
         extra: rating === undefined ? "—" : `★ ${rating}`,
       };

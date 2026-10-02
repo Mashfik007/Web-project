@@ -1,8 +1,8 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { Book } from "@/Model/Books";
 import type {
-  BorrowingHabitGenre,
-  ExploreGenre,
+  BorrowingHabitCategory,
+  ExploreCategory,
   ForYouData,
   RecommendedBook,
 } from "@/types/forYou";
@@ -17,7 +17,7 @@ type StoredBook = {
     score?: number;
   };
   metadata?: {
-    genre?: string;
+    category?: string;
   };
   matchScore?: {
     score?: number;
@@ -51,7 +51,7 @@ function matchPercent(book: StoredBook) {
 }
 
 function toRecommendedBook(book: StoredBook, isNew = false): RecommendedBook {
-  const genre = book.metadata?.genre?.trim() || "General";
+  const category = book.metadata?.category?.trim() || "General";
 
   return {
     id: book._id.toString(),
@@ -62,7 +62,7 @@ function toRecommendedBook(book: StoredBook, isNew = false): RecommendedBook {
       : "/svg/book.svg",
     rating: book.rating?.score ?? 0,
     matchPercent: matchPercent(book),
-    genre,
+    category,
     isNew,
   };
 }
@@ -83,30 +83,37 @@ export async function getForYouData(userId: string): Promise<ForYouData> {
 
   const counts = new Map<string, number>();
   for (const book of books) {
-    const genre = book.genre ?? "General";
-    counts.set(genre, (counts.get(genre) ?? 0) + 1);
+    const category = book.category ?? "General";
+    counts.set(category, (counts.get(category) ?? 0) + 1);
   }
 
   const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   const total = books.length || 1;
-  const habits: BorrowingHabitGenre[] = ranked.map(([genre, count], index) => ({
-    genre,
-    count,
-    percentage: Math.round((count / total) * 100),
-    color: colorAt(index).color,
-  }));
+  const habits: BorrowingHabitCategory[] = ranked.map(
+    ([category, count], index) => ({
+      category,
+      count,
+      percentage: Math.round((count / total) * 100),
+      color: colorAt(index).color,
+    }),
+  );
   const top = habits.slice(0, 2);
-  const topNames = new Set(top.map((genre) => genre.genre));
-  const inTopGenres = books.filter((book) => topNames.has(book.genre ?? ""));
-  const outside = books.filter((book) => !topNames.has(book.genre ?? ""));
-  const perfectMix = (inTopGenres.length > 0 ? inTopGenres : books).slice(0, 4);
+  const topNames = new Set(top.map((item) => item.category));
+  const inTopCategories = books.filter((book) =>
+    topNames.has(book.category ?? ""),
+  );
+  const outside = books.filter((book) => !topNames.has(book.category ?? ""));
+  const perfectMix = (inTopCategories.length > 0 ? inTopCategories : books).slice(
+    0,
+    4,
+  );
   const used = new Set(perfectMix.map((book) => book.id));
   const somethingNew = (outside.length > 0 ? outside : books)
     .filter((book) => !used.has(book.id))
     .slice(0, 4);
 
-  const left = top[0]?.genre ?? "Fiction";
-  const right = top[1]?.genre ?? left;
+  const left = top[0]?.category ?? "Fiction";
+  const right = top[1]?.category ?? left;
   const leftCount = top[0]?.count ?? 0;
   const rightCount = top[1]?.count ?? 0;
   const blend =
@@ -114,12 +121,14 @@ export async function getForYouData(userId: string): Promise<ForYouData> {
       ? 50
       : Math.round((leftCount / (leftCount + rightCount)) * 100);
 
-  const exploreGenres: ExploreGenre[] = ranked.map(([genre], index) => ({
-    id: genre.toLowerCase().replace(/\s+/g, "-"),
-    label: genre,
-    color: colorAt(index).color,
-    backgroundColor: colorAt(index).backgroundColor,
-  }));
+  const exploreCategories: ExploreCategory[] = ranked.map(
+    ([category], index) => ({
+      id: category.toLowerCase().replace(/\s+/g, "-"),
+      label: category,
+      color: colorAt(index).color,
+      backgroundColor: colorAt(index).backgroundColor,
+    }),
+  );
 
   return {
     header: {
@@ -127,24 +136,24 @@ export async function getForYouData(userId: string): Promise<ForYouData> {
       title: "Your",
       titleAccent: "Personalized Remix.",
       description: `Based on ${books.length} books in the catalog. These picks come from the titles stored in the library.`,
-      topGenres: top.map((genre, index) => ({
+      topCategories: top.map((item, index) => ({
         rank: index + 1,
-        genre: genre.genre,
-        percentage: genre.percentage,
-        color: genre.color,
+        category: item.category,
+        percentage: item.percentage,
+        color: item.color,
       })),
     },
     borrowingHabits: {
       totalBooks: books.length,
       months: 12,
-      genreCount: ranked.length,
-      genres: habits,
+      categoryCount: ranked.length,
+      categories: habits,
       blendSlider: {
         leftLabel: left,
         rightLabel: right,
         value: blend,
         balanceLabel: left === right ? left : "Catalog mix",
-        hint: "Shares follow the genres on the books in the library.",
+        hint: "Shares follow the categories on the books in the library.",
       },
     },
     sections: [
@@ -153,9 +162,9 @@ export async function getForYouData(userId: string): Promise<ForYouData> {
         title: "Perfect Mix",
         description:
           top.length > 1
-            ? `Books from ${left} and ${right} — the largest genres in the catalog`
+            ? `Books from ${left} and ${right} — the largest categories in the catalog`
             : `Books from ${left}`,
-        highlightGenres: top.map((genre) => genre.genre),
+        highlightCategories: top.map((item) => item.category),
         badge: "From the catalog",
         iconTheme: "blue",
         books: perfectMix,
@@ -163,12 +172,12 @@ export async function getForYouData(userId: string): Promise<ForYouData> {
       {
         id: "try-something-new",
         title: "Try Something New",
-        description: "More titles from the library, outside the top genres",
+        description: "More titles from the library, outside the top categories",
         iconTheme: "orange",
         books: somethingNew,
       },
     ],
-    exploreGenres,
+    exploreCategories,
     catalogHref: `/user/${userId}/browsebook`,
   };
 }

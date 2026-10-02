@@ -1,4 +1,5 @@
 import connectDB from "@/dbConfig/dbConfig";
+import { publishBorrowUpdate } from "@/Helper/publishBorrow";
 import { requireUserId } from "@/Helper/userFromToken";
 import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
@@ -92,6 +93,20 @@ export async function POST(request: Request) {
       userId,
       bookId,
       ownerId: targetId,
+    });
+
+    await publishBorrowUpdate({
+      id: saved._id.toString(),
+      action: "created",
+      scope: "peer",
+      status: "Pending",
+      userId,
+      ownerId: targetId,
+      member: String(saved.member),
+      book: String(saved.book),
+      bookId,
+      requested: String(saved.requested),
+      expectedReturn: String(saved.expectedReturn),
     });
 
     return new Response(

@@ -6,10 +6,11 @@ import AppDrawer, {
   drawerItemClass,
 } from "@/Components/Sidebar/AppDrawer/AppDrawer";
 import { logout } from "@/Controller/users.controller";
+import { getChatSocket } from "@/lib/chatSocket";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 const DRAWER_ID = "admin-drawer";
 const iconClass =
@@ -150,6 +151,31 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
   const router = useRouter();
   const adminId = params.id as string;
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  useEffect(() => {
+    const socket = getChatSocket();
+
+    function syncRooms() {
+      socket.emit("rooms:sync");
+    }
+
+    function onBorrowUpdate(update: { scope?: string; action?: string }) {
+      if (update?.scope !== "library") return;
+      // Keep admin lists in sync as soon as a member submits a request.
+      router.refresh();
+    }
+
+    socket.on("connect", syncRooms);
+    socket.on("borrow:update", onBorrowUpdate);
+    if (socket.connected) syncRooms();
+
+    return () => {
+      socket.off("connect", syncRooms);
+      socket.off("borrow:update", onBorrowUpdate);
+    };
+    // router.refresh identity is stable enough for this live subscription.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const dashboardHref = adminHref(adminId);
   const isDashboard = pathname === dashboardHref;

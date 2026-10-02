@@ -16,7 +16,7 @@ type BookRecord = {
   };
   metadata?: {
     published?: number;
-    genre?: string;
+    category?: string;
   };
 };
 
@@ -50,7 +50,7 @@ function toBrowseBook(book: BookRecord): BrowseBook {
     format: "PHYSICAL",
     availability,
     image: book.coverImage ? `/api/uploads/${book.coverImage}` : "/svg/book.svg",
-    genre: book.metadata?.genre ?? "",
+    category: book.metadata?.category ?? "",
   };
 }
 
@@ -70,7 +70,7 @@ function toDigitalBrowseBook(resource: DigitalRecord): BrowseBook {
     format: "DIGITAL",
     availability: "Available",
     image: "/svg/book.svg",
-    genre: resource.category,
+    category: resource.category,
     fileId: resource.fileId,
     digitalFormat: resource.format,
     sizeLabel: formatFileSize(resource.size ?? 0),

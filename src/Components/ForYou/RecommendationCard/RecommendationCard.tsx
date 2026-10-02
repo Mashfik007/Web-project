@@ -100,9 +100,9 @@ export default function RecommendationCard({
           </span>
 
           <div className="flex items-center gap-2">
-            {book.genre && (
+            {book.category && (
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-medium text-slate-600">
-                {book.genre}
+                {book.category}
               </span>
             )}
             <button
