@@ -144,68 +144,19 @@ async function assertConversation(userId: string, conversationId: string) {
   if (!peer || peer.isAdmin) throw new Error("Conversation not found");
 }
 
-export async function startChatSocket() {
-  const globalState = globalThis as typeof globalThis & {
-    __chatHttp?: ReturnType<typeof createServer>;
-    __chatIo?: Server;
-  };
-  if (globalState.__chatHttp) {
-    await new Promise<void>((resolve) => {
-      globalState.__chatIo?.close();
-      globalState.__chatHttp?.close(() => resolve());
-    });
-  }
+type ChatGlobal = typeof globalThis & {
+  __chatHttp?: ReturnType<typeof createServer>;
+  __chatIo?: Server;
+  __attachChatSocket?: (httpServer: ReturnType<typeof createServer>) => Promise<Server>;
+};
 
+async function ensureMongo() {
   if (mongoose.connection.readyState !== 1) {
     await mongoose.connect(process.env.MONGODB_URL!);
   }
+}
 
-  const httpServer = createServer((req, res) => {
-    const url = req.url || "";
-    if (req.method === "POST" && url.startsWith("/internal/notice")) {
-      const chunks: Buffer[] = [];
-      req.on("data", (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
-      req.on("end", () => {
-        if (req.headers["x-notice-key"] !== process.env.SECRET_ACCESS_TOKEN) {
-          res.writeHead(401);
-          res.end();
-          return;
-        }
-
-        try {
-          const notice = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-          if (!notice.id || !notice.title || !notice.message) {
-            res.writeHead(400);
-            res.end();
-            return;
-          }
-
-          io.emit("notice:new", {
-            id: notice.id,
-            title: notice.title,
-            message: notice.message,
-            createdAt: notice.createdAt,
-          });
-          res.writeHead(204);
-          res.end();
-        } catch {
-          res.writeHead(400);
-          res.end();
-        }
-      });
-      return;
-    }
-    if (!url.startsWith("/socket.io")) {
-      res.writeHead(404);
-      res.end();
-    }
-  });
-  const io = new Server(httpServer, {
-    cors: { origin: true, credentials: true },
-  });
-
+function bindChatHandlers(io: Server) {
   io.use((socket, nextSocket) => {
     try {
       const headerToken = socket.handshake.auth?.token;
@@ -306,6 +257,52 @@ export async function startChatSocket() {
       }
     });
   });
+}
+
+/** Attach Socket.IO to an existing HTTP server (production / Railway). */
+export async function attachChatSocket(httpServer: ReturnType<typeof createServer>) {
+  const globalState = globalThis as ChatGlobal;
+  if (globalState.__chatIo) {
+    await new Promise<void>((resolve) => {
+      globalState.__chatIo?.close(() => resolve());
+    });
+  }
+
+  await ensureMongo();
+
+  const io = new Server(httpServer, {
+    cors: { origin: true, credentials: true },
+    path: "/socket.io",
+  });
+  bindChatHandlers(io);
+  globalState.__chatIo = io;
+  console.log("> Chat socket attached to main HTTP server");
+  return io;
+}
+
+/** Standalone Socket.IO on CHAT_SOCKET_PORT (local `next dev`). */
+export async function startChatSocket() {
+  const globalState = globalThis as ChatGlobal;
+  if (globalState.__chatHttp) {
+    await new Promise<void>((resolve) => {
+      globalState.__chatIo?.close();
+      globalState.__chatHttp?.close(() => resolve());
+    });
+  }
+
+  await ensureMongo();
+
+  const httpServer = createServer((req, res) => {
+    const url = req.url || "";
+    if (!url.startsWith("/socket.io")) {
+      res.writeHead(404);
+      res.end();
+    }
+  });
+  const io = new Server(httpServer, {
+    cors: { origin: true, credentials: true },
+  });
+  bindChatHandlers(io);
 
   const port = Number(process.env.CHAT_SOCKET_PORT || 3001);
   globalState.__chatHttp = httpServer;

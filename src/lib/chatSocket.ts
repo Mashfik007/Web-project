@@ -5,9 +5,15 @@ import { io, type Socket } from "socket.io-client";
 let socket: Socket | null = null;
 
 function socketUrl() {
-  const protocol = window.location.protocol;
-  const host = window.location.hostname;
-  return `${protocol}//${host}:3001`;
+  if (process.env.NEXT_PUBLIC_CHAT_SOCKET_URL) {
+    return process.env.NEXT_PUBLIC_CHAT_SOCKET_URL;
+  }
+  // Local `next dev` runs Socket.IO on a separate port via instrumentation.
+  if (process.env.NODE_ENV === "development") {
+    return `${window.location.protocol}//${window.location.hostname}:3001`;
+  }
+  // Production (Railway): Socket.IO shares the Next.js HTTP server — same origin.
+  return window.location.origin;
 }
 
 export function getChatSocket() {
@@ -15,6 +21,7 @@ export function getChatSocket() {
     socket = io(socketUrl(), {
       autoConnect: false,
       withCredentials: true,
+      path: "/socket.io",
     });
     void openChatSocket(socket);
   }
