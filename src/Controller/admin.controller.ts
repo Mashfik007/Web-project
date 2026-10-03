@@ -328,6 +328,27 @@ export async function sendNotification(notice: { title: string; message: string 
     return postCategory("/api/admin/send-notification", notice);
 }
 
+export async function draftNotification(prompt: string): Promise<
+    ServerResult & { draft?: { title: string; message: string } }
+> {
+    try {
+        const res = await fetch("/api/admin/draft-notification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+        });
+        const data = await res.json();
+        return {
+            ok: res.ok,
+            message: data.message || (res.ok ? "Draft ready" : "Request failed"),
+            draft: data.data ?? undefined,
+        };
+    } catch (error) {
+        console.error(error);
+        return { ok: false, message: "Could not reach the server." };
+    }
+}
+
 export async function addDigitalResource(
     resource: DigitalResourceData,
     file: File,
