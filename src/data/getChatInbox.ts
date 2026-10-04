@@ -1,8 +1,8 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { unreadByConversation } from "@/data/getUnreadChatCount";
 import { COMMUNITY_CHAT_ID, directChatId, groupChatId } from "@/Helper/chat";
+import { acceptedFriendIds } from "@/Helper/friends";
 import { CommunityGroup } from "@/Model/CommunityGroups";
-import { FriendRequest } from "@/Model/FriendRequests";
 import { GroupMember } from "@/Model/GroupMembers";
 import { Message } from "@/Model/Messages";
 import { User } from "@/Model/Users";
@@ -36,48 +36,50 @@ type Account = { _id: { toString(): string }; name: string };
 export async function getChatInbox(userId: string): Promise<ChatInbox> {
   await connectDB();
 
-  const [viewer, accounts, friendRows, createdGroups, memberships] = await Promise.all([
-    User.findById(userId).select("name").lean<{ name?: string } | null>(),
-    User.find({ isAdmin: { $ne: true }, _id: { $ne: userId } })
-      .select("name")
-      .sort({ name: 1 })
-      .lean<Account[]>(),
-    FriendRequest.find({
-      status: "accepted",
-      $or: [{ fromId: userId }, { toId: userId }],
-    }).lean<{ fromId: string; toId: string }[]>(),
-    CommunityGroup.find()
-      .select("name description")
-      .sort({ createdAt: 1 })
-      .lean<{ _id: { toString(): string }; name: string; description?: string }[]>(),
-    GroupMember.find({ userId }).select("groupId").lean<{ groupId: string }[]>(),
-  ]);
+  const friendIds = await acceptedFriendIds(userId);
 
-  const friendIds = new Set(
-    friendRows.map((row) => (row.fromId === userId ? row.toId : row.fromId)),
-  );
+  const [viewer, friends, memberTotal, createdGroups, memberships] =
+    await Promise.all([
+      User.findById(userId).select("name").lean<{ name?: string } | null>(),
+      friendIds.length > 0
+        ? User.find({
+            _id: { $in: friendIds },
+            isAdmin: { $ne: true },
+          })
+            .select("name")
+            .sort({ name: 1 })
+            .lean<Account[]>()
+        : Promise.resolve([] as Account[]),
+      User.countDocuments({ isAdmin: { $ne: true } }),
+      CommunityGroup.find()
+        .select("name description")
+        .sort({ createdAt: 1 })
+        .lean<{ _id: { toString(): string }; name: string; description?: string }[]>(),
+      GroupMember.find({ userId }).select("groupId").lean<{ groupId: string }[]>(),
+    ]);
 
-  const directs: ChatPreview[] = accounts.map((account) => {
+  const directs: ChatPreview[] = friends.map((account) => {
     const id = account._id.toString();
     const name = account.name?.trim() || "Reader";
     return {
       conversationId: directChatId(userId, id),
-      kind: "direct",
+      kind: "direct" as const,
       title: name,
-      subtitle: friendIds.has(id) ? "Friend" : "Member",
+      subtitle: "Friend",
       initials: initials(name),
       avatarColor: colorFor(name),
       peerId: id,
-      isFriend: friendIds.has(id),
+      isFriend: true,
       lastBody: "",
       lastAt: null,
       unread: 0,
     };
   });
 
-  const memberCount = accounts.length + 1;
   const joinedIds = new Set(memberships.map((row) => row.groupId));
-  const joinedGroups = createdGroups.filter((group) => joinedIds.has(group._id.toString()));
+  const joinedGroups = createdGroups.filter((group) =>
+    joinedIds.has(group._id.toString()),
+  );
   const joinedGroupIds = joinedGroups.map((group) => group._id.toString());
   const memberTotals = new Map<string, number>();
   if (joinedGroupIds.length > 0) {
@@ -93,7 +95,7 @@ export async function getChatInbox(userId: string): Promise<ChatInbox> {
       conversationId: COMMUNITY_CHAT_ID,
       kind: "group",
       title: "Readers Community",
-      subtitle: `${memberCount} members`,
+      subtitle: `${memberTotal} members`,
       initials: "RC",
       avatarColor: "bg-sky-600",
       isFriend: false,
@@ -154,7 +156,6 @@ export async function getChatInbox(userId: string): Promise<ChatInbox> {
   }
 
   const withPreview = directs.map(applyPreview).sort((a, b) => {
-    if (a.isFriend !== b.isFriend) return a.isFriend ? -1 : 1;
     const aTime = a.lastAt ? new Date(a.lastAt).getTime() : 0;
     const bTime = b.lastAt ? new Date(b.lastAt).getTime() : 0;
     if (aTime !== bTime) return bTime - aTime;

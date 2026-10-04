@@ -1,23 +1,21 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { COMMUNITY_CHAT_ID, directChatId, groupChatId } from "@/Helper/chat";
+import { acceptedFriendIds } from "@/Helper/friends";
 import { ChatRead } from "@/Model/ChatReads";
 import { GroupMember } from "@/Model/GroupMembers";
 import { Message } from "@/Model/Messages";
-import { User } from "@/Model/Users";
 
 export async function conversationIdsFor(userId: string) {
   await connectDB();
-  const [memberships, peers] = await Promise.all([
+  const [memberships, friendIds] = await Promise.all([
     GroupMember.find({ userId }).select("groupId").lean<{ groupId: string }[]>(),
-    User.find({ isAdmin: { $ne: true }, _id: { $ne: userId } })
-      .select("_id")
-      .lean<{ _id: { toString(): string } }[]>(),
+    acceptedFriendIds(userId),
   ]);
 
   return [
     COMMUNITY_CHAT_ID,
     ...memberships.map((row) => groupChatId(row.groupId)),
-    ...peers.map((peer) => directChatId(userId, peer._id.toString())),
+    ...friendIds.map((peerId) => directChatId(userId, peerId)),
   ];
 }
 

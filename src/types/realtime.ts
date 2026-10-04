@@ -1,4 +1,9 @@
-export type FriendUpdateAction = "request" | "accept" | "decline" | "cancel";
+export type FriendUpdateAction =
+  | "request"
+  | "accept"
+  | "decline"
+  | "cancel"
+  | "unfriend";
 
 export type FriendUpdatePayload = {
   action: FriendUpdateAction;

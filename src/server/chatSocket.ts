@@ -1,5 +1,6 @@
 import { createServer } from "http";
 import { COMMUNITY_CHAT_ID } from "@/Helper/chat";
+import { acceptedFriendIds, areFriends } from "@/Helper/friends";
 import {
   ADMIN_OPS_ROOM,
   CATALOG_ROOM,
@@ -119,16 +120,8 @@ async function joinUserRooms(
   }
 
   if (!isAdmin && mongoose.Types.ObjectId.isValid(userId)) {
-    const peers = await mongoose.connection
-      .collection("users")
-      .find({
-        isAdmin: { $ne: true },
-        _id: { $ne: new mongoose.Types.ObjectId(userId) },
-      })
-      .project({ _id: 1 })
-      .toArray();
-    for (const peer of peers) {
-      const id = String(peer._id);
+    const peerIds = await acceptedFriendIds(userId);
+    for (const id of peerIds) {
       const [left, right] = [userId, id].sort();
       rooms.push(`dm:${left}:${right}`);
     }
@@ -160,6 +153,9 @@ async function assertConversation(userId: string, conversationId: string) {
     { projection: { isAdmin: 1 } },
   );
   if (!peer || peer.isAdmin) throw new Error("Conversation not found");
+  if (!(await areFriends(userId, peerId))) {
+    throw new Error("Add this member as a friend to message them");
+  }
 }
 
 type ChatGlobal = typeof globalThis & {

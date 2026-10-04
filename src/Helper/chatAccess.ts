@@ -1,4 +1,5 @@
 import { COMMUNITY_CHAT_ID, communityGroupId, peerFromDirectChat } from "@/Helper/chat";
+import { areFriends } from "@/Helper/friends";
 import { CommunityGroup } from "@/Model/CommunityGroups";
 import { GroupMember } from "@/Model/GroupMembers";
 import { User } from "@/Model/Users";
@@ -19,5 +20,6 @@ export async function userCanAccessConversation(userId: string, conversationId: 
   const peerId = peerFromDirectChat(conversationId, userId);
   if (!peerId || !mongoose.Types.ObjectId.isValid(peerId)) return false;
   const peer = await User.findById(peerId).select("isAdmin").lean<{ isAdmin?: boolean } | null>();
-  return Boolean(peer && !peer.isAdmin);
+  if (!peer || peer.isAdmin) return false;
+  return areFriends(userId, peerId);
 }

@@ -25,7 +25,13 @@ function statusFromUpdate(
   if (!involvesMember) return null;
 
   if (update.action === "accept") return "friends";
-  if (update.action === "decline" || update.action === "cancel") return "none";
+  if (
+    update.action === "decline" ||
+    update.action === "cancel" ||
+    update.action === "unfriend"
+  ) {
+    return "none";
+  }
   if (update.action === "request") {
     return update.fromId === viewerId ? "outgoing" : "incoming";
   }
@@ -105,6 +111,8 @@ export default function MemberCard({ viewerId, member }: MemberCardProps) {
         feedback.failed("Friend request", `${update.actorName} declined your friend request.`);
       } else if (update.action === "cancel" && update.toId === viewerId) {
         feedback.failed("Friend request", `${update.actorName} cancelled their friend request.`);
+      } else if (update.action === "unfriend") {
+        feedback.failed("Friends", `${update.actorName} removed you as a friend.`);
       }
     }
 
@@ -139,7 +147,9 @@ export default function MemberCard({ viewerId, member }: MemberCardProps) {
     }
   }
 
-  async function send(action: "request" | "accept" | "decline" | "cancel") {
+  async function send(
+    action: "request" | "accept" | "decline" | "cancel" | "unfriend",
+  ) {
     setBusy(true);
     try {
       const response = await fetch("/api/users/community/friend", {
@@ -220,13 +230,23 @@ export default function MemberCard({ viewerId, member }: MemberCardProps) {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
-        <Link href={`/user/${viewerId}/chat?with=${member.id}`} className="btn btn-ghost btn-xs">
-          Message
-        </Link>
         {status === "friends" && (
-          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
-            Friends
-          </span>
+          <>
+            <Link
+              href={`/user/${viewerId}/chat?with=${member.id}`}
+              className="btn btn-ghost btn-xs"
+            >
+              Message
+            </Link>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => send("unfriend")}
+              className="btn btn-ghost btn-xs text-rose-600"
+            >
+              Unfriend
+            </button>
+          </>
         )}
         {status === "none" && (
           <button

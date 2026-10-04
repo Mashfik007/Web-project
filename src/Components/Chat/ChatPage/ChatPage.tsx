@@ -4,6 +4,7 @@ import { getChatSocket } from "@/lib/chatSocket";
 import { markConversationRead, setViewingConversation } from "@/lib/chatUnread";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChatInbox, ChatMessage, ChatPreview, LiveChatMessage } from "@/types/chat";
+import type { FriendUpdatePayload } from "@/types/realtime";
 
 interface ChatPageProps {
   inbox: ChatInbox;
@@ -61,6 +62,11 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
   }, []);
 
   useEffect(() => {
+    setGroups(inbox.groups);
+    setDirects(inbox.directs);
+  }, [inbox]);
+
+  useEffect(() => {
     if (!selectedId) return;
     const patch = (item: ChatPreview) =>
       item.conversationId === selectedId ? { ...item, unread: 0 } : item;
@@ -68,6 +74,43 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
     setDirects((list) => list.map(patch));
     void markConversationRead(selectedId);
   }, [selectedId]);
+
+  useEffect(() => {
+    const socket = getChatSocket();
+
+    function onFriendUpdate(update: FriendUpdatePayload) {
+      if (update?.action !== "unfriend") return;
+      const peerId =
+        update.fromId === inbox.viewerId
+          ? update.toId
+          : update.toId === inbox.viewerId
+            ? update.fromId
+            : null;
+      if (!peerId) return;
+
+      setDirects((list) => {
+        const next = list.filter((item) => item.peerId !== peerId);
+        const stillOpen = next.some(
+          (item) => item.conversationId === selectedIdRef.current,
+        );
+        if (!stillOpen) {
+          const fallback = next[0] ?? inbox.groups[0];
+          if (fallback) {
+            setSelectedId(fallback.conversationId);
+            setChannel(fallback.kind === "direct" ? "direct" : "group");
+          } else {
+            setSelectedId("");
+          }
+        }
+        return next;
+      });
+    }
+
+    socket.on("friend:update", onFriendUpdate);
+    return () => {
+      socket.off("friend:update", onFriendUpdate);
+    };
+  }, [inbox.viewerId, inbox.groups]);
 
   useEffect(() => {
     if (!selectedId) return;

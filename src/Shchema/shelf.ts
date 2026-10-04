@@ -18,7 +18,7 @@ export const FollowAction_schema = ShelfUser_schema.extend({
 
 export const FriendAction_schema = ShelfUser_schema.extend({
   targetId: z.string().min(1, "member is required"),
-  action: z.enum(["request", "accept", "decline", "cancel"]),
+  action: z.enum(["request", "accept", "decline", "cancel", "unfriend"]),
 });
 
 export const PeerBorrow_schema = z.object({

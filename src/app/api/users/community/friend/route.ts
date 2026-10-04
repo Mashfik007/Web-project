@@ -154,6 +154,34 @@ export async function POST(request: Request) {
       );
     }
 
+    if (action === "unfriend") {
+      const friends =
+        outgoing?.status === "accepted" || incoming?.status === "accepted";
+      if (!friends) {
+        return new Response(
+          JSON.stringify(new ApiError(404, "You are not friends with this member")),
+          { status: 404, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      await FriendRequest.deleteMany({
+        $or: [
+          { fromId: userId, toId: targetId },
+          { fromId: targetId, toId: userId },
+        ],
+      });
+      await publishFriendUpdate({
+        action: "unfriend",
+        fromId: userId,
+        toId: targetId,
+        actorId: userId,
+        actorName,
+      });
+      return new Response(
+        JSON.stringify(new ApiResponce(200, { friendStatus: "none" }, "Removed from friends")),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     if (!outgoing || outgoing.status !== "pending") {
       return new Response(
         JSON.stringify(new ApiError(404, "No outgoing friend request")),
