@@ -31,7 +31,27 @@ const Order_schema = new mongoose.Schema(
     address: { type: String, required: true, trim: true },
     city: { type: String, required: true, trim: true },
     paymentMethod: { type: String, required: true, trim: true },
-    transactionId: { type: String, required: true, trim: true },
+    methodId: {
+      type: String,
+      enum: ["bkash", "rocket"],
+      default: null,
+    },
+    transactionId: { type: String, required: true, trim: true, uppercase: true },
+    paymentPhone: { type: String, default: "", trim: true },
+    paymentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "payments",
+      default: null,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "verified", "rejected"],
+      default: "pending",
+    },
+    paymentVerifiedAt: {
+      type: Date,
+      default: null,
+    },
     status: {
       type: String,
       enum: ["processing", "in-transit", "delivered"],
@@ -40,6 +60,8 @@ const Order_schema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+Order_schema.index({ transactionId: 1 }, { unique: true });
 
 const Order = mongoose.models.orders || mongoose.model("orders", Order_schema);
 

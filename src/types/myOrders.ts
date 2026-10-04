@@ -1,5 +1,7 @@
 export type OrderStatus = "processing" | "in-transit" | "delivered";
 
+export type PaymentStatus = "pending" | "verified" | "rejected";
+
 export type OrderStep = "order-placed" | "processing" | "in-transit" | "delivered";
 
 export type OrderFilter = {
@@ -39,6 +41,12 @@ export type Order = {
   item: OrderItem;
   deliveryAddress: string;
   agent: DeliveryAgent;
+  payment: {
+    method: string;
+    transactionId: string;
+    phone: string;
+    status: PaymentStatus;
+  };
 };
 
 export type MyOrdersData = {
@@ -59,4 +67,10 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   processing: "Processing",
   "in-transit": "In Transit",
   delivered: "Delivered",
+};
+
+export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
+  pending: "Payment Pending",
+  verified: "Payment Verified",
+  rejected: "Payment Rejected",
 };

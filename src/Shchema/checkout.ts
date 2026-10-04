@@ -22,17 +22,28 @@ export const deliveryFormSchema = z.object({
     .max(10, "Quantity cannot exceed 10"),
 });
 
-export const paymentFormSchema = z.object({
+export const paymentMethodSchema = z.object({
   methodId: z.enum(["bkash", "rocket"], {
     message: "Select a payment method",
   }),
+});
+
+export const confirmPaymentSchema = z.object({
   transactionId: z
     .string()
     .min(6, "Transaction ID must be at least 6 characters")
     .max(20, "Transaction ID is too long")
-    .regex(/^[A-Za-z0-9]+$/, "Transaction ID can only contain letters and numbers"),
+    .regex(
+      /^[A-Za-z0-9]+$/,
+      "Transaction ID can only contain letters and numbers",
+    ),
   paymentPhone: bdPhoneSchema,
 });
 
+/** @deprecated Use paymentMethodSchema + confirmPaymentSchema */
+export const paymentFormSchema = paymentMethodSchema.merge(confirmPaymentSchema);
+
 export type DeliveryFormValues = z.infer<typeof deliveryFormSchema>;
+export type PaymentMethodValues = z.infer<typeof paymentMethodSchema>;
+export type ConfirmPaymentValues = z.infer<typeof confirmPaymentSchema>;
 export type PaymentFormValues = z.infer<typeof paymentFormSchema>;

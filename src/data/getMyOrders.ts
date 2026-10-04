@@ -14,6 +14,9 @@ type StoredOrder = {
   address: string;
   city: string;
   paymentMethod: string;
+  transactionId?: string;
+  paymentPhone?: string;
+  paymentStatus?: "pending" | "verified" | "rejected";
   status: OrderStatus;
   createdAt?: Date;
 };
@@ -64,6 +67,12 @@ export async function getMyOrders(userId: string): Promise<MyOrdersData> {
         avatarColor: "bg-sky-100 text-sky-700",
         rating: 5,
         phone: "01700000000",
+      },
+      payment: {
+        method: order.paymentMethod,
+        transactionId: order.transactionId || "—",
+        phone: order.paymentPhone || "—",
+        status: order.paymentStatus || "pending",
       },
     };
   });

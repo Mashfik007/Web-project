@@ -5,6 +5,7 @@ const emailTypes = new Set<FolioEmailType>([
   "welcome",
   "account_suspended",
   "borrow_cancelled",
+  "payment_verification",
 ]);
 
 export async function POST(request: Request) {
@@ -21,6 +22,15 @@ export async function POST(request: Request) {
       type,
       bookTitle: body.bookTitle ? String(body.bookTitle) : undefined,
       reason: body.reason ? String(body.reason) : undefined,
+      transactionId: body.transactionId
+        ? String(body.transactionId)
+        : undefined,
+      orderNumber: body.orderNumber ? String(body.orderNumber) : undefined,
+      amount: body.amount ? String(body.amount) : undefined,
+      paymentMethod: body.paymentMethod
+        ? String(body.paymentMethod)
+        : undefined,
+      paymentPhone: body.paymentPhone ? String(body.paymentPhone) : undefined,
     });
 
     if (!result.ok) {

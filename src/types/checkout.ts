@@ -53,7 +53,13 @@ export type CheckoutData = {
 };
 
 export type DeliveryFormData = import("@/Shchema/checkout").DeliveryFormValues;
+export type PaymentMethodFormData =
+  import("@/Shchema/checkout").PaymentMethodValues;
+export type ConfirmPaymentFormData =
+  import("@/Shchema/checkout").ConfirmPaymentValues;
 export type PaymentFormData = import("@/Shchema/checkout").PaymentFormValues;
+
+export type PaymentStatus = "pending" | "verified" | "rejected";
 
 export type PlacedOrder = {
   orderId: string;
@@ -61,6 +67,10 @@ export type PlacedOrder = {
   totalPaid: number;
   currency: string;
   paymentMethod: string;
+  transactionId: string;
+  paymentStatus: PaymentStatus;
+  emailSent: boolean;
+  verificationEmail: string;
 };
 
 export const CHECKOUT_STEPS: { id: CheckoutStep; label: string }[] = [

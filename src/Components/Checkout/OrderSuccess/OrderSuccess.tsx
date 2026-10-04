@@ -31,7 +31,9 @@ export default function OrderSuccess({
             Order Placed!
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Your order has been confirmed and is being processed.
+            {order.emailSent
+              ? "Your Transaction ID was sent to your email for payment verification."
+              : "Your order was saved. Payment verification email could not be sent yet."}
           </p>
         </div>
 
@@ -59,6 +61,38 @@ export default function OrderSuccess({
             <span className="text-sky-600">Payment</span>
             <span className="font-semibold text-slate-800">
               {order.paymentMethod}
+            </span>
+          </div>
+          <div className="flex justify-between gap-4 py-2">
+            <span className="text-sky-600">Txn ID</span>
+            <span className="font-mono font-semibold text-slate-800">
+              {order.transactionId}
+            </span>
+          </div>
+          {order.verificationEmail ? (
+            <div className="flex justify-between gap-4 py-2">
+              <span className="text-sky-600">Email</span>
+              <span className="truncate font-semibold text-slate-800">
+                {order.verificationEmail}
+              </span>
+            </div>
+          ) : null}
+          <div className="flex justify-between gap-4 py-2">
+            <span className="text-sky-600">Payment Status</span>
+            <span
+              className={`font-semibold ${
+                order.paymentStatus === "verified"
+                  ? "text-emerald-600"
+                  : order.paymentStatus === "rejected"
+                    ? "text-red-600"
+                    : "text-amber-600"
+              }`}
+            >
+              {order.paymentStatus === "verified"
+                ? "Verified by email"
+                : order.paymentStatus === "rejected"
+                  ? "Rejected"
+                  : "Pending email"}
             </span>
           </div>
         </div>

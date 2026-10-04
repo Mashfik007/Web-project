@@ -3,6 +3,7 @@
 import { useState } from "react";
 import CheckoutHeader from "../CheckoutHeader/CheckoutHeader";
 import CheckoutStepper from "../CheckoutStepper/CheckoutStepper";
+import ConfirmPaymentForm from "../ConfirmPaymentForm/ConfirmPaymentForm";
 import DeliveryForm from "../DeliveryForm/DeliveryForm";
 import EstimatedDelivery from "../EstimatedDelivery/EstimatedDelivery";
 import OrderSuccess, { generateOrderId } from "../OrderSuccess/OrderSuccess";
@@ -13,8 +14,9 @@ import PaymentForm from "../PaymentForm/PaymentForm";
 import type {
   CheckoutData,
   CheckoutStep,
+  ConfirmPaymentFormData,
   DeliveryFormData,
-  PaymentFormData,
+  PaymentMethodFormData,
   PlacedOrder,
 } from "@/types/checkout";
 
@@ -26,6 +28,7 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
   const [step, setStep] = useState<CheckoutStep>("details");
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
   const [summaryQuantity, setSummaryQuantity] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
 
   const [deliveryForm, setDeliveryForm] = useState<DeliveryFormData>({
     fullName: "",
@@ -35,8 +38,11 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
     quantity: 1,
   });
 
-  const [paymentForm, setPaymentForm] = useState<PaymentFormData>({
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodFormData>({
     methodId: checkout.paymentMethods[0]?.id ?? "bkash",
+  });
+
+  const [confirmForm, setConfirmForm] = useState<ConfirmPaymentFormData>({
     transactionId: "",
     paymentPhone: "",
   });
@@ -45,56 +51,78 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
   const orderQuantity =
     step === "details" ? summaryQuantity : deliveryForm.quantity;
 
+  const selectedMethod = checkout.paymentMethods.find(
+    (method) => method.id === paymentMethod.methodId,
+  );
+
+  const amount = calculateCheckoutTotal(
+    checkout.book,
+    checkout.pricing,
+    deliveryForm.quantity,
+  );
+
   function handleDeliverySubmit(data: DeliveryFormData) {
     setDeliveryForm(data);
     setSummaryQuantity(data.quantity);
     setStep("payment");
   }
 
-  async function handlePaymentSubmit(data: PaymentFormData) {
-    setPaymentForm(data);
+  function handlePaymentConfirm(data: PaymentMethodFormData) {
+    setPaymentMethod(data);
     setOrderError("");
-
-    const paymentMethod =
-      checkout.paymentMethods.find((method) => method.id === data.methodId)
-        ?.name ?? data.methodId;
-
-    const response = await fetch("/api/users/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: checkout.userId,
-        bookId: String(checkout.book.id),
-        quantity: deliveryForm.quantity,
-        fullName: deliveryForm.fullName,
-        phone: deliveryForm.phone,
-        address: deliveryForm.address,
-        city: deliveryForm.city,
-        paymentMethod,
-        transactionId: data.transactionId,
-      }),
-    });
-    const payload = await response.json();
-    if (!response.ok) {
-      setOrderError(payload.message || "Could not place the order");
-      return;
-    }
-
-    setPlacedOrder({
-      orderId: payload.data?.orderNumber || generateOrderId(),
-      bookTitle: checkout.book.title,
-      totalPaid: calculateCheckoutTotal(
-        checkout.book,
-        checkout.pricing,
-        deliveryForm.quantity,
-      ),
-      currency: checkout.pricing.currency,
-      paymentMethod: paymentMethod.toLowerCase(),
-    });
     setStep("confirm");
   }
 
-  if (step === "confirm" && placedOrder) {
+  async function handlePurchaseConfirm(data: ConfirmPaymentFormData) {
+    setConfirmForm(data);
+    setOrderError("");
+    setSubmitting(true);
+
+    const methodName = selectedMethod?.name ?? paymentMethod.methodId;
+
+    try {
+      const response = await fetch("/api/users/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: checkout.userId,
+          bookId: String(checkout.book.id),
+          quantity: deliveryForm.quantity,
+          fullName: deliveryForm.fullName,
+          phone: deliveryForm.phone,
+          address: deliveryForm.address,
+          city: deliveryForm.city,
+          methodId: paymentMethod.methodId,
+          paymentMethodName: methodName,
+          transactionId: data.transactionId,
+          paymentPhone: data.paymentPhone,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        setOrderError(payload.message || "Could not place the order");
+        return;
+      }
+
+      setPlacedOrder({
+        orderId: payload.data?.orderNumber || generateOrderId(),
+        bookTitle: checkout.book.title,
+        totalPaid: payload.data?.total ?? amount,
+        currency: payload.data?.currency ?? checkout.pricing.currency,
+        paymentMethod: methodName.toLowerCase(),
+        transactionId:
+          payload.data?.transactionId || data.transactionId.toUpperCase(),
+        paymentStatus: payload.data?.paymentStatus || "pending",
+        emailSent: Boolean(payload.data?.emailSent),
+        verificationEmail:
+          payload.data?.verificationEmail || checkout.payer.email || "",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (placedOrder) {
     return (
       <main className="min-h-screen w-full bg-slate-50">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-center px-4 py-16">
@@ -135,22 +163,29 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
                 paymentMethods={checkout.paymentMethods}
                 payer={checkout.payer}
                 bookTitle={checkout.book.title}
-                amount={calculateCheckoutTotal(
-                  checkout.book,
-                  checkout.pricing,
-                  deliveryForm.quantity,
-                )}
+                amount={amount}
                 currency={checkout.pricing.currency}
-                defaultValues={paymentForm}
+                defaultValues={paymentMethod}
                 onBack={() => setStep("details")}
+                onSubmit={handlePaymentConfirm}
+              />
+            )}
+
+            {step === "confirm" && (
+              <ConfirmPaymentForm
+                bookTitle={checkout.book.title}
+                amount={amount}
+                currency={checkout.pricing.currency}
+                selectedMethod={selectedMethod}
+                defaultValues={confirmForm}
+                submitting={submitting}
+                error={orderError}
+                onBack={() => setStep("payment")}
                 onSubmit={(data) => {
-                  void handlePaymentSubmit(data);
+                  void handlePurchaseConfirm(data);
                 }}
               />
             )}
-            {orderError ? (
-              <p className="text-sm text-red-600">{orderError}</p>
-            ) : null}
           </div>
 
           <aside className="space-y-4">

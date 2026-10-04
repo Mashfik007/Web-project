@@ -36,6 +36,12 @@ export const fakeMyOrdersData: MyOrdersData = {
         rating: 4.6,
         phone: "01887654321",
       },
+      payment: {
+        method: "Rocket",
+        transactionId: "RKT7B2D3F9",
+        phone: "01887654321",
+        status: "verified",
+      },
     },
     {
       id: "2",
@@ -60,6 +66,12 @@ export const fakeMyOrdersData: MyOrdersData = {
         avatarColor: "bg-info text-info-content",
         rating: 4.8,
         phone: "01711223344",
+      },
+      payment: {
+        method: "bKash",
+        transactionId: "BA7B2D3F9K",
+        phone: "01711223344",
+        status: "pending",
       },
     },
     {
@@ -86,6 +98,12 @@ export const fakeMyOrdersData: MyOrdersData = {
         rating: 4.6,
         phone: "01887654321",
       },
+      payment: {
+        method: "bKash",
+        transactionId: "BK9C4E1A2M",
+        phone: "01887654321",
+        status: "verified",
+      },
     },
     {
       id: "4",
@@ -110,6 +128,12 @@ export const fakeMyOrdersData: MyOrdersData = {
         avatarColor: "bg-accent text-accent-content",
         rating: 4.9,
         phone: "01999887766",
+      },
+      payment: {
+        method: "Rocket",
+        transactionId: "RKT4PL6Q88",
+        phone: "01999887766",
+        status: "verified",
       },
     },
   ],

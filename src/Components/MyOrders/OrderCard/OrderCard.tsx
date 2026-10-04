@@ -2,9 +2,11 @@ import Image from "next/image";
 import OrderStepper from "../OrderStepper/OrderStepper";
 import {
   ORDER_STATUS_LABEL,
+  PAYMENT_STATUS_LABEL,
   type DeliveryAgent,
   type Order,
   type OrderItem,
+  type PaymentStatus,
 } from "@/types/myOrders";
 
 interface OrderCardProps {
@@ -69,6 +71,44 @@ function DeliveryAddress({ address }: { address: string }) {
         Delivery Address
       </div>
       <p className="mt-2 text-sm text-slate-600">{address}</p>
+    </div>
+  );
+}
+
+function paymentStatusClass(status: PaymentStatus) {
+  if (status === "verified") return "text-emerald-700";
+  if (status === "rejected") return "text-red-700";
+  return "text-amber-700";
+}
+
+function PaymentDetails({ payment }: { payment: Order["payment"] }) {
+  return (
+    <div className="rounded-xl bg-emerald-50 p-4 md:col-span-2">
+      <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+        Payment
+      </div>
+      <dl className="mt-2 grid grid-cols-1 gap-2 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <dt className="text-xs text-slate-400">Method</dt>
+          <dd className="font-medium text-slate-800">{payment.method}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-slate-400">Txn ID</dt>
+          <dd className="font-mono font-medium text-slate-800">
+            {payment.transactionId}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs text-slate-400">Paid from</dt>
+          <dd className="font-medium text-slate-800">{payment.phone}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-slate-400">Status</dt>
+          <dd className={`font-semibold ${paymentStatusClass(payment.status)}`}>
+            {PAYMENT_STATUS_LABEL[payment.status]}
+          </dd>
+        </div>
+      </dl>
     </div>
   );
 }
@@ -140,6 +180,7 @@ export default function OrderCard({ order }: OrderCardProps) {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <DeliveryAddress address={order.deliveryAddress} />
           <DeliveryAgentCard agent={order.agent} />
+          <PaymentDetails payment={order.payment} />
         </div>
       </div>
     </article>
