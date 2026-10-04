@@ -22,7 +22,6 @@ type AccessClaims = jwt.JwtPayload & {
 export function readAccessToken(token: string): SessionUser | null {
   try {
     const data = jwt.verify(token, process.env.SECRET_ACCESS_TOKEN!) as AccessClaims;
-    // console.log("access token", data);
     if (!data || typeof data === "string" || data._id == null) return null;
     return {
       _id: String(data._id),

@@ -28,24 +28,31 @@ function getResendApiKey() {
   return { ok: true as const, key };
 }
 
-/** With onboarding@resend.dev, payment emails must go to the Resend account email. */
-function resolveRecipient(type: FolioEmailType, requestedEmail: string) {
+/** Free Resend (onboarding@resend.dev) can only deliver to RESEND_TO_EMAIL. */
+function resolveRecipient(requestedEmail: string) {
+  const from =
+    String(process.env.RESEND_FROM_EMAIL ?? "").trim() ||
+    "Folio <onboarding@resend.dev>";
+  const testingFrom = from.toLowerCase().includes("onboarding@resend.dev");
   const verifiedTo = String(process.env.RESEND_TO_EMAIL ?? "")
     .trim()
     .toLowerCase();
 
-  if (type === "payment_verification") {
+  if (testingFrom) {
     if (!verifiedTo || !emailPattern.test(verifiedTo)) {
       return {
         ok: false as const,
         error:
-          "RESEND_TO_EMAIL is missing. Set it to your verified Resend account email.",
+          "RESEND_TO_EMAIL is required while using onboarding@resend.dev. Set it to your Resend account email.",
       };
     }
-    return { ok: true as const, email: verifiedTo };
+    return { ok: true as const, email: verifiedTo, from };
   }
 
-  return { ok: true as const, email: requestedEmail };
+  if (!emailPattern.test(requestedEmail)) {
+    return { ok: false as const, error: "Valid recipient email is required" };
+  }
+  return { ok: true as const, email: requestedEmail, from };
 }
 
 export async function sendFolioEmail(input: {
@@ -66,20 +73,10 @@ export async function sendFolioEmail(input: {
   const paymentMethod = String(input.paymentMethod ?? "").trim();
   const paymentPhone = String(input.paymentPhone ?? "").trim();
   const buyerName = String(input.buyerName ?? name).trim();
-  const buyerEmail = String(input.buyerEmail ?? requestedEmail).trim().toLowerCase();
-
-  const recipient = resolveRecipient(type, requestedEmail);
-  if (!recipient.ok) return recipient;
-  const email = recipient.email;
-
-  const firstName =
-    type === "payment_verification"
-      ? "Admin"
-      : name.split(/\s+/)[0] || "there";
-
-  if (!emailPattern.test(email)) {
-    return { ok: false as const, error: "Valid recipient email is required" };
-  }
+  const buyerEmail = String(input.buyerEmail ?? requestedEmail)
+    .trim()
+    .toLowerCase();
+  const firstName = name.split(/\s+/)[0] || "there";
 
   if (type === "payment_verification" && !transactionId) {
     return {
@@ -88,70 +85,64 @@ export async function sendFolioEmail(input: {
     };
   }
 
+  const recipient = resolveRecipient(requestedEmail);
+  if (!recipient.ok) return recipient;
+
   const apiKey = getResendApiKey();
   if (!apiKey.ok) return apiKey;
 
-  const html = await render(
-    EmailTemplate({
-      firstName,
-      type,
-      bookTitle: bookTitle || undefined,
-      reason: reason || undefined,
-      transactionId: transactionId || undefined,
-      orderNumber: orderNumber || undefined,
-      amount: amount || undefined,
-      paymentMethod: paymentMethod || undefined,
-      paymentPhone: paymentPhone || undefined,
-      buyerName: buyerName || undefined,
-      buyerEmail: buyerEmail || undefined,
-    }),
-  );
+  const subject =
+    type === "payment_verification"
+      ? `Folio Transaction ID: ${transactionId}`
+      : subjects[type];
 
-  const textLines =
-    type === "account_suspended"
-      ? [
-          `Hi ${firstName}, your Folio account was deactivated.`,
-          "You will not be able to borrow or reserve books until it is reactivated.",
-        ]
-      : type === "borrow_cancelled"
-        ? [
-            `Hi ${firstName}, your book request was cancelled.`,
-            bookTitle ? `Book: ${bookTitle}` : "",
-            reason ? `Reason: ${reason}` : "",
-          ].filter(Boolean)
-        : type === "payment_verification"
+  // Purchase: plain text only. Welcome / other: HTML template like before.
+  let html: string | undefined;
+  let text: string;
+
+  if (type === "payment_verification") {
+    text = [
+      `Transaction ID: ${transactionId}`,
+      orderNumber ? `Order: ${orderNumber}` : "",
+      bookTitle ? `Book: ${bookTitle}` : "",
+      amount ? `Amount: ${amount}` : "",
+      paymentMethod ? `Method: ${paymentMethod}` : "",
+      paymentPhone ? `Paid from: ${paymentPhone}` : "",
+      buyerName ? `Buyer: ${buyerName}` : "",
+      buyerEmail ? `Buyer email: ${buyerEmail}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  } else {
+    html = await render(
+      EmailTemplate({
+        firstName,
+        type,
+        bookTitle: bookTitle || undefined,
+        reason: reason || undefined,
+      }),
+    );
+    text =
+      type === "account_suspended"
+        ? `Hi ${firstName}, your Folio account was deactivated.`
+        : type === "borrow_cancelled"
           ? [
-              `Hi ${firstName}, Folio payment verification.`,
+              `Hi ${firstName}, your book request was cancelled.`,
               bookTitle ? `Book: ${bookTitle}` : "",
-              orderNumber ? `Order: ${orderNumber}` : "",
-              `Transaction ID: ${transactionId}`,
-              amount ? `Amount: ${amount}` : "",
-              paymentMethod ? `Method: ${paymentMethod}` : "",
-              paymentPhone ? `Paid from: ${paymentPhone}` : "",
-              buyerName ? `Buyer: ${buyerName}` : "",
-              buyerEmail ? `Buyer email: ${buyerEmail}` : "",
-              "Confirm this Transaction ID in bKash/Rocket, then process the order.",
-            ].filter(Boolean)
-          : [
-              `Welcome, ${firstName}!`,
-              "Your Folio account is ready. Sign in anytime and start building your shelf.",
-            ];
-
-  const from =
-    String(process.env.RESEND_FROM_EMAIL ?? "").trim() ||
-    "Folio <onboarding@resend.dev>";
+              reason ? `Reason: ${reason}` : "",
+            ]
+              .filter(Boolean)
+              .join("\n")
+          : `Welcome, ${firstName}!\nYour Folio account is ready. Sign in anytime and start building your shelf.`;
+  }
 
   try {
     const resend = new Resend(apiKey.key);
     const { data, error } = await resend.emails.send({
-      from,
-      to: [email],
-      subject:
-        type === "payment_verification"
-          ? `Folio payment verification — ${transactionId}`
-          : subjects[type],
-      html,
-      text: textLines.join("\n"),
+      from: recipient.from,
+      to: [recipient.email],
+      subject,
+      ...(html ? { html, text } : { text }),
     });
 
     if (error) {
@@ -171,12 +162,12 @@ export async function sendFolioEmail(input: {
 
     console.info("[email] Sent", {
       type,
-      to: email,
+      to: recipient.email,
       id: data.id,
       transactionId: transactionId || undefined,
     });
 
-    return { ok: true as const, id: data.id, to: email };
+    return { ok: true as const, id: data.id, to: recipient.email };
   } catch (error) {
     console.error("[email] Resend threw:", error);
     return {

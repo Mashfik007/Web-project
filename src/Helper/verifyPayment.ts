@@ -102,10 +102,10 @@ export async function validatePaymentRecord(
   return { ok: true, payment, order };
 }
 
-/** Mark payment verified after the Transaction ID email is sent. */
+/** Mark payment verified in the database after validation. */
 export async function markPaymentVerifiedViaEmail(
   paymentId: string | mongoose.Types.ObjectId,
-  emailId?: string,
+  note?: string,
 ): Promise<PaymentVerifyResult> {
   const validated = await validatePaymentRecord(paymentId);
   if (!validated.ok) return validated;
@@ -117,9 +117,7 @@ export async function markPaymentVerifiedViaEmail(
 
   payment.status = "verified";
   payment.verifiedAt = new Date();
-  payment.verificationNote = emailId
-    ? `Verified via email (${emailId})`
-    : "Verified via email";
+  payment.verificationNote = note || "Verified in database";
   await payment.save();
 
   order.paymentStatus = "verified";
@@ -129,7 +127,7 @@ export async function markPaymentVerifiedViaEmail(
   return { ok: true, payment, order };
 }
 
-/** Re-check a saved payment; email verification is the primary path. */
+/** Re-check a saved payment against its order. */
 export async function verifyPaymentInDatabase(
   paymentId: string | mongoose.Types.ObjectId,
 ): Promise<PaymentVerifyResult> {

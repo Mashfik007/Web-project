@@ -31,13 +31,8 @@ export default function OrderSuccess({
             Order Placed!
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            {order.emailSent
-              ? `Transaction ID emailed to ${order.verificationEmail || "your Resend inbox"} for verification.`
-              : "Order saved, but the verification email was not sent."}
+            Your order and payment were saved and verified in the database.
           </p>
-          {!order.emailSent && order.emailError ? (
-            <p className="mt-2 text-sm text-red-600">{order.emailError}</p>
-          ) : null}
         </div>
 
         <div className="w-full rounded-xl bg-sky-50 p-4 text-left text-sm">
@@ -72,14 +67,6 @@ export default function OrderSuccess({
               {order.transactionId}
             </span>
           </div>
-          {order.verificationEmail ? (
-            <div className="flex justify-between gap-4 py-2">
-              <span className="text-sky-600">Email</span>
-              <span className="truncate font-semibold text-slate-800">
-                {order.verificationEmail}
-              </span>
-            </div>
-          ) : null}
           <div className="flex justify-between gap-4 py-2">
             <span className="text-sky-600">Payment Status</span>
             <span
@@ -92,10 +79,10 @@ export default function OrderSuccess({
               }`}
             >
               {order.paymentStatus === "verified"
-                ? "Verified by email"
+                ? "Verified"
                 : order.paymentStatus === "rejected"
                   ? "Rejected"
-                  : "Pending email"}
+                  : "Pending"}
             </span>
           </div>
         </div>

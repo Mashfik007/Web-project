@@ -20,8 +20,8 @@ const defaultPaymentMethods: CheckoutData["paymentMethods"] = [
       "Scan the QR code, or open bKash and tap Send Money.",
       "Send the exact total amount from your order summary.",
       "Complete the payment and copy the Transaction ID.",
-      "Tap Confirm Order & Pay, then enter the Transaction ID on the next step.",
-      "We will email the Transaction ID to verify your payment.",
+      "Enter the Transaction ID and phone, then tap I Paid — Save Order.",
+      "Your order is saved in the database right away.",
     ],
   },
   {
@@ -37,8 +37,8 @@ const defaultPaymentMethods: CheckoutData["paymentMethods"] = [
       "Scan the QR code, or open Rocket and choose Send Money.",
       "Send the exact order total amount.",
       "Save the Transaction ID from the confirmation screen.",
-      "Tap Confirm Order & Pay, then enter the Transaction ID on the next step.",
-      "We will email the Transaction ID to verify your payment.",
+      "Enter the Transaction ID and phone, then tap I Paid — Save Order.",
+      "Your order is saved in the database right away.",
     ],
   },
 ];

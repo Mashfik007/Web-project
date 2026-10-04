@@ -71,7 +71,8 @@ function genAccessToken(this: {
     },
     process.env.SECRET_ACCESS_TOKEN!,
     {
-      expiresIn: "15m",
+      // Long enough for checkout + manual bKash/Rocket payment.
+      expiresIn: "1d",
     },
   );
 }

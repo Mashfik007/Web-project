@@ -8,8 +8,12 @@ function tokenUser(token: string) {
     if (!payload) return null;
     const json = JSON.parse(
       atob(payload.replace(/-/g, "+").replace(/_/g, "/")),
-    ) as { _id?: unknown; isAdmin?: unknown };
+    ) as { _id?: unknown; isAdmin?: unknown; exp?: unknown };
     if (typeof json._id !== "string" || !json._id) return null;
+    // Enforce expiry here too — API already rejects expired tokens with jwt.verify.
+    if (typeof json.exp === "number" && json.exp * 1000 <= Date.now()) {
+      return null;
+    }
     return { id: json._id, isAdmin: json.isAdmin === true };
   } catch {
     return null;

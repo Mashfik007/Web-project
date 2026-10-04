@@ -1,4 +1,4 @@
-export type CheckoutStep = "details" | "payment" | "confirm";
+export type CheckoutStep = "details" | "payment";
 
 export type CheckoutBook = {
   id: string | number;
@@ -69,13 +69,9 @@ export type PlacedOrder = {
   paymentMethod: string;
   transactionId: string;
   paymentStatus: PaymentStatus;
-  emailSent: boolean;
-  verificationEmail: string;
-  emailError?: string;
 };
 
 export const CHECKOUT_STEPS: { id: CheckoutStep; label: string }[] = [
   { id: "details", label: "Details" },
   { id: "payment", label: "Payment" },
-  { id: "confirm", label: "Confirm" },
 ];

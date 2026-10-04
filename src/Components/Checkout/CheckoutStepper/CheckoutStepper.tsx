@@ -7,7 +7,6 @@ interface CheckoutStepperProps {
 const stepIndex: Record<CheckoutStep, number> = {
   details: 0,
   payment: 1,
-  confirm: 2,
 };
 
 export default function CheckoutStepper({ currentStep }: CheckoutStepperProps) {

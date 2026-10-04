@@ -1,12 +1,10 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { requireUserId } from "@/Helper/userFromToken";
-import { sendFolioEmail } from "@/Helper/sendFolioEmail";
 import {
   markPaymentVerifiedViaEmail,
   validatePaymentRecord,
 } from "@/Helper/verifyPayment";
 import { Payment } from "@/Model/Payments";
-import { User } from "@/Model/Users";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
@@ -18,7 +16,7 @@ function jsonError(status: number, message: string) {
   });
 }
 
-/** Re-send the Transaction ID verification email and mark payment verified when sent. */
+/** Re-validate and mark payment verified in the database (no email). */
 export async function POST(request: Request) {
   try {
     const session = await requireUserId();
@@ -60,33 +58,7 @@ export async function POST(request: Request) {
       return jsonError(400, validated.reason);
     }
 
-    const account = await User.findById(userId).select("name email");
-    if (!account?.email) {
-      return jsonError(400, "Add an email to your account to verify payment");
-    }
-
-    const emailResult = await sendFolioEmail({
-      email: account.email,
-      name: account.name || "Member",
-      type: "payment_verification",
-      bookTitle: validated.order.bookTitle,
-      transactionId: String(payment.transactionId),
-      orderNumber: String(payment.orderNumber),
-      amount: `${payment.currency}${payment.amount}`,
-      paymentMethod: String(payment.paymentMethod),
-      paymentPhone: String(payment.paymentPhone),
-      buyerName: account.name || "Member",
-      buyerEmail: account.email,
-    });
-
-    if (!emailResult.ok) {
-      return jsonError(
-        500,
-        emailResult.error || "Could not send verification email",
-      );
-    }
-
-    const result = await markPaymentVerifiedViaEmail(payment._id, emailResult.id);
+    const result = await markPaymentVerifiedViaEmail(payment._id);
     if (!result.ok) {
       return jsonError(400, result.reason);
     }
@@ -100,10 +72,8 @@ export async function POST(request: Request) {
             order: result.order,
             paymentStatus: result.payment.status,
             verifiedAt: result.payment.verifiedAt,
-            emailSent: true,
-            verificationEmail: emailResult.to || account.email,
           },
-          "Transaction ID sent to your email. Payment verified.",
+          "Payment verified in database.",
         ),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },

@@ -40,7 +40,6 @@ export const confirmPaymentSchema = z.object({
   paymentPhone: bdPhoneSchema,
 });
 
-/** @deprecated Use paymentMethodSchema + confirmPaymentSchema */
 export const paymentFormSchema = paymentMethodSchema.merge(confirmPaymentSchema);
 
 export type DeliveryFormValues = z.infer<typeof deliveryFormSchema>;

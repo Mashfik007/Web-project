@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  paymentMethodSchema,
-  type PaymentMethodValues,
+  paymentFormSchema,
+  type PaymentFormValues,
 } from "@/Shchema/checkout";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
@@ -11,8 +11,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import type {
   CheckoutPayer,
+  PaymentFormData,
   PaymentMethod,
-  PaymentMethodFormData,
 } from "@/types/checkout";
 
 interface PaymentFormProps {
@@ -21,9 +21,11 @@ interface PaymentFormProps {
   bookTitle: string;
   amount: number;
   currency: string;
-  defaultValues?: PaymentMethodFormData;
+  defaultValues?: Partial<PaymentFormData>;
+  submitting?: boolean;
+  error?: string;
   onBack: () => void;
-  onSubmit: (data: PaymentMethodFormData) => void;
+  onSubmit: (data: PaymentFormData) => void;
 }
 
 export function paymentQrText(input: {
@@ -46,6 +48,8 @@ export function paymentQrText(input: {
   ].join("\n");
 }
 
+const inputClassName = "input w-full";
+
 export default function PaymentForm({
   paymentMethods,
   payer,
@@ -53,6 +57,8 @@ export default function PaymentForm({
   amount,
   currency,
   defaultValues,
+  submitting = false,
+  error = "",
   onBack,
   onSubmit,
 }: PaymentFormProps) {
@@ -64,14 +70,17 @@ export default function PaymentForm({
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<PaymentMethodValues>({
-    resolver: zodResolver(paymentMethodSchema),
+  } = useForm<PaymentFormValues>({
+    resolver: zodResolver(paymentFormSchema),
     defaultValues: {
       methodId: defaultValues?.methodId ?? "bkash",
+      transactionId: defaultValues?.transactionId ?? "",
+      paymentPhone: defaultValues?.paymentPhone ?? "",
     },
   });
 
   const methodId = watch("methodId");
+  const busy = submitting || isSubmitting;
 
   const selectedMethod =
     paymentMethods.find((method) => method.id === methodId) ??
@@ -84,7 +93,7 @@ export default function PaymentForm({
     window.setTimeout(() => setCopied(false), 2000);
   }
 
-  const handleFormSubmit: SubmitHandler<PaymentMethodValues> = (data) => {
+  const handleFormSubmit: SubmitHandler<PaymentFormValues> = (data) => {
     onSubmit(data);
   };
 
@@ -96,8 +105,8 @@ export default function PaymentForm({
             Payment Details
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            Choose a method, send the money, then confirm your order to enter
-            the Transaction ID.
+            Send the money, enter your Transaction ID, then tap I Paid to save
+            the order.
           </p>
         </div>
 
@@ -173,14 +182,6 @@ export default function PaymentForm({
                   <dd className="font-medium">{payer.name}</dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-slate-500">ID</dt>
-                  <dd className="truncate font-mono text-xs">{payer.id}</dd>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <dt className="text-slate-500">Email</dt>
-                  <dd className="truncate">{payer.email || "—"}</dd>
-                </div>
-                <div className="flex justify-between gap-3">
                   <dt className="text-slate-500">Price</dt>
                   <dd className="font-semibold">
                     {currency}
@@ -204,32 +205,60 @@ export default function PaymentForm({
                   includeMargin
                 />
               </div>
-              <p className="mt-2 text-center text-xs text-slate-500">
-                Scan this code to pay {currency}
-                {amount} to {selectedMethod.merchantNumber}.
-              </p>
-
-              <ol className="mt-4 list-decimal space-y-1 pl-4 text-xs text-slate-600">
-                {selectedMethod.instructions.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
             </div>
           )}
 
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Transaction ID (TxnID)
+            </label>
+            <input
+              {...register("transactionId")}
+              type="text"
+              placeholder="e.g. BA7B2D3F9K"
+              className={inputClassName}
+              autoComplete="off"
+            />
+            {errors.transactionId && (
+              <span className="text-red-400">
+                {errors.transactionId.message}
+              </span>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Phone Number Used
+            </label>
+            <input
+              {...register("paymentPhone")}
+              type="tel"
+              placeholder="01XXXXXXXXX"
+              className={inputClassName}
+            />
+            {errors.paymentPhone && (
+              <span className="text-red-400">
+                {errors.paymentPhone.message}
+              </span>
+            )}
+          </div>
+
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[auto_1fr]">
-            <button type="button" onClick={onBack} className="btn btn-outline">
+            <button
+              type="button"
+              onClick={onBack}
+              disabled={busy}
+              className="btn btn-outline"
+            >
               Back
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn btn-primary"
-            >
-              {isSubmitting ? "Continuing..." : "I Paid — Enter Txn ID"}
+            <button type="submit" disabled={busy} className="btn btn-primary">
+              {busy ? "Saving order..." : "I Paid — Save Order"}
               <Image
-                src="/svg/arrow-right.svg"
-                alt="Continue"
+                src="/svg/check-circle.svg"
+                alt="Save"
                 width={16}
                 height={16}
                 className="size-4"

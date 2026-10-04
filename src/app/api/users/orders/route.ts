@@ -1,20 +1,17 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { requireUserId } from "@/Helper/userFromToken";
-import { sendFolioEmail } from "@/Helper/sendFolioEmail";
 import {
   isValidPaymentPhone,
   isValidTransactionId,
-  markPaymentVerifiedViaEmail,
-  validatePaymentRecord,
 } from "@/Helper/verifyPayment";
+import { publishOrderUpdate } from "@/Helper/publishDomain";
 import { Book } from "@/Model/Books";
 import { Order } from "@/Model/Orders";
 import { Payment } from "@/Model/Payments";
-import { User } from "@/Model/Users";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
-import { publishOrderUpdate } from "@/Helper/publishDomain";
+import { NextResponse } from "next/server";
 
 const MERCHANT_NUMBER = "01921591087";
 const ALLOWED_METHODS = new Set(["bkash", "rocket"]);
@@ -28,18 +25,12 @@ function orderNumber() {
   return `FLO-${suffix}`;
 }
 
-function jsonError(status: number, message: string) {
-  return new Response(JSON.stringify(new ApiError(status, message)), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
 export async function POST(request: Request) {
   try {
     const session = await requireUserId();
     if (session instanceof Response) return session;
-    const userId = session;
+    const userId = String(session);
+
     const body = await request.json();
     const bookId = String(body.bookId ?? "").trim();
     const quantity = Number(body.quantity);
@@ -57,65 +48,99 @@ export async function POST(request: Request) {
     const paymentPhone = String(body.paymentPhone ?? "").trim();
 
     if (!mongoose.Types.ObjectId.isValid(bookId)) {
-      return jsonError(400, "Choose a valid book");
+      return NextResponse.json(new ApiError(400, "Choose a valid book"), {
+        status: 400,
+      });
     }
 
     if (!fullName || !phone || !address || !city) {
-      return jsonError(400, "Delivery details are required");
+      return NextResponse.json(
+        new ApiError(400, "Delivery details are required"),
+        { status: 400 },
+      );
     }
 
     if (!ALLOWED_METHODS.has(methodId)) {
-      return jsonError(400, "Select a valid payment method");
+      return NextResponse.json(
+        new ApiError(400, "Select a valid payment method"),
+        { status: 400 },
+      );
     }
 
     if (!isValidTransactionId(transactionId)) {
-      return jsonError(400, "Enter a valid transaction ID");
+      return NextResponse.json(
+        new ApiError(400, "Enter a valid transaction ID"),
+        { status: 400 },
+      );
     }
 
     if (!isValidPaymentPhone(paymentPhone)) {
-      return jsonError(400, "Enter a valid payment phone number");
+      return NextResponse.json(
+        new ApiError(400, "Enter a valid payment phone number"),
+        { status: 400 },
+      );
     }
 
     if (!Number.isInteger(quantity) || quantity < 1) {
-      return jsonError(400, "Choose a valid quantity");
+      return NextResponse.json(new ApiError(400, "Choose a valid quantity"), {
+        status: 400,
+      });
     }
 
     await connectDB();
 
-    const account = await User.findById(userId).select("name email");
-    if (!account?.email) {
-      return jsonError(400, "Add an email to your account to verify payment");
-    }
-
-    const existingPayment = await Payment.findOne({ transactionId }).select("_id");
-    if (existingPayment) {
-      return jsonError(409, "This transaction ID was already used");
-    }
-
     const existingOrder = await Order.findOne({ transactionId }).select("_id");
     if (existingOrder) {
-      return jsonError(409, "This transaction ID was already used");
+      return NextResponse.json(
+        new ApiError(
+          409,
+          "This transaction ID was already used. Enter a new TxnID.",
+        ),
+        { status: 409 },
+      );
     }
 
-    const book = await Book.findById(bookId).select("title author coverImage price");
+    const existingPayment = await Payment.findOne({ transactionId });
+    if (existingPayment) {
+      const linkedOrder = await Order.findById(existingPayment.orderId).select(
+        "_id",
+      );
+      if (linkedOrder) {
+        return NextResponse.json(
+          new ApiError(
+            409,
+            "This transaction ID was already used. Enter a new TxnID.",
+          ),
+          { status: 409 },
+        );
+      }
+      await Payment.findByIdAndDelete(existingPayment._id);
+    }
+
+    const book = await Book.findById(bookId).select(
+      "title author coverImage price",
+    );
     if (!book) {
-      return jsonError(404, "Book not found");
+      return NextResponse.json(new ApiError(404, "Book not found"), {
+        status: 404,
+      });
     }
 
-    const unitPrice = book.price?.amount ?? 0;
+    const unitPrice = Number(book.price?.amount ?? 0);
     const deliveryFee = 60;
     const total = unitPrice * quantity + deliveryFee;
     const currency = book.price?.currency ?? "৳";
     const paymentMethod =
       paymentMethodName || (methodId === "bkash" ? "bKash" : "Rocket");
     const createdOrderNumber = orderNumber();
+    const now = new Date();
 
     const order = await Order.create({
       userId,
       bookId,
       orderNumber: createdOrderNumber,
       bookTitle: book.title,
-      author: book.author,
+      author: book.author || "Unknown",
       coverImage: book.coverImage
         ? `/api/uploads/${book.coverImage}`
         : "/svg/book.svg",
@@ -132,7 +157,8 @@ export async function POST(request: Request) {
       methodId,
       transactionId,
       paymentPhone,
-      paymentStatus: "pending",
+      paymentStatus: "verified",
+      paymentVerifiedAt: now,
       status: "processing",
     });
 
@@ -149,12 +175,17 @@ export async function POST(request: Request) {
         amount: total,
         currency,
         merchantNumber: MERCHANT_NUMBER,
-        status: "pending",
+        status: "verified",
+        verifiedAt: now,
+        verificationNote: "Verified in database",
       });
     } catch (error: any) {
       await Order.findByIdAndDelete(order._id);
       if (error?.code === 11000) {
-        return jsonError(409, "This transaction ID was already used");
+        return NextResponse.json(
+          new ApiError(409, "This transaction ID was already used"),
+          { status: 409 },
+        );
       }
       throw error;
     }
@@ -162,83 +193,36 @@ export async function POST(request: Request) {
     order.paymentId = payment._id;
     await order.save();
 
-    const validated = await validatePaymentRecord(payment._id);
-    if (!validated.ok) {
-      await Payment.findByIdAndDelete(payment._id);
-      await Order.findByIdAndDelete(order._id);
-      return jsonError(400, validated.reason || "Payment validation failed");
-    }
-
-    let emailResult;
-    try {
-      emailResult = await sendFolioEmail({
-        email: account.email,
-        name: account.name || fullName,
-        type: "payment_verification",
-        bookTitle: book.title,
-        transactionId,
-        orderNumber: createdOrderNumber,
-        amount: `${currency}${total}`,
-        paymentMethod,
-        paymentPhone,
-        buyerName: account.name || fullName,
-        buyerEmail: account.email,
-      });
-    } catch (error) {
-      console.error("[orders] Payment verification email failed:", error);
-      emailResult = {
-        ok: false as const,
-        error: error instanceof Error ? error.message : "Email failed",
-      };
-    }
-
-    let verificationEmail = String(process.env.RESEND_TO_EMAIL ?? "").trim();
-    let emailId: string | undefined;
-
-    if (emailResult.ok) {
-      verificationEmail = emailResult.to || verificationEmail;
-      emailId = emailResult.id;
-      await markPaymentVerifiedViaEmail(payment._id, emailResult.id);
-    } else {
-      console.error(
-        "[orders] Payment verification email failed:",
-        emailResult.error,
-      );
-    }
-
-    const freshOrder = await Order.findById(order._id);
-    const freshPayment = await Payment.findById(payment._id);
-
     await publishOrderUpdate({
       action: "placed",
       id: String(order._id),
-      userId: String(userId),
+      userId,
       bookId: String(order.bookId || ""),
     });
 
-    return new Response(
-      JSON.stringify(
-        new ApiResponce(
-          201,
-          {
-            ...(freshOrder?.toObject() ?? order.toObject()),
-            payment: freshPayment?.toObject() ?? payment.toObject(),
-            emailSent: emailResult.ok,
-            verificationEmail,
-            emailId,
-            emailError: emailResult.ok ? undefined : emailResult.error,
-          },
-          emailResult.ok
-            ? "Order placed. Transaction ID sent for email verification."
-            : `Order saved, but verification email failed: ${emailResult.error}`,
-        ),
+    console.info("[orders] Saved", {
+      orderId: String(order._id),
+      orderNumber: createdOrderNumber,
+      userId,
+      transactionId,
+    });
+
+    return NextResponse.json(
+      new ApiResponce(
+        201,
+        {
+          ...order.toObject(),
+          payment: payment.toObject(),
+        },
+        "Order saved successfully",
       ),
-      { status: 201, headers: { "Content-Type": "application/json" } },
+      { status: 201 },
     );
   } catch (error: any) {
-    return new Response(
-      JSON.stringify(new ApiError(500, error.message || "Internal Server Error")),
-      { status: 500, headers: { "Content-Type": "application/json" } },
+    console.error("[orders] Failed:", error);
+    return NextResponse.json(
+      new ApiError(500, error.message || "Internal Server Error"),
+      { status: 500 },
     );
   }
 }

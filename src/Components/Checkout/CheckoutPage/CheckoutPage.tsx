@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import CheckoutHeader from "../CheckoutHeader/CheckoutHeader";
 import CheckoutStepper from "../CheckoutStepper/CheckoutStepper";
-import ConfirmPaymentForm from "../ConfirmPaymentForm/ConfirmPaymentForm";
 import DeliveryForm from "../DeliveryForm/DeliveryForm";
 import EstimatedDelivery from "../EstimatedDelivery/EstimatedDelivery";
 import OrderSuccess, { generateOrderId } from "../OrderSuccess/OrderSuccess";
@@ -14,9 +13,8 @@ import PaymentForm from "../PaymentForm/PaymentForm";
 import type {
   CheckoutData,
   CheckoutStep,
-  ConfirmPaymentFormData,
   DeliveryFormData,
-  PaymentMethodFormData,
+  PaymentFormData,
   PlacedOrder,
 } from "@/types/checkout";
 
@@ -29,6 +27,8 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
   const [summaryQuantity, setSummaryQuantity] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState("");
+  const submittingRef = useRef(false);
 
   const [deliveryForm, setDeliveryForm] = useState<DeliveryFormData>({
     fullName: "",
@@ -38,21 +38,17 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
     quantity: 1,
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodFormData>({
+  const [paymentForm, setPaymentForm] = useState<PaymentFormData>({
     methodId: checkout.paymentMethods[0]?.id ?? "bkash",
-  });
-
-  const [confirmForm, setConfirmForm] = useState<ConfirmPaymentFormData>({
     transactionId: "",
     paymentPhone: "",
   });
-  const [orderError, setOrderError] = useState("");
 
   const orderQuantity =
     step === "details" ? summaryQuantity : deliveryForm.quantity;
 
   const selectedMethod = checkout.paymentMethods.find(
-    (method) => method.id === paymentMethod.methodId,
+    (method) => method.id === paymentForm.methodId,
   );
 
   const amount = calculateCheckoutTotal(
@@ -64,25 +60,23 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
   function handleDeliverySubmit(data: DeliveryFormData) {
     setDeliveryForm(data);
     setSummaryQuantity(data.quantity);
+    setOrderError("");
     setStep("payment");
   }
 
-  function handlePaymentConfirm(data: PaymentMethodFormData) {
-    setPaymentMethod(data);
-    setOrderError("");
-    setStep("confirm");
-  }
-
-  async function handlePurchaseConfirm(data: ConfirmPaymentFormData) {
-    setConfirmForm(data);
+  async function handlePaidSubmit(data: PaymentFormData) {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setPaymentForm(data);
     setOrderError("");
     setSubmitting(true);
 
-    const methodName = selectedMethod?.name ?? paymentMethod.methodId;
+    const methodName = selectedMethod?.name ?? data.methodId;
 
     try {
       const response = await fetch("/api/users/orders", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: checkout.userId,
@@ -92,24 +86,21 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
           phone: deliveryForm.phone,
           address: deliveryForm.address,
           city: deliveryForm.city,
-          methodId: paymentMethod.methodId,
+          methodId: data.methodId,
           paymentMethodName: methodName,
           transactionId: data.transactionId,
           paymentPhone: data.paymentPhone,
         }),
       });
       const payload = await response.json();
-      if (!response.ok) {
-        setOrderError(payload.message || "Could not place the order");
-        return;
-      }
 
-      if (!payload.data?.emailSent) {
+      if (!response.ok) {
         setOrderError(
-          payload.data?.emailError ||
-            payload.message ||
-            "Order saved, but the verification email was not sent. Check Resend API key on the server.",
+          response.status === 401
+            ? "Your session expired. Log in again, then try again."
+            : payload.message || "Could not save the order",
         );
+        return;
       }
 
       setPlacedOrder({
@@ -120,17 +111,14 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
         paymentMethod: methodName.toLowerCase(),
         transactionId:
           payload.data?.transactionId || data.transactionId.toUpperCase(),
-        paymentStatus: payload.data?.paymentStatus || "pending",
-        emailSent: Boolean(payload.data?.emailSent),
-        verificationEmail:
-          payload.data?.verificationEmail || checkout.payer.email || "",
-        emailError: payload.data?.emailError || "",
+        paymentStatus: payload.data?.paymentStatus || "verified",
       });
     } catch (error) {
       setOrderError(
-        error instanceof Error ? error.message : "Could not place the order",
+        error instanceof Error ? error.message : "Could not save the order",
       );
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }
@@ -178,24 +166,12 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
                 bookTitle={checkout.book.title}
                 amount={amount}
                 currency={checkout.pricing.currency}
-                defaultValues={paymentMethod}
-                onBack={() => setStep("details")}
-                onSubmit={handlePaymentConfirm}
-              />
-            )}
-
-            {step === "confirm" && (
-              <ConfirmPaymentForm
-                bookTitle={checkout.book.title}
-                amount={amount}
-                currency={checkout.pricing.currency}
-                selectedMethod={selectedMethod}
-                defaultValues={confirmForm}
+                defaultValues={paymentForm}
                 submitting={submitting}
                 error={orderError}
-                onBack={() => setStep("payment")}
+                onBack={() => setStep("details")}
                 onSubmit={(data) => {
-                  void handlePurchaseConfirm(data);
+                  void handlePaidSubmit(data);
                 }}
               />
             )}

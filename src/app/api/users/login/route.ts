@@ -41,10 +41,12 @@ export async function POST(request: Request) {
 
     response.cookies.set("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure:
+        process.env.NODE_ENV === "production" ||
+        Boolean(process.env.RAILWAY_ENVIRONMENT),
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 15,
+      maxAge: 60 * 60 * 24,
     });
 
     return response;
