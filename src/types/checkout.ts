@@ -71,6 +71,7 @@ export type PlacedOrder = {
   paymentStatus: PaymentStatus;
   emailSent: boolean;
   verificationEmail: string;
+  emailError?: string;
 };
 
 export const CHECKOUT_STEPS: { id: CheckoutStep; label: string }[] = [

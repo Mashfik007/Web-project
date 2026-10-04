@@ -226,7 +226,7 @@ export default function PaymentForm({
               disabled={isSubmitting}
               className="btn btn-primary"
             >
-              {isSubmitting ? "Confirming..." : "Confirm Order & Pay"}
+              {isSubmitting ? "Continuing..." : "I Paid — Enter Txn ID"}
               <Image
                 src="/svg/arrow-right.svg"
                 alt="Continue"

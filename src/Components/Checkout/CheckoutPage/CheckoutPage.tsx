@@ -104,6 +104,14 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
         return;
       }
 
+      if (!payload.data?.emailSent) {
+        setOrderError(
+          payload.data?.emailError ||
+            payload.message ||
+            "Order saved, but the verification email was not sent. Check Resend API key on the server.",
+        );
+      }
+
       setPlacedOrder({
         orderId: payload.data?.orderNumber || generateOrderId(),
         bookTitle: checkout.book.title,
@@ -116,7 +124,12 @@ export default function CheckoutPage({ checkout }: CheckoutPageProps) {
         emailSent: Boolean(payload.data?.emailSent),
         verificationEmail:
           payload.data?.verificationEmail || checkout.payer.email || "",
+        emailError: payload.data?.emailError || "",
       });
+    } catch (error) {
+      setOrderError(
+        error instanceof Error ? error.message : "Could not place the order",
+      );
     } finally {
       setSubmitting(false);
     }

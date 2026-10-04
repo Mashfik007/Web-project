@@ -32,9 +32,12 @@ export default function OrderSuccess({
           </h2>
           <p className="mt-2 text-sm text-slate-500">
             {order.emailSent
-              ? "Your Transaction ID was sent to your email for payment verification."
-              : "Your order was saved. Payment verification email could not be sent yet."}
+              ? `Transaction ID emailed to ${order.verificationEmail || "your Resend inbox"} for verification.`
+              : "Order saved, but the verification email was not sent."}
           </p>
+          {!order.emailSent && order.emailError ? (
+            <p className="mt-2 text-sm text-red-600">{order.emailError}</p>
+          ) : null}
         </div>
 
         <div className="w-full rounded-xl bg-sky-50 p-4 text-left text-sm">

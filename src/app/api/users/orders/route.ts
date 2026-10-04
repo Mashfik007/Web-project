@@ -192,12 +192,10 @@ export async function POST(request: Request) {
       };
     }
 
-    let emailSent = false;
     let verificationEmail = String(process.env.RESEND_TO_EMAIL ?? "").trim();
     let emailId: string | undefined;
 
     if (emailResult.ok) {
-      emailSent = true;
       verificationEmail = emailResult.to || verificationEmail;
       emailId = emailResult.id;
       await markPaymentVerifiedViaEmail(payment._id, emailResult.id);
@@ -225,12 +223,12 @@ export async function POST(request: Request) {
           {
             ...(freshOrder?.toObject() ?? order.toObject()),
             payment: freshPayment?.toObject() ?? payment.toObject(),
-            emailSent,
+            emailSent: emailResult.ok,
             verificationEmail,
             emailId,
             emailError: emailResult.ok ? undefined : emailResult.error,
           },
-          emailSent
+          emailResult.ok
             ? "Order placed. Transaction ID sent for email verification."
             : `Order saved, but verification email failed: ${emailResult.error}`,
         ),
