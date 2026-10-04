@@ -7,6 +7,8 @@ type StoredNotice = {
   title: string;
   message: string;
   recipients?: number;
+  recipientUserId?: string | null;
+  recipientName?: string | null;
   createdAt?: Date;
 };
 
@@ -21,10 +23,23 @@ function toLibraryNotice(notice: StoredNotice): LibraryNotice {
   };
 }
 
-export async function getLibraryNotices(): Promise<LibraryNotice[]> {
+/** Broadcast notices plus any notice aimed at this user. */
+function audienceFilter(userId: string) {
+  return {
+    $or: [
+      { recipientUserId: { $in: [null, ""] } },
+      { recipientUserId: { $exists: false } },
+      { recipientUserId: userId },
+    ],
+  };
+}
+
+export async function getLibraryNotices(
+  userId: string,
+): Promise<LibraryNotice[]> {
   await connectDB();
 
-  const notices = await Notice.find()
+  const notices = await Notice.find(audienceFilter(userId))
     .sort({ createdAt: -1 })
     .limit(100)
     .lean<StoredNotice[]>();
@@ -43,5 +58,6 @@ export async function getAdminNotices(): Promise<AdminNotice[]> {
   return notices.map((notice) => ({
     ...toLibraryNotice(notice),
     recipients: notice.recipients ?? 0,
+    recipientName: notice.recipientName ?? null,
   }));
 }

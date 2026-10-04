@@ -24,6 +24,17 @@ const Notice_schema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
+    // when set, notice is only for this auth user; omit for broadcast
+    recipientUserId: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    recipientName: {
+      type: String,
+      trim: true,
+      default: null,
+    },
   },
   { timestamps: true },
 );

@@ -7,4 +7,11 @@ export type LibraryNotice = {
 
 export type AdminNotice = LibraryNotice & {
   recipients: number;
+  recipientName?: string | null;
+};
+
+export type NotificationRecipient = {
+  id: string;
+  name: string;
+  email: string;
 };

@@ -15,10 +15,11 @@ import {
   draftNotification,
   sendNotification,
 } from "@/Controller/admin.controller";
-import type { AdminNotice } from "@/types/notice";
+import type { AdminNotice, NotificationRecipient } from "@/types/notice";
 
 interface NotificationsPageProps {
   notices: AdminNotice[];
+  recipients: NotificationRecipient[];
 }
 
 function formatWhen(iso: string) {
@@ -33,11 +34,16 @@ function formatWhen(iso: string) {
   });
 }
 
-export default function NotificationsPage({ notices }: NotificationsPageProps) {
+export default function NotificationsPage({
+  notices,
+  recipients,
+}: NotificationsPageProps) {
   const router = useRouter();
   const feedback = useFeedback();
   const [sending, setSending] = useState(false);
   const [drafting, setDrafting] = useState(false);
+  const [audience, setAudience] = useState<"all" | "one">("all");
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [aiPrompt, setAiPrompt] = useState("");
   const [draft, setDraft] = useState<{ title: string; message: string } | null>(
     null,
@@ -52,12 +58,18 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
       return;
     }
 
+    if (audience === "one" && !selectedUserId) {
+      feedback.failed("Message not sent", "Choose a reader to notify.");
+      return;
+    }
+
     const data = new FormData(form);
     setSending(true);
 
     const result = await sendNotification({
       title: String(data.get("title") ?? "").trim(),
       message: String(data.get("message") ?? "").trim(),
+      ...(audience === "one" ? { userId: selectedUserId } : {}),
     });
 
     setSending(false);
@@ -68,6 +80,8 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
     }
 
     form.reset();
+    setSelectedUserId("");
+    setAudience("all");
     router.refresh();
     feedback.success("Notification sent", result.message);
   }
@@ -107,10 +121,19 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
     }
   }
 
+  const sendLabel =
+    audience === "one"
+      ? sending
+        ? "Sending..."
+        : "Send to reader"
+      : sending
+        ? "Sending..."
+        : "Send to all users";
+
   return (
     <AdminPageShell
       title="Notifications"
-      subtitle="Send a message to every reader"
+      subtitle="Send a message to every reader or one person"
       framed={false}
     >
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
@@ -211,9 +234,60 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
                 Compose Notification
               </h2>
               <p className="text-xs text-slate-400">
-                Paste the AI draft here, or write your own. This goes to all
-                readers and shows up on their notifications page.
+                Paste the AI draft here, or write your own. Choose all readers
+                or one person — it shows on their notifications page.
               </p>
+
+              <fieldset className="fieldset p-0">
+                <legend className="fieldset-legend">Send to</legend>
+                <div className="flex flex-wrap gap-4 pt-1">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="audience"
+                      className="radio radio-sm"
+                      checked={audience === "all"}
+                      onChange={() => setAudience("all")}
+                    />
+                    All readers
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="radio"
+                      name="audience"
+                      className="radio radio-sm"
+                      checked={audience === "one"}
+                      onChange={() => setAudience("one")}
+                    />
+                    Specific reader
+                  </label>
+                </div>
+              </fieldset>
+
+              {audience === "one" ? (
+                <fieldset className="fieldset p-0">
+                  <legend className="fieldset-legend">Reader</legend>
+                  <select
+                    className="select w-full"
+                    value={selectedUserId}
+                    onChange={(event) => setSelectedUserId(event.target.value)}
+                    required
+                  >
+                    <option value="">Select a reader</option>
+                    {recipients.map((reader) => (
+                      <option key={reader.id} value={reader.id}>
+                        {reader.name} ({reader.email})
+                      </option>
+                    ))}
+                  </select>
+                  {recipients.length === 0 ? (
+                    <p className="mt-1 text-xs text-slate-400">
+                      No signed-up readers available yet.
+                    </p>
+                  ) : null}
+                </fieldset>
+              ) : null}
+
               <FormField
                 label="Title"
                 name="title"
@@ -228,9 +302,7 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
                 required
               />
               <div className="flex justify-end pt-2">
-                <ModalButton type="submit">
-                  {sending ? "Sending..." : "Send to all users"}
-                </ModalButton>
+                <ModalButton type="submit">{sendLabel}</ModalButton>
               </div>
             </form>
           </AdminCard>
@@ -250,9 +322,12 @@ export default function NotificationsPage({ notices }: NotificationsPageProps) {
                     <p className="font-semibold text-slate-800">{notice.title}</p>
                     <p className="mt-1 text-sm text-slate-500">{notice.message}</p>
                     <p className="mt-2 text-xs text-slate-400">
-                      {notice.recipients}{" "}
-                      {notice.recipients === 1 ? "reader" : "readers"} ·{" "}
-                      {formatWhen(notice.createdAt)}
+                      {notice.recipientName
+                        ? `To ${notice.recipientName}`
+                        : `${notice.recipients} ${
+                            notice.recipients === 1 ? "reader" : "readers"
+                          }`}{" "}
+                      · {formatWhen(notice.createdAt)}
                     </p>
                   </li>
                 ))}

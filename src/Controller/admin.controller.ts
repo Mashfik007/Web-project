@@ -324,7 +324,11 @@ export async function deleteCommunityGroup(id: string) {
     return postCategory("/api/admin/delete-community-groups", { id });
 }
 
-export async function sendNotification(notice: { title: string; message: string }) {
+export async function sendNotification(notice: {
+    title: string;
+    message: string;
+    userId?: string;
+}) {
     return postCategory("/api/admin/send-notification", notice);
 }
 
