@@ -13,6 +13,7 @@ export const adminSections = [
   { slug: "reports", label: "Reports" },
   { slug: "notifications", label: "Notifications" },
   { slug: "barcode", label: "Barcode / QR" },
+  { slug: "thank-you", label: "Thank You" },
 ] as const;
 
 export type AdminSectionSlug = (typeof adminSections)[number]["slug"];

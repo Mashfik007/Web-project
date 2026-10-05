@@ -184,6 +184,15 @@ const sectionIcons: Record<string, ReactNode> = {
       className={iconClass}
     />
   ),
+  "thank-you": (
+    <Image
+      src="/svg/heart.svg"
+      alt="Thank you"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
 };
 
 export default function AdminSidebar({ children }: { children: ReactNode }) {
