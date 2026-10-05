@@ -3,7 +3,7 @@ import type { BookDetails } from "@/types/bookDetails";
 interface BookHeaderProps {
   book: Pick<
     BookDetails,
-    "tags" | "title" | "author" | "rating" | "description"
+    "tags" | "title" | "author" | "rating" | "description" | "availability"
   >;
 }
 
@@ -55,6 +55,20 @@ export default function BookHeader({ book }: BookHeaderProps) {
 
       <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-600">
         {book.description}
+      </p>
+
+      <p className="mt-4 text-sm text-slate-600">
+        <span
+          className={`font-semibold ${
+            book.availability.current > 0 ? "text-emerald-600" : "text-rose-600"
+          }`}
+        >
+          {book.availability.current}
+        </span>
+        <span className="text-slate-500">
+          {" "}
+          of {book.availability.total} copies available
+        </span>
       </p>
     </div>
   );

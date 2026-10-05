@@ -90,7 +90,11 @@ export default function BookSidebar({ userId, book }: BookSidebarProps) {
 
       <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-emerald-500" />
+          <span
+            className={`size-2 rounded-full ${
+              book.availability.current > 0 ? "bg-emerald-500" : "bg-rose-500"
+            }`}
+          />
           <p className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
             Copies Available
           </p>
@@ -100,6 +104,11 @@ export default function BookSidebar({ userId, book }: BookSidebarProps) {
           <span className="font-normal text-slate-500">
             of {book.availability.total}
           </span>
+        </p>
+        <p className="mt-1 text-xs text-slate-400">
+          {book.availability.current > 0
+            ? "In stock from library inventory"
+            : "Currently out of stock"}
         </p>
       </div>
 

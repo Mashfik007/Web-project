@@ -10,9 +10,10 @@ type Tab = (typeof TABS)[number];
 
 interface BookTabsProps {
   metadata: BookDetails["metadata"];
+  availability: BookDetails["availability"];
 }
 
-export default function BookTabs({ metadata }: BookTabsProps) {
+export default function BookTabs({ metadata, availability }: BookTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>("Details");
 
   return (
@@ -32,7 +33,9 @@ export default function BookTabs({ metadata }: BookTabsProps) {
       </div>
 
       <div className="mt-6">
-        {activeTab === "Details" && <DetailsTab metadata={metadata} />}
+        {activeTab === "Details" && (
+          <DetailsTab metadata={metadata} availability={availability} />
+        )}
         {activeTab === "Reviews" && (
           <p className="py-8 text-center text-sm text-slate-500">
             Reviews coming soon.

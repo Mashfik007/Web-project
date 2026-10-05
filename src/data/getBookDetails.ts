@@ -76,7 +76,7 @@ function toBookDetails(book: BookRecord): BookDetails {
       series: book.metadata?.series ?? "",
       isbn: book.metadata?.isbn ?? "",
       published: book.metadata?.published ?? 0,
-      copiesHeld: book.metadata?.copiesHeld ?? "",
+      copiesHeld: `${book.availability?.current ?? 0} of ${book.availability?.total ?? 0} available`,
       pages: book.metadata?.pages ?? 0,
       category: book.metadata?.category ?? "",
       deweyDecimal: book.metadata?.deweyDecimal ?? "",

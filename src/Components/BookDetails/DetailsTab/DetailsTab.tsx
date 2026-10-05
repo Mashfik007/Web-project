@@ -2,6 +2,7 @@ import type { BookDetails } from "@/types/bookDetails";
 
 interface DetailsTabProps {
   metadata: BookDetails["metadata"];
+  availability: BookDetails["availability"];
 }
 
 type DetailField = {
@@ -20,7 +21,10 @@ function DetailItem({ label, value }: DetailField) {
   );
 }
 
-export default function DetailsTab({ metadata }: DetailsTabProps) {
+export default function DetailsTab({
+  metadata,
+  availability,
+}: DetailsTabProps) {
   const columns: DetailField[][] = [
     [
       { label: "Publisher", value: metadata.publisher },
@@ -30,7 +34,10 @@ export default function DetailsTab({ metadata }: DetailsTabProps) {
     [
       { label: "ISBN", value: metadata.isbn },
       { label: "Published", value: metadata.published },
-      { label: "Copies Held", value: metadata.copiesHeld },
+      {
+        label: "Available",
+        value: `${availability.current} of ${availability.total}`,
+      },
     ],
     [
       { label: "Pages", value: `${metadata.pages} pages` },
