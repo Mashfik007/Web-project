@@ -48,6 +48,28 @@ export default function BookSidebar({ userId, book }: BookSidebarProps) {
     router.refresh();
   }
 
+  async function copyShareLink() {
+    const url = `${window.location.origin}/user/${userId}/browsebook/${book.id}`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const input = document.createElement("textarea");
+        input.value = url;
+        input.setAttribute("readonly", "");
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        document.body.removeChild(input);
+      }
+      feedback.success("Link copied", "You can paste it anywhere.");
+    } catch {
+      feedback.failed("Could not copy link", "Copy this link manually: " + url);
+    }
+  }
+
   return (
     <aside className="flex flex-col gap-4">
       <div className="relative aspect-3/4 w-full overflow-hidden rounded-2xl shadow-md">
@@ -149,7 +171,7 @@ export default function BookSidebar({ userId, book }: BookSidebarProps) {
         message={`Copy a Folio link for "${book.title}" to send to a friend.`}
         confirmLabel="Copy link"
         onConfirm={() => {
-          feedback.success("Link copied", "You can paste it anywhere.");
+          void copyShareLink();
         }}
       />
 
