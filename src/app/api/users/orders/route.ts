@@ -117,13 +117,44 @@ export async function POST(request: Request) {
       await Payment.findByIdAndDelete(existingPayment._id);
     }
 
-    const book = await Book.findById(bookId).select(
-      "title author coverImage price",
-    );
+    const book = await Book.findOneAndUpdate(
+      {
+        _id: bookId,
+        "availability.current": { $gte: quantity },
+        "availability.total": { $gte: quantity },
+      },
+      {
+        $inc: {
+          "availability.current": -quantity,
+          "availability.total": -quantity,
+        },
+      },
+      { new: true },
+    ).select("title author coverImage price availability");
+
     if (!book) {
-      return NextResponse.json(new ApiError(404, "Book not found"), {
-        status: 404,
-      });
+      const exists = await Book.findById(bookId).select("_id");
+      if (!exists) {
+        return NextResponse.json(new ApiError(404, "Book not found"), {
+          status: 404,
+        });
+      }
+      return NextResponse.json(
+        new ApiError(400, "Not enough copies available to purchase"),
+        { status: 400 },
+      );
+    }
+
+    async function restoreStock() {
+      await Book.updateOne(
+        { _id: bookId },
+        {
+          $inc: {
+            "availability.current": quantity,
+            "availability.total": quantity,
+          },
+        },
+      );
     }
 
     const unitPrice = Number(book.price?.amount ?? 0);
@@ -135,32 +166,38 @@ export async function POST(request: Request) {
     const createdOrderNumber = orderNumber();
     const now = new Date();
 
-    const order = await Order.create({
-      userId,
-      bookId,
-      orderNumber: createdOrderNumber,
-      bookTitle: book.title,
-      author: book.author || "Unknown",
-      coverImage: book.coverImage
-        ? `/api/uploads/${book.coverImage}`
-        : "/svg/book.svg",
-      quantity,
-      unitPrice,
-      deliveryFee,
-      currency,
-      total,
-      fullName,
-      phone,
-      address,
-      city,
-      paymentMethod,
-      methodId,
-      transactionId,
-      paymentPhone,
-      paymentStatus: "verified",
-      paymentVerifiedAt: now,
-      status: "processing",
-    });
+    let order;
+    try {
+      order = await Order.create({
+        userId,
+        bookId,
+        orderNumber: createdOrderNumber,
+        bookTitle: book.title,
+        author: book.author || "Unknown",
+        coverImage: book.coverImage
+          ? `/api/uploads/${book.coverImage}`
+          : "/svg/book.svg",
+        quantity,
+        unitPrice,
+        deliveryFee,
+        currency,
+        total,
+        fullName,
+        phone,
+        address,
+        city,
+        paymentMethod,
+        methodId,
+        transactionId,
+        paymentPhone,
+        paymentStatus: "verified",
+        paymentVerifiedAt: now,
+        status: "processing",
+      });
+    } catch (error) {
+      await restoreStock();
+      throw error;
+    }
 
     let payment;
     try {
@@ -181,6 +218,7 @@ export async function POST(request: Request) {
       });
     } catch (error: any) {
       await Order.findByIdAndDelete(order._id);
+      await restoreStock();
       if (error?.code === 11000) {
         return NextResponse.json(
           new ApiError(409, "This transaction ID was already used"),
