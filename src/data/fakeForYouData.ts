@@ -23,13 +23,6 @@ export const fakeForYouData: ForYouData = {
       { category: "Mystery", count: 3, percentage: 13, color: "#f59e0b" },
       { category: "Non-Fiction", count: 1, percentage: 5, color: "#14b8a6" },
     ],
-    blendSlider: {
-      leftLabel: "Fiction",
-      rightLabel: "Sci-Fi",
-      value: 50,
-      balanceLabel: "Balanced Mix",
-      hint: "Drag to tune recommendations between your top categories.",
-    },
   },
   sections: [
     {

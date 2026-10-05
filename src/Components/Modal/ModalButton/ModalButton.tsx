@@ -5,11 +5,13 @@ export default function ModalButton({
   onClick,
   type = "button",
   tone = "primary",
+  disabled = false,
 }: {
   children: ReactNode;
   onClick?: () => void;
   type?: "button" | "submit";
   tone?: "primary" | "secondary" | "danger" | "success";
+  disabled?: boolean;
 }) {
   const tones = {
     primary: "btn-primary",
@@ -19,7 +21,12 @@ export default function ModalButton({
   };
 
   return (
-    <button type={type} onClick={onClick} className={`btn ${tones[tone]}`}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`btn ${tones[tone]}`}
+    >
       {children}
     </button>
   );

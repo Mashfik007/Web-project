@@ -13,6 +13,7 @@ import type { RecommendedBook } from "@/types/forYou";
 interface RecommendationCardProps {
   book: RecommendedBook;
   userId: string;
+  onWantToReadChange?: () => void | Promise<void>;
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -31,6 +32,7 @@ function StarRating({ rating }: { rating: number }) {
 export default function RecommendationCard({
   book,
   userId,
+  onWantToReadChange,
 }: RecommendationCardProps) {
   const router = useRouter();
   const feedback = useFeedback();
@@ -55,7 +57,11 @@ export default function RecommendationCard({
       return;
     }
 
-    feedback.success("Blind date booked", payload.message);
+    feedback.success(
+      "Blind date booked",
+      payload.message || "Wrapped and added to Want to Read on your shelf.",
+    );
+    await onWantToReadChange?.();
     router.refresh();
   }
 

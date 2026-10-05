@@ -1,7 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
+  ConfirmModal,
   FormField,
   FormModal,
   StatusModal,
@@ -13,10 +16,161 @@ import type { ForYouHeader } from "@/types/forYou";
 
 interface RemixHeaderProps {
   header: ForYouHeader;
+  userId: string;
+  onWantToReadChange?: () => void | Promise<void>;
 }
 
-export default function RemixHeader({ header }: RemixHeaderProps) {
+type SeriesMatch = {
+  bookId: string;
+  title: string;
+  author: string;
+  series: string;
+  volume: number;
+  available: boolean;
+  availability: { current: number; total: number };
+  usedAi?: boolean;
+  reason?: string;
+};
+
+export default function RemixHeader({
+  header,
+  userId,
+  onWantToReadChange,
+}: RemixHeaderProps) {
+  const router = useRouter();
   const feedback = useFeedback();
+  const [seriesMatch, setSeriesMatch] = useState<SeriesMatch | null>(null);
+
+  async function startBlindDate(form: HTMLFormElement) {
+    if (!formHasValues(form, ["mood", "length"])) {
+      feedback.failed(
+        "Could not match",
+        "Choose a mood and length for your surprise book.",
+      );
+      return false;
+    }
+
+    const data = new FormData(form);
+    try {
+      const response = await fetch("/api/users/for-you/blind-date", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          mood: String(data.get("mood") ?? ""),
+          length: String(data.get("length") ?? ""),
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        feedback.failed(
+          "Could not match",
+          payload.message || "No surprise book could be wrapped.",
+        );
+        return false;
+      }
+
+      const usedAi = Boolean(payload.data?.usedAi);
+      feedback.success(
+        usedAi ? "AI found your date" : "Your date is ready",
+        payload.message ||
+          "A wrapped pick was added to Want to Read on your shelf.",
+      );
+      await onWantToReadChange?.();
+      router.refresh();
+      return true;
+    } catch {
+      feedback.failed("Could not match", "Could not reach the server.");
+      return false;
+    }
+  }
+
+  async function findNextVolume(form: HTMLFormElement) {
+    if (!formHasValues(form, ["series"])) {
+      feedback.failed(
+        "Series not found",
+        "Enter a series name to find the next volume.",
+      );
+      return false;
+    }
+
+    const data = new FormData(form);
+    const series = String(data.get("series") ?? "").trim();
+    const volume = Number(data.get("volume") || 1);
+
+    try {
+      const response = await fetch("/api/users/for-you/series-next", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ series, volume }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        setSeriesMatch(null);
+        feedback.failed(
+          "Series not found",
+          payload.message || "Could not find the next volume.",
+        );
+        return false;
+      }
+
+      const match = payload.data as SeriesMatch;
+      setSeriesMatch(match);
+
+      if (!match.available) {
+        feedback.failed(
+          "Volume unavailable",
+          `"${match.title}" (vol. ${match.volume}) is in the catalog but has no copies available right now.`,
+        );
+        return false;
+      }
+
+      if (match.usedAi) {
+        feedback.success(
+          "AI found next volume",
+          match.reason ||
+            `"${match.title}" looks like volume ${match.volume}. Confirm to reserve.`,
+        );
+      }
+
+      openModal("series-reserve");
+      return true;
+    } catch {
+      feedback.failed("Series not found", "Could not reach the server.");
+      return false;
+    }
+  }
+
+  async function reserveNextVolume() {
+    if (!seriesMatch?.available) return;
+
+    try {
+      const response = await fetch("/api/users/for-you/series-reserve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookId: seriesMatch.bookId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        feedback.failed(
+          "Could not reserve",
+          payload.message || "Reservation failed.",
+        );
+        return;
+      }
+
+      feedback.success(
+        "Volume reserved",
+        payload.message ||
+          `"${seriesMatch.title}" was reserved and added to your shelf.`,
+      );
+      setSeriesMatch(null);
+      await onWantToReadChange?.();
+      router.refresh();
+    } catch {
+      feedback.failed("Could not reserve", "Could not reach the server.");
+    }
+  }
 
   return (
     <section>
@@ -81,26 +235,24 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
           />
           Series Navigator
         </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            void onWantToReadChange?.();
+          }}
+          className="btn btn-ghost"
+        >
+          Want to Read
+        </button>
       </div>
 
       <FormModal
         id="blind-date"
         title="Start a Blind Date"
-        submitLabel="Match me"
-        onSubmit={(form) => {
-          if (!formHasValues(form, ["mood", "length"])) {
-            feedback.failed(
-              "Could not match",
-              "Choose a mood and length for your surprise book.",
-            );
-            return;
-          }
-          const data = new FormData(form);
-          feedback.success(
-            "Your date is ready",
-            `A ${data.get("length")} ${data.get("mood")} pick is waiting on your shelf.`,
-          );
-        }}
+        submitLabel="Match with AI"
+        loadingLabel="Choosing for you..."
+        onSubmit={startBlindDate}
       >
         <FormField
           label="Mood"
@@ -116,26 +268,18 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
           required
           options={["Short read", "Standard", "Epic"]}
         />
+        <p className="text-xs text-slate-500">
+          AI picks from your real available catalog (and your shelf tastes),
+          wraps the cover, and adds it under Want to Read on My Shelf.
+        </p>
       </FormModal>
 
       <FormModal
         id="series-navigator"
         title="Series Navigator"
-        submitLabel="Find next book"
-        onSubmit={(form) => {
-          if (!formHasValues(form, ["series"])) {
-            feedback.failed(
-              "Series not found",
-              "Enter a series name to find the next volume.",
-            );
-            return;
-          }
-          const data = new FormData(form);
-          feedback.success(
-            "Next volume found",
-            `"${data.get("series")}" — volume ${data.get("volume") || "2"} is available to reserve.`,
-          );
-        }}
+        submitLabel="Find with AI"
+        loadingLabel="Searching your catalog..."
+        onSubmit={findNextVolume}
       >
         <FormField
           label="Series name"
@@ -148,8 +292,27 @@ export default function RemixHeader({ header }: RemixHeaderProps) {
           name="volume"
           type="number"
           placeholder="1"
+          defaultValue="1"
         />
+        <p className="text-xs text-slate-500">
+          AI searches your real catalog for the next volume after the one you
+          entered, then checks stock before you reserve.
+        </p>
       </FormModal>
+
+      <ConfirmModal
+        id="series-reserve"
+        title="Reserve next volume"
+        message={
+          seriesMatch
+            ? `"${seriesMatch.title}" is volume ${seriesMatch.volume} of ${seriesMatch.series}. ${seriesMatch.availability.current} of ${seriesMatch.availability.total} copies are available. Reserve it and add it to Want to Read?`
+            : "Reserve this volume?"
+        }
+        confirmLabel="Reserve"
+        onConfirm={() => {
+          void reserveNextVolume();
+        }}
+      />
 
       <StatusModal
         id={feedback.id}

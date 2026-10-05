@@ -17,13 +17,6 @@ export type BorrowingHabits = {
   months: number;
   categoryCount: number;
   categories: BorrowingHabitCategory[];
-  blendSlider: {
-    leftLabel: string;
-    rightLabel: string;
-    value: number;
-    balanceLabel: string;
-    hint: string;
-  };
 };
 
 export type RecommendedBook = {

@@ -12,6 +12,18 @@ const Reservation_schema = new mongoose.Schema(
       required: [true, "book is required"],
       trim: true,
     },
+    userId: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
+    },
+    bookId: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
+    },
     reservedDate: {
       type: String,
       required: [true, "reserved date is required"],
@@ -33,8 +45,21 @@ const Reservation_schema = new mongoose.Schema(
   },
 );
 
+const existingReservation = mongoose.models.reservations;
+if (existingReservation) {
+  if (!existingReservation.schema.path("userId")) {
+    existingReservation.schema.add({
+      userId: { type: String, default: "", trim: true, index: true },
+    });
+  }
+  if (!existingReservation.schema.path("bookId")) {
+    existingReservation.schema.add({
+      bookId: { type: String, default: "", trim: true, index: true },
+    });
+  }
+}
+
 const Reservation =
-  mongoose.models.reservations ||
-  mongoose.model("reservations", Reservation_schema);
+  existingReservation || mongoose.model("reservations", Reservation_schema);
 
 export { Reservation, Reservation_schema };

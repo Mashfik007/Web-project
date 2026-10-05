@@ -14,12 +14,14 @@ interface ReadingBookCardProps {
   userId: string;
   book: ShelfBook;
   variant?: "reading" | "simple";
+  canRemove?: boolean;
 }
 
 export default function ReadingBookCard({
   userId,
   book,
   variant = "reading",
+  canRemove = false,
 }: ReadingBookCardProps) {
   const router = useRouter();
   const progress =
@@ -29,6 +31,7 @@ export default function ReadingBookCard({
   const feedback = useFeedback();
   const renewId = `renew-${book.id}`;
   const returnId = `return-${book.id}`;
+  const removeId = `remove-wishlist-${book.id}`;
 
   async function updateLoan(action: "renew" | "return") {
     try {
@@ -50,6 +53,29 @@ export default function ReadingBookCard({
         action === "renew" ? "Book renewed" : "Book returned",
         payload.message,
       );
+      router.refresh();
+    } catch {
+      feedback.failed("Request failed", "Could not reach the server.");
+    }
+  }
+
+  async function removeFromWishlist() {
+    try {
+      const response = await fetch("/api/users/shelf/wishlist", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, loanId: book.id }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        feedback.failed(
+          "Could not remove",
+          payload.message || "Request failed",
+        );
+        return;
+      }
+
+      feedback.success("Removed", payload.message || "Removed from Want to Read");
       router.refresh();
     } catch {
       feedback.failed("Request failed", "Could not reach the server.");
@@ -163,17 +189,30 @@ export default function ReadingBookCard({
                   ? `Completed · ${book.dueDate}`
                   : book.checkedOut
                     ? "Returned to the library"
-                    : "On your wishlist"}
+                    : book.blindDate
+                      ? "Blind date surprise — cover stays hidden until you borrow it"
+                      : "On your wishlist"}
               </p>
-              {book.checkedOut ? (
-                <button
-                  type="button"
-                  onClick={() => openModal(returnId)}
-                  className="btn btn-ghost btn-sm mt-3"
-                >
-                  Return
-                </button>
-              ) : null}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {book.checkedOut ? (
+                  <button
+                    type="button"
+                    onClick={() => openModal(returnId)}
+                    className="btn btn-ghost btn-sm"
+                  >
+                    Return
+                  </button>
+                ) : null}
+                {canRemove ? (
+                  <button
+                    type="button"
+                    onClick={() => openModal(removeId)}
+                    className="btn btn-error btn-soft btn-sm"
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
             </div>
           )}
         </div>
@@ -198,6 +237,18 @@ export default function ReadingBookCard({
           void updateLoan("return");
         }}
       />
+      {canRemove ? (
+        <ConfirmModal
+          id={removeId}
+          title="Remove from Want to Read"
+          message={`Remove "${book.blindDate ? "this blind date pick" : book.title}" from your wishlist?`}
+          confirmLabel="Delete"
+          tone="danger"
+          onConfirm={() => {
+            void removeFromWishlist();
+          }}
+        />
+      ) : null}
       <StatusModal
         id={feedback.id}
         variant={feedback.status.variant}

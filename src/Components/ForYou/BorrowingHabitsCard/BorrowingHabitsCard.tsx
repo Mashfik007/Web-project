@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { BorrowingHabits } from "@/types/forYou";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -53,8 +52,6 @@ function DonutChart({
 export default function BorrowingHabitsCard({
   habits,
 }: BorrowingHabitsCardProps) {
-  const [blendValue, setBlendValue] = useState(habits.blendSlider.value);
-
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="text-sm font-semibold text-slate-800">
@@ -92,38 +89,6 @@ export default function BorrowingHabitsCard({
             </li>
           ))}
         </ul>
-      </div>
-
-      <div className="mt-6 border-t border-slate-100 pt-5">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold text-slate-700">
-            Category Blend Slider
-          </p>
-          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
-            {habits.blendSlider.balanceLabel}
-          </span>
-        </div>
-
-        <div className="mt-3 flex items-center gap-3">
-          <span className="text-[10px] font-medium text-slate-500">
-            {habits.blendSlider.leftLabel}
-          </span>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={blendValue}
-            onChange={(event) => setBlendValue(Number(event.target.value))}
-            className="range range-xs range-primary flex-1"
-          />
-          <span className="text-[10px] font-medium text-slate-500">
-            {habits.blendSlider.rightLabel}
-          </span>
-        </div>
-
-        <p className="mt-2 text-[10px] text-slate-400">
-          {habits.blendSlider.hint}
-        </p>
       </div>
     </article>
   );

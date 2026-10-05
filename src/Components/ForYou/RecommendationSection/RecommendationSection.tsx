@@ -5,6 +5,7 @@ import type { RecommendationSection as RecommendationSectionData } from "@/types
 interface RecommendationSectionProps {
   section: RecommendationSectionData;
   userId: string;
+  onWantToReadChange?: () => void | Promise<void>;
 }
 
 const iconThemes = {
@@ -72,6 +73,7 @@ function renderDescription(
 export default function RecommendationSection({
   section,
   userId,
+  onWantToReadChange,
 }: RecommendationSectionProps) {
   const theme = iconThemes[section.iconTheme];
 
@@ -108,7 +110,12 @@ export default function RecommendationSection({
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {section.books.map((book) => (
-          <RecommendationCard key={book.id} book={book} userId={userId} />
+          <RecommendationCard
+            key={book.id}
+            book={book}
+            userId={userId}
+            onWantToReadChange={onWantToReadChange}
+          />
         ))}
       </div>
     </section>

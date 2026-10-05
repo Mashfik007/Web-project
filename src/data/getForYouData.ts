@@ -114,12 +114,6 @@ export async function getForYouData(userId: string): Promise<ForYouData> {
 
   const left = top[0]?.category ?? "Fiction";
   const right = top[1]?.category ?? left;
-  const leftCount = top[0]?.count ?? 0;
-  const rightCount = top[1]?.count ?? 0;
-  const blend =
-    leftCount + rightCount === 0
-      ? 50
-      : Math.round((leftCount / (leftCount + rightCount)) * 100);
 
   const exploreCategories: ExploreCategory[] = ranked.map(
     ([category], index) => ({
@@ -148,13 +142,6 @@ export async function getForYouData(userId: string): Promise<ForYouData> {
       months: 12,
       categoryCount: ranked.length,
       categories: habits,
-      blendSlider: {
-        leftLabel: left,
-        rightLabel: right,
-        value: blend,
-        balanceLabel: left === right ? left : "Catalog mix",
-        hint: "Shares follow the categories on the books in the library.",
-      },
     },
     sections: [
       {

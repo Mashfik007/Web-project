@@ -65,6 +65,7 @@ export default function ShelfTabs({
               userId={userId}
               book={book}
               variant={activeTab === "currently-reading" ? "reading" : "simple"}
+              canRemove={activeTab === "want-to-read"}
             />
           ))
         )}

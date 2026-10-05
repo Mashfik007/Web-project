@@ -14,13 +14,25 @@ interface BrowsePageProps {
   browse: BrowsePageData;
 }
 
-function matchesFilters(book: Book, filters: BrowseFilters) {
+function matchesQuery(book: Book, query: string) {
+  const term = query.trim().toLowerCase();
+  if (!term) return true;
+
+  return (
+    book.title.toLowerCase().includes(term) ||
+    book.author.toLowerCase().includes(term) ||
+    book.category.toLowerCase().includes(term)
+  );
+}
+
+function matchesFilters(book: Book, filters: BrowseFilters, query: string) {
   const formatMatches =
     filters.format === "All" ||
     (filters.format === "Physical" && book.format === "PHYSICAL") ||
     (filters.format === "Digital" && book.format === "DIGITAL");
 
   return (
+    matchesQuery(book, query) &&
     (filters.categories.length === 0 ||
       filters.categories.includes(book.category)) &&
     (filters.availability === "All" ||
@@ -76,14 +88,15 @@ export default function BrowsePage({ browse }: BrowsePageProps) {
   );
   const [filters, setFilters] = useState(defaults);
   const [sort, setSort] = useState("Most Relevant");
+  const [query, setQuery] = useState("");
 
   const visibleBooks = useMemo(
     () =>
       sortBooks(
-        browse.books.filter((book) => matchesFilters(book, filters)),
+        browse.books.filter((book) => matchesFilters(book, filters, query)),
         sort,
       ),
-    [browse.books, filters, sort],
+    [browse.books, filters, query, sort],
   );
 
   return (
@@ -106,15 +119,26 @@ export default function BrowsePage({ browse }: BrowsePageProps) {
           <BrowseToolbar
             total={visibleBooks.length}
             sort={sort}
+            query={query}
             onSortChange={setSort}
+            onQueryChange={setQuery}
           />
 
           <div className="mt-5">
-            <BookGrid books={visibleBooks} userId={browse.userId} />
+            {visibleBooks.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-12 text-center text-sm text-slate-500">
+                {query.trim()
+                  ? `No books match “${query.trim()}”.`
+                  : "No books match the selected filters."}
+              </p>
+            ) : (
+              <BookGrid books={visibleBooks} userId={browse.userId} />
+            )}
           </div>
 
           <p className="mt-8 text-center text-xs text-slate-500">
             Showing {visibleBooks.length} of {browse.books.length} results
+            {query.trim() ? ` for “${query.trim()}”` : ""}
           </p>
         </section>
       </div>
