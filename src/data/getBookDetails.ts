@@ -1,7 +1,8 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { Book } from "@/Model/Books";
+import { BookReview } from "@/Model/BookReviews";
 import { ShelfLoan } from "@/Model/ShelfLoans";
-import type { BookDetails } from "@/types/bookDetails";
+import type { BookDetails, BookReviewItem } from "@/types/bookDetails";
 import mongoose from "mongoose";
 
 type BookRecord = {
@@ -91,6 +92,43 @@ function toBookDetails(book: BookRecord): BookDetails {
       label: book.matchScore?.label ?? "",
       description: book.matchScore?.description ?? "",
     },
+    reviews: [],
+    canReview: false,
+    viewerReview: null,
+  };
+}
+
+function reviewInitials(name: string) {
+  const letters = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "");
+  return letters.join("") || "R";
+}
+
+function toReviewItem(review: {
+  _id: { toString(): string };
+  userId: string;
+  userName: string;
+  rating: number;
+  note?: string;
+  createdAt?: Date;
+}): BookReviewItem {
+  return {
+    id: review._id.toString(),
+    userId: review.userId,
+    userName: review.userName,
+    initials: reviewInitials(review.userName),
+    rating: review.rating,
+    note: review.note ?? "",
+    createdAt: review.createdAt
+      ? new Date(review.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "",
   };
 }
 
@@ -170,12 +208,52 @@ export async function getBookDetails(
     return null;
   }
 
-  const holders = await communityHolders(bookId, viewerId);
+  const [holders, returnedLoan, reviewRecords] = await Promise.all([
+    communityHolders(bookId, viewerId),
+    ShelfLoan.findOne({
+      userId: viewerId,
+      bookId,
+      status: "returned",
+    })
+      .select("_id")
+      .lean(),
+    BookReview.find({ bookId })
+      .sort({ createdAt: -1 })
+      .lean<
+        {
+          _id: { toString(): string };
+          userId: string;
+          userName: string;
+          rating: number;
+          note?: string;
+          createdAt?: Date;
+        }[]
+      >(),
+  ]);
+
   const book = toBookDetails(record);
   book.community = {
     totalOnShelf: holders.length,
     members: holders,
   };
+  book.reviews = reviewRecords.map(toReviewItem);
+  book.canReview = Boolean(returnedLoan);
+  book.viewerReview =
+    book.reviews.find((review) => review.userId === viewerId) ?? null;
+
+  if (book.reviews.length > 0) {
+    const total = book.reviews.length;
+    const score =
+      Math.round(
+        (book.reviews.reduce((sum, review) => sum + review.rating, 0) / total) *
+          10,
+      ) / 10;
+    book.rating = {
+      score,
+      totalRatings: total,
+      totalReviews: total,
+    };
+  }
 
   return book;
 }

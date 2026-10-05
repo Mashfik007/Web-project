@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import DetailsTab from "../DetailsTab/DetailsTab";
-import type { BookDetails } from "@/types/bookDetails";
+import ReviewsTab from "../ReviewsTab/ReviewsTab";
+import type { BookDetails, BookReviewItem } from "@/types/bookDetails";
 
 const TABS = ["Details", "Reviews", "Stats", "Related Books"] as const;
 
@@ -11,9 +12,14 @@ type Tab = (typeof TABS)[number];
 interface BookTabsProps {
   metadata: BookDetails["metadata"];
   availability: BookDetails["availability"];
+  reviews: BookReviewItem[];
 }
 
-export default function BookTabs({ metadata, availability }: BookTabsProps) {
+export default function BookTabs({
+  metadata,
+  availability,
+  reviews,
+}: BookTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>("Details");
 
   return (
@@ -28,6 +34,9 @@ export default function BookTabs({ metadata, availability }: BookTabsProps) {
             className={`tab ${activeTab === tab ? "tab-active" : ""}`}
           >
             {tab}
+            {tab === "Reviews" && reviews.length > 0
+              ? ` (${reviews.length})`
+              : ""}
           </button>
         ))}
       </div>
@@ -36,11 +45,7 @@ export default function BookTabs({ metadata, availability }: BookTabsProps) {
         {activeTab === "Details" && (
           <DetailsTab metadata={metadata} availability={availability} />
         )}
-        {activeTab === "Reviews" && (
-          <p className="py-8 text-center text-sm text-slate-500">
-            Reviews coming soon.
-          </p>
-        )}
+        {activeTab === "Reviews" && <ReviewsTab reviews={reviews} />}
         {activeTab === "Stats" && (
           <p className="py-8 text-center text-sm text-slate-500">
             Reading stats coming soon.

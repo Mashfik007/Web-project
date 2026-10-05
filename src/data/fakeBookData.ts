@@ -54,6 +54,9 @@ export const fakeBookData: BookDetails = {
     description:
       "You tend to enjoy introspective fiction with hopeful themes and parallel-life narratives.",
   },
+  reviews: [],
+  canReview: false,
+  viewerReview: null,
 };
 
 function buildBookDetailsFromCatalog(catalogBook: Book): BookDetails {
@@ -98,6 +101,9 @@ function buildBookDetailsFromCatalog(catalogBook: Book): BookDetails {
       label: "Good Match",
       description: `Based on your interest in ${catalogBook.category.toLowerCase()} books.`,
     },
+    reviews: [],
+    canReview: false,
+    viewerReview: null,
   };
 }
 

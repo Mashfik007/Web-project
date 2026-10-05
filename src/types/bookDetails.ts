@@ -5,6 +5,16 @@ export type BookCommunityMember = {
   color: string;
 };
 
+export type BookReviewItem = {
+  id: string;
+  userId: string;
+  userName: string;
+  initials: string;
+  rating: number;
+  note: string;
+  createdAt: string;
+};
+
 export type BookDetails = {
   id: string | number;
   title: string;
@@ -46,4 +56,7 @@ export type BookDetails = {
     label: string;
     description: string;
   };
+  reviews: BookReviewItem[];
+  canReview: boolean;
+  viewerReview: BookReviewItem | null;
 };
