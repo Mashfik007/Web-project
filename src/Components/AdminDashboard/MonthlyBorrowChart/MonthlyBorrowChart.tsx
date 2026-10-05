@@ -27,7 +27,14 @@ export default function MonthlyBorrowChart({
   data,
   yearLabel,
 }: MonthlyBorrowChartProps) {
-  const top = axisTop(data.flatMap((point) => [point.borrows, point.returns]));
+  const top = axisTop(
+    data.flatMap((point) => [
+      point.borrows,
+      point.returns,
+      point.purchases,
+      point.downloads,
+    ]),
+  );
   const ticks = [0, 1, 2, 3, 4].map((step) => Math.round((top / 4) * step));
 
   return (
@@ -35,10 +42,10 @@ export default function MonthlyBorrowChart({
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-slate-800">
-            Monthly Borrow Activity
+            Monthly Activity
           </h2>
           <p className="mt-0.5 text-xs text-slate-400">
-            Borrows and returns in {yearLabel}
+            Borrows, returns, purchases, and downloads in {yearLabel}
           </p>
         </div>
         <span className="text-xs font-semibold text-slate-500">{yearLabel}</span>
@@ -58,6 +65,14 @@ export default function MonthlyBorrowChart({
               <linearGradient id="returnFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.28} />
                 <stop offset="95%" stopColor="#38BDF8" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="purchaseFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.28} />
+                <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id="downloadFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#6366F1" stopOpacity={0.28} />
+                <stop offset="95%" stopColor="#6366F1" stopOpacity={0.02} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -108,6 +123,22 @@ export default function MonthlyBorrowChart({
               stroke="#38BDF8"
               strokeWidth={2.4}
               fill="url(#returnFill)"
+            />
+            <Area
+              type="monotone"
+              dataKey="purchases"
+              name="Purchases"
+              stroke="#F59E0B"
+              strokeWidth={2.4}
+              fill="url(#purchaseFill)"
+            />
+            <Area
+              type="monotone"
+              dataKey="downloads"
+              name="Downloads"
+              stroke="#6366F1"
+              strokeWidth={2.4}
+              fill="url(#downloadFill)"
             />
           </AreaChart>
         </ResponsiveContainer>

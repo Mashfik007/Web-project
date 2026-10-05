@@ -1,7 +1,10 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { Book } from "@/Model/Books";
+import { DigitalResource } from "@/Model/DigitalResources";
+import { DownloadEvent } from "@/Model/DownloadEvents";
 import { Fine } from "@/Model/Fines";
 import { LibraryUser } from "@/Model/LibraryUsers";
+import { Order } from "@/Model/Orders";
 import { ReturnRecord } from "@/Model/Returns";
 import type {
   AdminReport,
@@ -24,7 +27,14 @@ type DatedCount = {
 };
 
 const periods = new Set<AdminReportPeriod>(["week", "month", "year", "custom"]);
-const tabs = new Set<AdminReportTab>(["borrows", "users", "fines", "inventory"]);
+const tabs = new Set<AdminReportTab>([
+  "borrows",
+  "users",
+  "fines",
+  "inventory",
+  "sales",
+  "downloads",
+]);
 
 export function reportPeriod(value: string | undefined): AdminReportPeriod {
   return periods.has(value as AdminReportPeriod)
@@ -322,6 +332,117 @@ export async function getAdminReports(
           book.metadata?.category || "—",
         value: String(book.availability?.current ?? 0),
         extra: String(book.availability?.total ?? 0),
+      })),
+    };
+  }
+
+  if (filters.tab === "sales") {
+    const orders = await Order.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+    })
+      .select("bookTitle fullName quantity total currency status createdAt")
+      .lean<
+        {
+          bookTitle: string;
+          fullName: string;
+          quantity: number;
+          total: number;
+          currency?: string;
+          status: string;
+          createdAt?: Date;
+        }[]
+      >();
+
+    const byBook = new Map<
+      string,
+      { copies: number; revenue: number; currency: string }
+    >();
+    for (const order of orders) {
+      const current = byBook.get(order.bookTitle) ?? {
+        copies: 0,
+        revenue: 0,
+        currency: order.currency || "৳",
+      };
+      current.copies += order.quantity;
+      current.revenue += order.total;
+      byBook.set(order.bookTitle, current);
+    }
+
+    const ranked = [...byBook.entries()]
+      .sort((left, right) => right[1].revenue - left[1].revenue)
+      .slice(0, 8);
+
+    return {
+      trends: fillTrend(
+        range.start,
+        range.end,
+        range.unit,
+        orders.map((order) => ({
+          date: dateKey(order.createdAt),
+          amount: order.total,
+        })),
+      ),
+      chartTitle: "Purchase Revenue",
+      seriesName: "Revenue",
+      tableTitle: "Top Purchased Books",
+      columns: ["Book", "Buyer focus", "Copies sold", "Revenue"],
+      rows: ranked.map(([title, stats]) => ({
+        primary: title,
+        secondary: `${orders.filter((order) => order.bookTitle === title).length} orders`,
+        value: String(stats.copies),
+        extra: `${stats.currency}${stats.revenue.toLocaleString()}`,
+      })),
+    };
+  }
+
+  if (filters.tab === "downloads") {
+    const [events, topResources] = await Promise.all([
+      DownloadEvent.find({
+        createdAt: { $gte: startDate, $lte: endDate },
+      })
+        .select("title format category createdAt")
+        .lean<
+          {
+            title: string;
+            format: string;
+            category?: string;
+            createdAt?: Date;
+          }[]
+        >(),
+      DigitalResource.find()
+        .select("title author format category downloads")
+        .sort({ downloads: -1, title: 1 })
+        .limit(8)
+        .lean<
+          {
+            title: string;
+            author?: string;
+            format: string;
+            category?: string;
+            downloads?: number;
+          }[]
+        >(),
+    ]);
+
+    return {
+      trends: fillTrend(
+        range.start,
+        range.end,
+        range.unit,
+        events.map((event) => ({
+          date: dateKey(event.createdAt),
+          amount: 1,
+        })),
+      ),
+      chartTitle: "PDF / Digital Downloads",
+      seriesName: "Downloads",
+      tableTitle: "Most Downloaded Resources",
+      columns: ["Title", "Format", "Downloads", "Category"],
+      rows: topResources.map((resource) => ({
+        primary: resource.title,
+        secondary: resource.format,
+        value: String(resource.downloads ?? 0),
+        extra: resource.category || "—",
       })),
     };
   }

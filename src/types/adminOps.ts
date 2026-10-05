@@ -83,7 +83,38 @@ export type AdminReportPoint = {
 
 export type AdminReportPeriod = "week" | "month" | "year" | "custom";
 
-export type AdminReportTab = "borrows" | "users" | "fines" | "inventory";
+export type AdminReportTab =
+  | "borrows"
+  | "users"
+  | "fines"
+  | "inventory"
+  | "sales"
+  | "downloads";
+
+export type AdminOrderStatus = "processing" | "in-transit" | "delivered";
+
+export type AdminOrder = {
+  id: string;
+  orderNumber: string;
+  member: string;
+  initials: string;
+  avatarClass: string;
+  book: string;
+  quantity: number;
+  total: number;
+  currency: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  status: AdminOrderStatus;
+  placedAt: string;
+};
+
+export type AdminOrderSummary = {
+  totalOrders: number;
+  revenue: number;
+  thisMonth: number;
+  processing: number;
+};
 
 export type AdminReportRow = {
   primary: string;

@@ -9,9 +9,9 @@ const iconWrap: Record<AdminStat["id"], string> = {
   "total-books": "bg-blue-50 text-blue-500",
   "active-users": "bg-violet-50 text-violet-500",
   "borrows-today": "bg-emerald-50 text-emerald-500",
-  overdue: "bg-red-50 text-red-500",
-  "fines-due": "bg-amber-50 text-amber-500",
-  reservations: "bg-cyan-50 text-cyan-500",
+  "purchases-today": "bg-amber-50 text-amber-500",
+  "downloads-today": "bg-indigo-50 text-indigo-500",
+  "fines-due": "bg-rose-50 text-rose-500",
 };
 
 function StatIcon({ id }: { id: AdminStat["id"] }) {
@@ -51,11 +51,11 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
     );
   }
 
-  if (id === "overdue") {
+  if (id === "purchases-today") {
     return (
       <Image
-        src="/svg/alert-triangle.svg"
-        alt="Overdue"
+        src="/svg/cart.svg"
+        alt="Purchases"
         width={16}
         height={16}
         className="size-4"
@@ -63,11 +63,11 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
     );
   }
 
-  if (id === "fines-due") {
+  if (id === "downloads-today") {
     return (
       <Image
-        src="/svg/target.svg"
-        alt="Fines"
+        src="/svg/shelf.svg"
+        alt="Downloads"
         width={16}
         height={16}
         className="size-4"
@@ -77,8 +77,8 @@ function StatIcon({ id }: { id: AdminStat["id"] }) {
 
   return (
     <Image
-      src="/svg/shield.svg"
-      alt="Reservations"
+      src="/svg/target.svg"
+      alt="Fines"
       width={16}
       height={16}
       className="size-4"

@@ -1,9 +1,11 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { DigitalResource } from "@/Model/DigitalResources";
+import { DownloadEvent } from "@/Model/DownloadEvents";
 import ApiError from "@/Utils/Api_error";
 import ApiResponce from "@/Utils/Api_responce";
 import mongoose from "mongoose";
 import { publishDigitalUpdate } from "@/Helper/publishDomain";
+import { getSessionUser } from "@/Helper/userFromToken";
 
 export async function POST(request: Request) {
   try {
@@ -29,6 +31,16 @@ export async function POST(request: Request) {
         { status: 404, headers: { "Content-Type": "application/json" } },
       );
     }
+
+    const session = await getSessionUser();
+    await DownloadEvent.create({
+      resourceId: String(resource._id),
+      title: resource.title,
+      author: resource.author || "",
+      format: resource.format,
+      category: resource.category || "",
+      userId: session?._id ?? "",
+    });
 
     await publishDigitalUpdate({ action: "download", id: String(id) });
     return new Response(

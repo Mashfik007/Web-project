@@ -1,8 +1,10 @@
 import connectDB from "@/dbConfig/dbConfig";
 import { Book } from "@/Model/Books";
 import { BorrowRequest } from "@/Model/BorrowRequests";
+import { DownloadEvent } from "@/Model/DownloadEvents";
 import { Fine } from "@/Model/Fines";
 import { LibraryUser } from "@/Model/LibraryUsers";
+import { Order } from "@/Model/Orders";
 import { Reservation } from "@/Model/Reservations";
 import { ReturnRecord } from "@/Model/Returns";
 import { User } from "@/Model/Users";
@@ -72,6 +74,9 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
   const monthStart = new Date(year, now.getMonth(), 1);
   const lastMonthStart = new Date(year, now.getMonth() - 1, 1);
 
+  const yearStart = new Date(year, 0, 1);
+  const yearEnd = new Date(year, 11, 31, 23, 59, 59, 999);
+
   const [
     admin,
     bookCount,
@@ -80,15 +85,23 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
     suspended,
     borrowsToday,
     borrowsYesterday,
+    purchasesToday,
+    purchasesYesterday,
+    downloadsToday,
+    downloadsYesterday,
     openReturns,
     pendingFines,
     reservations,
     books,
     requests,
     returns,
+    recentOrders,
+    recentDownloads,
     newMembers,
     yearRequests,
     yearReturns,
+    yearOrders,
+    yearDownloads,
   ] = await Promise.all([
     User.find({ isAdmin: true })
       .select("name email")
@@ -103,6 +116,10 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
       .lean<{ email?: string }[]>(),
     BorrowRequest.countDocuments({ createdAt: { $gte: todayStart, $lt: tomorrow } }),
     BorrowRequest.countDocuments({ createdAt: { $gte: yesterdayStart, $lt: todayStart } }),
+    Order.countDocuments({ createdAt: { $gte: todayStart, $lt: tomorrow } }),
+    Order.countDocuments({ createdAt: { $gte: yesterdayStart, $lt: todayStart } }),
+    DownloadEvent.countDocuments({ createdAt: { $gte: todayStart, $lt: tomorrow } }),
+    DownloadEvent.countDocuments({ createdAt: { $gte: yesterdayStart, $lt: todayStart } }),
     ReturnRecord.find({ status: { $ne: "Returned" } })
       .select("member dueDate status")
       .lean<{ member?: string; dueDate?: string; status: string }[]>(),
@@ -119,21 +136,54 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
     ReturnRecord.find().sort({ updatedAt: -1 }).limit(6).lean<
       { _id: { toString(): string }; member: string; book: string; status: string; updatedAt?: Date }[]
     >(),
+    Order.find()
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .lean<
+        {
+          _id: { toString(): string };
+          fullName: string;
+          bookTitle: string;
+          quantity: number;
+          createdAt?: Date;
+        }[]
+      >(),
+    DownloadEvent.find()
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .lean<
+        {
+          _id: { toString(): string };
+          title: string;
+          format: string;
+          createdAt?: Date;
+        }[]
+      >(),
     LibraryUser.find({ role: { $ne: "Admin" } })
       .sort({ createdAt: -1 })
       .limit(6)
       .lean<{ _id: { toString(): string }; name: string; email?: string; createdAt?: Date }[]>(),
     BorrowRequest.find({
-      createdAt: { $gte: new Date(year, 0, 1), $lte: new Date(year, 11, 31, 23, 59, 59, 999) },
+      createdAt: { $gte: yearStart, $lte: yearEnd },
     })
       .select("createdAt")
       .lean<{ createdAt?: Date }[]>(),
     ReturnRecord.find({
       status: "Returned",
-      updatedAt: { $gte: new Date(year, 0, 1), $lte: new Date(year, 11, 31, 23, 59, 59, 999) },
+      updatedAt: { $gte: yearStart, $lte: yearEnd },
     })
       .select("updatedAt")
       .lean<{ updatedAt?: Date }[]>(),
+    Order.find({
+      createdAt: { $gte: yearStart, $lte: yearEnd },
+    })
+      .select("createdAt")
+      .lean<{ createdAt?: Date }[]>(),
+    DownloadEvent.find({
+      createdAt: { $gte: yearStart, $lte: yearEnd },
+    })
+      .select("createdAt")
+      .lean<{ createdAt?: Date }[]>(),
   ]);
 
   const adminEmails = new Set(
@@ -185,7 +235,13 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
     categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
   }
 
-  const monthly = monthNames.map((month) => ({ month, borrows: 0, returns: 0 }));
+  const monthly = monthNames.map((month) => ({
+    month,
+    borrows: 0,
+    returns: 0,
+    purchases: 0,
+    downloads: 0,
+  }));
   for (const request of yearRequests) {
     if (!request.createdAt) continue;
     monthly[new Date(request.createdAt).getMonth()].borrows += 1;
@@ -193,6 +249,14 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
   for (const record of yearReturns) {
     if (!record.updatedAt) continue;
     monthly[new Date(record.updatedAt).getMonth()].returns += 1;
+  }
+  for (const order of yearOrders) {
+    if (!order.createdAt) continue;
+    monthly[new Date(order.createdAt).getMonth()].purchases += 1;
+  }
+  for (const download of yearDownloads) {
+    if (!download.createdAt) continue;
+    monthly[new Date(download.createdAt).getMonth()].downloads += 1;
   }
 
   const recent = [
@@ -218,6 +282,24 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
       time: timeAgo(record.updatedAt),
       avatarClass: record.status === "Overdue" ? "bg-rose-500" : "bg-emerald-500",
       at: record.updatedAt ? new Date(record.updatedAt).getTime() : 0,
+    })),
+    ...recentOrders.map((order) => ({
+      id: `order-${order._id.toString()}`,
+      name: order.fullName,
+      initials: initials(order.fullName),
+      action: `Purchased ${order.quantity}× '${order.bookTitle}'`,
+      time: timeAgo(order.createdAt),
+      avatarClass: "bg-amber-500",
+      at: order.createdAt ? new Date(order.createdAt).getTime() : 0,
+    })),
+    ...recentDownloads.map((download) => ({
+      id: `download-${download._id.toString()}`,
+      name: "Reader",
+      initials: "DL",
+      action: `Downloaded ${download.format} '${download.title}'`,
+      time: timeAgo(download.createdAt),
+      avatarClass: "bg-indigo-500",
+      at: download.createdAt ? new Date(download.createdAt).getTime() : 0,
     })),
     ...newMembers
       .filter((user) => !adminEmails.has(user.email?.trim().toLowerCase() || ""))
@@ -260,14 +342,16 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
         trend: percentChange(borrowsToday, borrowsYesterday, "positive"),
       },
       {
-        id: "overdue",
-        label: "Overdue",
-        value: String(overdueNames.size),
-        trend: {
-          value: 0,
-          direction: "up",
-          tone: overdueNames.size > 0 ? "negative" : "positive",
-        },
+        id: "purchases-today",
+        label: "Purchases Today",
+        value: String(purchasesToday),
+        trend: percentChange(purchasesToday, purchasesYesterday, "positive"),
+      },
+      {
+        id: "downloads-today",
+        label: "Downloads Today",
+        value: String(downloadsToday),
+        trend: percentChange(downloadsToday, downloadsYesterday, "positive"),
       },
       {
         id: "fines-due",
@@ -278,12 +362,6 @@ export async function getAdminDashboardData(adminId: string): Promise<AdminDashb
           direction: "up",
           tone: fineTotal > 0 ? "negative" : "positive",
         },
-      },
-      {
-        id: "reservations",
-        label: "Reservations",
-        value: String(reservations.length),
-        trend: { value: 0, direction: "up", tone: "positive" },
       },
     ],
     monthlyBorrows: monthly,

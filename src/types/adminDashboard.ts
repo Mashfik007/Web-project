@@ -9,9 +9,9 @@ export type AdminStat = {
     | "total-books"
     | "active-users"
     | "borrows-today"
-    | "overdue"
-    | "fines-due"
-    | "reservations";
+    | "purchases-today"
+    | "downloads-today"
+    | "fines-due";
   label: string;
   value: string;
   trend: AdminStatTrend;
@@ -21,6 +21,8 @@ export type MonthlyBorrowPoint = {
   month: string;
   borrows: number;
   returns: number;
+  purchases: number;
+  downloads: number;
 };
 
 export type UserActivitySlice = {

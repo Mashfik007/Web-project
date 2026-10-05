@@ -148,6 +148,15 @@ const sectionIcons: Record<string, ReactNode> = {
       className={iconClass}
     />
   ),
+  orders: (
+    <Image
+      src="/svg/cart.svg"
+      alt="Purchases"
+      width={16}
+      height={16}
+      className={iconClass}
+    />
+  ),
   "digital-library": (
     <Image
       src="/svg/shelf.svg"

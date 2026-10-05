@@ -162,13 +162,30 @@ export default function DigitalLibraryPage({
                     {resource.category}
                   </span>
                   <div className="flex gap-1">
-                    <a
-                      href={`/api/uploads/${resource.fileId}?download=1`}
+                    <button
+                      type="button"
                       className="btn btn-ghost btn-square btn-sm"
                       aria-label="Download"
+                      onClick={async () => {
+                        try {
+                          await fetch("/api/users/digital-resources/download", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: resource.id }),
+                          });
+                        } catch {
+                          // Still open the file if logging fails.
+                        }
+                        window.open(
+                          `/api/uploads/${resource.fileId}?download=1`,
+                          "_blank",
+                          "noopener,noreferrer",
+                        );
+                        router.refresh();
+                      }}
                     >
                       ↓
-                    </a>
+                    </button>
                     <button
                       type="button"
                       onClick={() => {

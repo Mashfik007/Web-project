@@ -41,6 +41,8 @@ const tabOptions: { id: AdminReportTab; label: string }[] = [
   { id: "users", label: "User Stats" },
   { id: "fines", label: "Fine Report" },
   { id: "inventory", label: "Inventory" },
+  { id: "sales", label: "Purchases" },
+  { id: "downloads", label: "Downloads" },
 ];
 
 export default function ReportsPage({

@@ -13,6 +13,8 @@ const tabNames = {
   users: "User stats",
   fines: "Fine report",
   inventory: "Inventory",
+  sales: "Purchases",
+  downloads: "Downloads",
 };
 
 export async function GET(request: Request) {

@@ -9,6 +9,7 @@ export const adminSections = [
   { slug: "returns", label: "Returns" },
   { slug: "reservations", label: "Reservations" },
   { slug: "fines", label: "Fines" },
+  { slug: "orders", label: "Purchases" },
   { slug: "digital-library", label: "Digital Library" },
   { slug: "reports", label: "Reports" },
   { slug: "notifications", label: "Notifications" },
