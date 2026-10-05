@@ -31,6 +31,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
   const [groups, setGroups] = useState(inbox.groups);
   const [directs, setDirects] = useState(inbox.directs);
   const [selectedId, setSelectedId] = useState(starting?.conversationId ?? "");
+  const [mobileThreadOpen, setMobileThreadOpen] = useState(Boolean(initialPeerId));
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
@@ -227,6 +228,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
     clearUnread(item.conversationId);
     setDraft("");
     setError("");
+    setMobileThreadOpen(true);
   }
 
   function sendMessage() {
@@ -260,25 +262,30 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
 
   if (!selected) {
     return (
-      <main className="flex h-[calc(100dvh-7.5rem)] min-h-[32rem] items-center justify-center">
+      <main className="flex h-[calc(100dvh-4rem)] items-center justify-center lg:h-[calc(100dvh-7.5rem)] lg:min-h-[32rem]">
         <p className="text-sm text-slate-400">No conversations yet.</p>
       </main>
     );
   }
 
   return (
-    <main className="flex h-[calc(100dvh-7.5rem)] min-h-[32rem] flex-col">
-
-
-      <section className="grid min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="flex min-h-0 flex-col border-b border-slate-200 lg:border-r lg:border-b-0">
+    <main className="flex h-[calc(100dvh-4rem)] min-h-0 flex-col lg:h-[calc(100dvh-7.5rem)] lg:min-h-[32rem]">
+      <section className="grid min-h-0 flex-1 overflow-hidden rounded-none border-0 border-slate-200 bg-white shadow-none lg:rounded-2xl lg:border lg:shadow-sm lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside
+          className={`min-h-0 flex-col border-b border-slate-200 lg:flex lg:border-r lg:border-b-0 ${
+            mobileThreadOpen ? "hidden" : "flex"
+          }`}
+        >
           <div className="space-y-3 p-4">
             <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1">
               <button
                 type="button"
                 onClick={() => {
                   setChannel("group");
-                  if (selected?.kind !== "group" && groups[0]) openConversation(groups[0]);
+                  if (selected?.kind !== "group" && groups[0]) {
+                    setSelectedId(groups[0].conversationId);
+                    clearUnread(groups[0].conversationId);
+                  }
                 }}
                 className={`rounded-lg px-3 py-2 text-sm font-semibold ${channel === "group" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
                   }`}
@@ -289,7 +296,10 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                 type="button"
                 onClick={() => {
                   setChannel("direct");
-                  if (selected?.kind === "group" && directs[0]) openConversation(directs[0]);
+                  if (selected?.kind === "group" && directs[0]) {
+                    setSelectedId(directs[0].conversationId);
+                    clearUnread(directs[0].conversationId);
+                  }
                 }}
                 className={`rounded-lg px-3 py-2 text-sm font-semibold ${channel === "direct" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
                   }`}
@@ -352,8 +362,27 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
           </ul>
         </aside>
 
-        <div className="flex min-h-0 flex-col">
-          <header className="flex items-center gap-3 border-b border-slate-200 px-5 py-4">
+        <div
+          className={`min-h-0 flex-col lg:flex ${mobileThreadOpen ? "flex" : "hidden"}`}
+        >
+          <header className="flex items-center gap-3 border-b border-slate-200 px-3 py-3 sm:px-5 sm:py-4">
+            <button
+              type="button"
+              aria-label="Back to conversations"
+              onClick={() => setMobileThreadOpen(false)}
+              className="btn btn-ghost btn-square btn-sm shrink-0 lg:hidden"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="size-5"
+                aria-hidden
+              >
+                <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
             <span
               className={`flex size-11 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${selected.avatarColor}`}
             >
@@ -361,7 +390,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
             </span>
             <div className="min-w-0">
               <h2 className="truncate text-base font-semibold text-slate-800">{selected.title}</h2>
-              <p className="text-xs text-slate-500">
+              <p className="truncate text-xs text-slate-500">
                 {live ? "Live" : "Reconnecting"}
                 {" · "}
                 {selected.kind === "group"
@@ -383,7 +412,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
               const distance = node.scrollHeight - node.scrollTop - node.clientHeight;
               stickToBottom.current = distance < 80;
             }}
-            className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-slate-50 px-5 py-4"
+            className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-slate-50 px-3 py-4 sm:px-5"
           >
             {loading ? (
               <p className="text-sm text-slate-400">Loading messages…</p>
@@ -402,7 +431,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                 const showName = !mine && previous?.senderId !== message.senderId;
                 return (
                   <div key={message.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                    <div className={`flex max-w-[80%] gap-2 ${mine ? "flex-row-reverse" : ""}`}>
+                    <div className={`flex max-w-[85%] gap-2 sm:max-w-[80%] ${mine ? "flex-row-reverse" : ""}`}>
                       {!mine && (
                         <span
                           className={`mt-5 flex size-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${message.avatarColor}`}
@@ -438,7 +467,7 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
           </div>
 
           <form
-            className="border-t border-slate-200 p-4"
+            className="shrink-0 border-t border-slate-200 p-3 sm:p-4"
             onSubmit={(event) => {
               event.preventDefault();
               void sendMessage();
@@ -463,7 +492,11 @@ export default function ChatPage({ inbox, initialPeerId }: ChatPageProps) {
                 }
                 className="textarea textarea-bordered max-h-32 min-h-11 flex-1 resize-none"
               />
-              <button type="submit" disabled={sending || !draft.trim()} className="btn btn-primary">
+              <button
+                type="submit"
+                disabled={sending || !draft.trim()}
+                className="btn btn-primary shrink-0"
+              >
                 Send
               </button>
             </div>
