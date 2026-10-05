@@ -1,4 +1,3 @@
-import AutoHoldBanner from "../AutoHoldBanner/AutoHoldBanner";
 import BackLink from "../BackLink/BackLink";
 import BookHeader from "../BookHeader/BookHeader";
 import BookSidebar from "../BookSidebar/BookSidebar";
@@ -32,10 +31,7 @@ export default function BookDetailsPage({
 
           <div>
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_220px]">
-              <div>
-                <BookHeader book={book} />
-                <AutoHoldBanner />
-              </div>
+              <BookHeader book={book} />
 
               <div className="xl:pt-0">
                 <PurchaseCard price={book.price} checkoutHref={checkoutHref} />
