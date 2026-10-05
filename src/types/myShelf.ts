@@ -26,6 +26,7 @@ export type ShelfPerson = {
 
 export type ShelfBook = {
   id: string | number;
+  bookId: string;
   title: string;
   author: string;
   category: string;

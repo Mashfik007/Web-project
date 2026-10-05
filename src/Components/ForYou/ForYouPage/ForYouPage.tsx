@@ -19,10 +19,12 @@ interface ForYouPageProps {
 
 export default function ForYouPage({ forYou, userId }: ForYouPageProps) {
   const [wantToRead, setWantToRead] = useState<WantToReadBook[]>([]);
+  const [hasActiveReading, setHasActiveReading] = useState(false);
 
   async function showWantToRead() {
-    const books = await loadWantToReadBooks();
-    setWantToRead(books);
+    const shelf = await loadWantToReadBooks();
+    setWantToRead(shelf.books);
+    setHasActiveReading(shelf.hasActiveReading);
     openModal("want-to-read");
   }
 
@@ -58,6 +60,7 @@ export default function ForYouPage({ forYou, userId }: ForYouPageProps) {
       <WantToReadModal
         userId={userId}
         books={wantToRead}
+        hasActiveReading={hasActiveReading}
         onBooksChange={setWantToRead}
       />
     </main>

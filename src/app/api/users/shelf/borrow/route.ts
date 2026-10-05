@@ -93,6 +93,25 @@ export async function POST(request: Request) {
       );
     }
 
+    // Want to Read / Blind Date requests wait until the current book is finished
+    // and returned — one active reading loan at a time.
+    const activeReading = await ShelfLoan.findOne({
+      userId,
+      status: "reading",
+      bookId: { $ne: bookId },
+    }).select("_id");
+    if (activeReading) {
+      return new Response(
+        JSON.stringify(
+          new ApiError(
+            400,
+            "Finish and return your current book before requesting another",
+          ),
+        ),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     const saved = await recordBorrowRequest({
       userId,
       bookId,

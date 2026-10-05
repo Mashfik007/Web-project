@@ -33,6 +33,7 @@ export default function ShelfTabs({
   };
 
   const activeBooks = booksByTab[activeTab] ?? [];
+  const hasActiveReading = currentlyReading.length > 0;
 
   return (
     <section className="card bg-base-100 shadow-sm">
@@ -54,6 +55,12 @@ export default function ShelfTabs({
       </div>
 
       <div className="space-y-4 p-5">
+        {activeTab === "want-to-read" && hasActiveReading ? (
+          <p className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Finish and return your current book before requesting a Want to Read
+            or Blind Date title.
+          </p>
+        ) : null}
         {activeBooks.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-500">
             No books in this section yet.
@@ -66,6 +73,8 @@ export default function ShelfTabs({
               book={book}
               variant={activeTab === "currently-reading" ? "reading" : "simple"}
               canRemove={activeTab === "want-to-read"}
+              canRequestBorrow={activeTab === "want-to-read"}
+              hasActiveReading={hasActiveReading}
             />
           ))
         )}

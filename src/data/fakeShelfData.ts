@@ -55,6 +55,7 @@ export const fakeShelfData: MyShelfData = {
   currentlyReading: [
     {
       id: 1,
+      bookId: "1",
       title: "The Midnight Library",
       author: "Matt Haig",
       category: "Fiction",
@@ -68,6 +69,7 @@ export const fakeShelfData: MyShelfData = {
   completed: [
     {
       id: 2,
+      bookId: "2",
       title: "Klara and the Sun",
       author: "Kazuo Ishiguro",
       category: "Sci-Fi",
@@ -80,6 +82,7 @@ export const fakeShelfData: MyShelfData = {
     },
     {
       id: 3,
+      bookId: "3",
       title: "The Vanishing Half",
       author: "Brit Bennett",
       category: "Literary",
@@ -92,6 +95,7 @@ export const fakeShelfData: MyShelfData = {
     },
     {
       id: 4,
+      bookId: "4",
       title: "Piranesi",
       author: "Susanna Clarke",
       category: "Fantasy",
@@ -104,6 +108,7 @@ export const fakeShelfData: MyShelfData = {
     },
     {
       id: 5,
+      bookId: "5",
       title: "Project Hail Mary",
       author: "Andy Weir",
       category: "Sci-Fi",
@@ -118,6 +123,7 @@ export const fakeShelfData: MyShelfData = {
   wantToRead: [
     {
       id: 6,
+      bookId: "6",
       title: "Demon Copperhead",
       author: "Barbara Kingsolver",
       category: "Literary",
@@ -130,6 +136,7 @@ export const fakeShelfData: MyShelfData = {
     },
     {
       id: 7,
+      bookId: "7",
       title: "The Paris Apartment",
       author: "Lucy Foley",
       category: "Mystery",
@@ -142,6 +149,7 @@ export const fakeShelfData: MyShelfData = {
     },
     {
       id: 8,
+      bookId: "8",
       title: "Lessons in Chemistry",
       author: "Bonnie Garmus",
       category: "Fiction",
@@ -156,6 +164,7 @@ export const fakeShelfData: MyShelfData = {
   borrowedHistory: [
     {
       id: 9,
+      bookId: "9",
       title: "In the Woods",
       author: "Tana French",
       category: "Mystery",
@@ -168,6 +177,7 @@ export const fakeShelfData: MyShelfData = {
     },
     {
       id: 10,
+      bookId: "10",
       title: "Crying in H Mart",
       author: "Michelle Zauner",
       category: "Non-Fiction",
@@ -180,6 +190,7 @@ export const fakeShelfData: MyShelfData = {
     },
     {
       id: 11,
+      bookId: "11",
       title: "The Atlas Six",
       author: "Olivie Blake",
       category: "Fantasy",
@@ -192,6 +203,7 @@ export const fakeShelfData: MyShelfData = {
     },
     {
       id: 12,
+      bookId: "12",
       title: "Orbital",
       author: "Samantha Harvey",
       category: "Literary",

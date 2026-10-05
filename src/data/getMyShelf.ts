@@ -78,6 +78,7 @@ function initials(name: string) {
 function toShelfBook(loan: LoanRecord, book: StoredBook): ShelfBook {
   return {
     id: loan._id.toString(),
+    bookId: loan.bookId,
     title: book.title,
     author: book.author,
     category: book.metadata?.category ?? "General",

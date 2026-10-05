@@ -4,7 +4,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ConfirmModal,
+  FormField,
+  FormModal,
   StatusModal,
+  formHasValues,
   openModal,
   useFeedback,
 } from "@/Components/Modal";
@@ -15,6 +18,8 @@ interface ReadingBookCardProps {
   book: ShelfBook;
   variant?: "reading" | "simple";
   canRemove?: boolean;
+  canRequestBorrow?: boolean;
+  hasActiveReading?: boolean;
 }
 
 export default function ReadingBookCard({
@@ -22,6 +27,8 @@ export default function ReadingBookCard({
   book,
   variant = "reading",
   canRemove = false,
+  canRequestBorrow = false,
+  hasActiveReading = false,
 }: ReadingBookCardProps) {
   const router = useRouter();
   const progress =
@@ -32,6 +39,7 @@ export default function ReadingBookCard({
   const renewId = `renew-${book.id}`;
   const returnId = `return-${book.id}`;
   const removeId = `remove-wishlist-${book.id}`;
+  const borrowId = `borrow-wishlist-${book.id}`;
 
   async function updateLoan(action: "renew" | "return") {
     try {
@@ -79,6 +87,55 @@ export default function ReadingBookCard({
       router.refresh();
     } catch {
       feedback.failed("Request failed", "Could not reach the server.");
+    }
+  }
+
+  async function requestBorrow(form: HTMLFormElement) {
+    if (hasActiveReading) {
+      feedback.failed(
+        "Request blocked",
+        "Finish and return your current book before requesting another.",
+      );
+      return false;
+    }
+
+    if (!formHasValues(form, ["returnDate"])) {
+      feedback.failed(
+        "Request not sent",
+        "Choose an expected return date.",
+      );
+      return false;
+    }
+
+    try {
+      const response = await fetch("/api/users/shelf/borrow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          bookId: book.bookId,
+          returnDate: String(new FormData(form).get("returnDate") ?? ""),
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        feedback.failed(
+          "Request not sent",
+          payload.message || "Could not send borrow request.",
+        );
+        return false;
+      }
+
+      feedback.success(
+        "Request sent",
+        payload.message ||
+          "Your borrow request was sent. It appears under Currently Reading after approval.",
+      );
+      router.refresh();
+      return true;
+    } catch {
+      feedback.failed("Request not sent", "Could not reach the server.");
+      return false;
     }
   }
 
@@ -203,6 +260,21 @@ export default function ReadingBookCard({
                     Return
                   </button>
                 ) : null}
+                {canRequestBorrow ? (
+                  <button
+                    type="button"
+                    disabled={hasActiveReading}
+                    title={
+                      hasActiveReading
+                        ? "Finish and return your current book first"
+                        : "Send a borrow request"
+                    }
+                    onClick={() => openModal(borrowId)}
+                    className="btn btn-primary btn-soft btn-sm"
+                  >
+                    Borrow request
+                  </button>
+                ) : null}
                 {canRemove ? (
                   <button
                     type="button"
@@ -248,6 +320,34 @@ export default function ReadingBookCard({
             void removeFromWishlist();
           }}
         />
+      ) : null}
+      {canRequestBorrow ? (
+        <FormModal
+          id={borrowId}
+          title="Borrow request"
+          submitLabel="Send request"
+          onSubmit={requestBorrow}
+        >
+          <p className="text-sm text-slate-500">
+            Request{" "}
+            <b>{book.blindDate ? "your blind date surprise" : book.title}</b>
+            {book.blindDate ? "" : ` by ${book.author}`}.
+          </p>
+          {hasActiveReading ? (
+            <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              Finish and return your current book before sending this request.
+            </p>
+          ) : null}
+          <FormField
+            label="Expected return"
+            name="returnDate"
+            type="date"
+            defaultValue={new Date(Date.now() + 14 * 86400000)
+              .toISOString()
+              .slice(0, 10)}
+            required
+          />
+        </FormModal>
       ) : null}
       <StatusModal
         id={feedback.id}
